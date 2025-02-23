@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 @Author  : linghypshen@gmail.com
-@File    : __init__.py.py
+@File    : database_extension.py
 """
-from .config import Config
+from pkg.sqlalchemy import SQLAlchemy
 
-__all__ = ["Config"]
+db = SQLAlchemy()

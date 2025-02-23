@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 @Author  : linghypshen@gmail.com
-@File    : __init__.py.py
+@File    : migrate_extension.py
 """
-from .config import Config
+from flask_migrate import Migrate
 
-__all__ = ["Config"]
+migrate = Migrate()

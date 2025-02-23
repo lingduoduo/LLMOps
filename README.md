@@ -1,5 +1,7 @@
 # LLMOps
 
+### App Framework
+
 ```
 |---app  // Application entry points collection
 |   ├---__init__.py
@@ -70,7 +72,6 @@
 |   └---...
 |---storage  // Local storage
 |---test  // Testing directory
-|---venv  // Virtual environment
 |---.env  // Application configuration file
 |---.gitignore  // Git ignore file
 |---requirements.txt  // Dependency management for third-party packages
@@ -94,3 +95,9 @@ graph TD;
     J --> K[User Data Response];
 ```
 
+### Start PostgreSQL server
+
+```
+brew services restart postgresql@16
+brew services stop postgresql@16
+```
