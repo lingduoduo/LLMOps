@@ -1,5 +1,82 @@
 # LLMOps
 
+```
+|---app  // Application entry points collection
+|   ├---__init__.py
+|   └---http
+|---config  // Application configuration files
+|   ├---__init__.py
+|   ├---config.py
+|   └---default_config.py
+|---internal  // All internal application directories
+|   ├---core  // LLM core files, integrating LangChain, LLM, Embeddings, and other non-business logic code
+|   |   |---agent  // Agent-related components
+|   |   |---chain  // Chain-related logic
+|   |   |---prompt  // Prompt templates and configurations
+|   |   |---model_runtime  // LLM model runtime management
+|   |   |---moderation  // Content moderation logic
+|   |   |---tool  // Various tools and utilities
+|   |   |---vector_store  // Vector database interactions
+|   |   └---...
+|   ├---exception  // Common exception handling
+|   |   ├---__init__.py
+|   |   ├---exception.py
+|   |   └---...
+|   ├---extension  // Flask extension files
+|   |   ├---__init__.py
+|   |   ├---database_extension.py
+|   |   └---...
+|   ├---handler  // Route handlers and controllers
+|   |   ├---__init__.py
+|   |   ├---account_handler.py
+|   |   └---...
+|   ├---middleware  // Middleware components, including authentication checks
+|   |   ├---__init__.py
+|   |   └---middleware.py
+|   |   └---...
+|   ├---migration  // Database migration files (auto-generated)
+|   |   ├---versions
+|   |   └---...
+|   ├---model  // Database models
+|   |   ├---__init__.py
+|   |   ├---account.py
+|   |   └---...
+|   ├---router  // Application routing files
+|   |   ├---__init__.py
+|   |   ├---router.py
+|   |   └---...
+|   ├---schedule  // Scheduled and periodic tasks
+|   |   ├---__init__.py
+|   |   └---...
+|   ├---schema  // Request and response schema definitions
+|   |   ├---__init__.py
+|   |   └---...
+|   ├---server  // Application server components (corresponding to the `app` folder)
+|   |   ├---__init__.py
+|   |   └---...
+|   ├---service  // Service layer components
+|   |   ├---__init__.py
+|   |   ├---oauth_service.py
+|   |   └---...
+|   ├---task  // Task management, supporting immediate and delayed tasks
+|   |   ├---__init__.py
+|   |   └---...
+|---pkg  // External package extensions
+|   ├---__init__.py
+|   |---oauth  // OAuth authentication modules
+|   |   ├---__init__.py
+|   |   ├---github_oauth.py
+|   |   └---...
+|   └---...
+|---storage  // Local storage
+|---test  // Testing directory
+|---venv  // Virtual environment
+|---.env  // Application configuration file
+|---.gitignore  // Git ignore file
+|---requirements.txt  // Dependency management for third-party packages
+└---README.md  // Project documentation
+```
+
 ```mermaid
 graph TD;
     A[Request Data/Form/Browser/API] --> B[Controller];
