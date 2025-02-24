@@ -4,7 +4,6 @@
 @Author  : linghypshen@gmail.com
 @File    : app_handler.py
 """
-import os
 import uuid
 from dataclasses import dataclass
 
@@ -51,15 +50,16 @@ class AppHandler:
             return validate_error_json(req.errors)
 
         # 2. Initialize the OpenAI client and send a request
-        client = OpenAI(base_url=os.getenv("OPENAI_API_BASE"))
+        client = OpenAI()
 
         # 3. Get the response and pass it to the frontend
         completion = client.chat.completions.create(
-            model="gpt-3.5-turbo-16k",
+            model="gpt-4",
             messages=[
                 {"role": "system",
                  "content": "You are a chatbot developed by OpenAI. Respond to user input accordingly."},
-                {"role": "user", "content": req.query.data},
+                {"role": "user",
+                 "content": req.query.data},
             ]
         )
 

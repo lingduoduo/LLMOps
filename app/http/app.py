@@ -14,7 +14,7 @@ from internal.server import Http
 from pkg.sqlalchemy import SQLAlchemy
 from .module import ExtensionModule
 
-# 将env加载到环境变量中
+# import .env
 dotenv.load_dotenv()
 
 conf = Config()
