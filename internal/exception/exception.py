@@ -11,7 +11,7 @@ from pkg.response import HttpCode
 
 
 class CustomException(Exception):
-    """基础自定义异常信息"""
+    """Base custom exception"""
     code: HttpCode = HttpCode.FAIL
     message: str = ""
     data: Any = field(default_factory=dict)
@@ -23,25 +23,25 @@ class CustomException(Exception):
 
 
 class FailException(CustomException):
-    """通用失败异常"""
+    """General failure exception"""
     pass
 
 
 class NotFoundException(CustomException):
-    """未找到数据异常"""
+    """Data not found exception"""
     code = HttpCode.NOT_FOUND
 
 
 class UnauthorizedException(CustomException):
-    """未授权异常"""
+    """Unauthorized exception"""
     code = HttpCode.UNAUTHORIZED
 
 
 class ForbiddenException(CustomException):
-    """无权限异常"""
+    """Permission denied exception"""
     code = HttpCode.FORBIDDEN
 
 
 class ValidateErrorException(CustomException):
-    """数据验证异常"""
+    """Data validation exception"""
     code = HttpCode.VALIDATE_ERROR
