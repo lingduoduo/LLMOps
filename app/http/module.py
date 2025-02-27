@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@Time    : 2024/4/5 19:03
 @Author  : linghypshen@gmail.com
 @File    : module.py
 """
@@ -14,7 +13,7 @@ from pkg.sqlalchemy import SQLAlchemy
 
 
 class ExtensionModule(Module):
-    """扩展模块的依赖注入"""
+    """Dependency injection for the extension module"""
 
     def configure(self, binder: Binder) -> None:
         binder.bind(SQLAlchemy, to=db)
