@@ -38,8 +38,8 @@ class Http(Flask):
         self.register_error_handler(Exception, self._register_error_handler)
 
         # 4. Initialize Flask extensions
-        # db.init_app(self)
-        # migrate.init_app(self, db, directory="internal/migration")
+        db.init_app(self)
+        migrate.init_app(self, db, directory="internal/migration")
 
         # 5. Register application routes
         router.register_router(self)

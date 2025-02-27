@@ -4,12 +4,13 @@
 @Author  : linghypshen@gmail.com
 @File    : default_config.py
 """
-# 应用默认配置项
+
+# Default application configuration
 DEFAULT_CONFIG = {
-    # wft配置
+    # WTF configuration
     "WTF_CSRF_ENABLED": "False",
 
-    # SQLAlchemy数据库配置
+    # SQLAlchemy database configuration
     "SQLALCHEMY_DATABASE_URI": "",
     "SQLALCHEMY_POOL_SIZE": 30,
     "SQLALCHEMY_POOL_RECYCLE": 3600,
