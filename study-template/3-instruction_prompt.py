@@ -42,8 +42,8 @@ pipeline_prompt = PipelinePromptTemplate(
 
 # Print formatted prompt
 print(pipeline_prompt.format(
-    person="Lei Jun",
-    example_q="What is your favorite car?",
-    example_a="Xiaomi SU7",
+    person="Ling",
+    example_q="What is your favorite fruit?",
+    example_a="Apple",
     input="What is your favorite phone?"
 ))

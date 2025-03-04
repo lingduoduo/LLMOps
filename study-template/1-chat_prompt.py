@@ -17,11 +17,11 @@ print("==========\n")
 
 # Define a chat prompt template
 chat_prompt = ChatPromptTemplate.from_messages([
-    ("system",
-     "You are a chatbot developed by OpenAI. Please respond to the user's question. The current time is {now}"),
+    ("system", "You are a chatbot. Please respond to the user's question. The current time is {now}"),
     MessagesPlaceholder(variable_name="chat_history"),
     HumanMessagePromptTemplate.from_template("Tell me a cold joke about {subject}")
 ]).partial(now=datetime.now())
+
 # Invoke the chat prompt with user input
 chat_prompt_value = chat_prompt.invoke({
     "chat_history": [
