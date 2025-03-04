@@ -22,16 +22,15 @@ chat_prompt = ChatPromptTemplate.from_messages([
     MessagesPlaceholder(variable_name="chat_history"),
     HumanMessagePromptTemplate.from_template("Tell me a cold joke about {subject}")
 ]).partial(now=datetime.now())
-
 # Invoke the chat prompt with user input
 chat_prompt_value = chat_prompt.invoke({
-    "subject": "programmers",
     "chat_history": [
-        ("human", "My name is Mu Xiaoke"),
-        ("AIMessage", "I am ChatGPT. How can I help you?")
-    ]
+        ("human", "My name is Ling"),
+        ("AIMessage", "I am ChatGPT. How can I help you?"),
+    ],
+    "subject": "programmers",
 })
 
 print(chat_prompt)
-print(chat_prompt_value)
+print(chat_prompt_value.to_string())
 print("==========\n")
