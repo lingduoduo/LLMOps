@@ -24,42 +24,10 @@ chain = (
 
 # Step 4: Execute the chain with an example query
 content = chain.stream(
-    "你好，你是谁？",  # Example input: "Hello, who are you?"
+    "Hello",  # Example input: "Hello, who are you?"
     config={"callbacks": [StdOutCallbackHandler()]}
 )
 
 # Step 5: Process and display the output
 for chunk in content:
     print(chunk)
-
-from langchain_core.callbacks import BaseCallbackHandler
-from typing import Optional, Union, Any, Dict, List
-from uuid import UUID
-from langchain_core.schema import GenerationChunk, ChatGenerationChunk
-
-
-class LLMOpsCallbackHandler(BaseCallbackHandler):
-    """Custom callback handler for LLMOps."""
-
-    def on_llm_start(
-            self,
-            serialized: Dict[str, Any],
-            prompts: List[str],
-            run_id: UUID,
-            parent_run_id: Optional[UUID] = None,
-            tags: Optional[List[str]] = None,
-            metadata: Optional[Dict[str, Any]] = None,
-            **kwargs: Any
-    ) -> Any:
-        print("on_llm_start serialized:", serialized)
-        print("on_llm_start prompts:", prompts)
-
-    def on_llm_new_token(
-            self,
-            token: str,
-            chunk: Optional[Union[GenerationChunk, ChatGenerationChunk]] = None,
-            run_id: UUID,
-            parent_run_id: Optional[UUID] = None,
-            **kwargs: Any
-    ) -> Any:
-        print("New token generated:", token)
