@@ -7,6 +7,7 @@
 import os
 
 from flask import Flask
+from flask_cors import CORS
 from flask_migrate import Migrate
 
 from config import Config
@@ -40,6 +41,16 @@ class Http(Flask):
         # 4. Initialize Flask extensions
         db.init_app(self)
         migrate.init_app(self, db, directory="internal/migration")
+
+        # 5. Solve CORS
+        CORS(self, resources={
+            r"/*": {
+                "origins": ["*"],
+                "supports_credentials": True,
+                "methods": ["GET", "POST"],
+                "allow_headers": ["Content-Type"],
+            }
+        })
 
         # 5. Register application routes
         router.register_router(self)

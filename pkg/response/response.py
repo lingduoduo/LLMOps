@@ -22,7 +22,12 @@ class Response:
 
 def json(data: Response = None):
     """Basic response interface"""
-    return jsonify(data), 200
+    response = jsonify(data)
+    # response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
+    # response.headers["Access-Control-Allow-Header"] = "Content-Type"
+    # response.headers["Access-Control-Allow-Methods"] = "GET, POST"
+    # response.headers["Access-Control-Allow-Credential"] = "true"
+    return response, 200
 
 
 def success_json(data: Any = None):

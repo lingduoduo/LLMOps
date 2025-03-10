@@ -31,6 +31,7 @@ class Router:
         bp.add_url_rule("/app/<uuid:id>", view_func=self.app_handler.get_app)
         bp.add_url_rule("/app/<uuid:id>", methods=["POST"], view_func=self.app_handler.update_app)
         bp.add_url_rule("/app/<uuid:id>/delete", methods=["POST"], view_func=self.app_handler.delete_app)
+        # bp.add_url_rule("/apps/<uuid:id>/debug", methods=["POST", "OPTION"], view_func=self.app_handler.completion)
 
         # 3. Register the blueprint with the application
         app.register_blueprint(bp)
