@@ -12,22 +12,23 @@ from openai import OpenAI
 dotenv.load_dotenv()
 
 
-# 1. max_tokens is used to determine if a new summary needs to be generated
-# 2. summary stores the summary information
-# 3. chat_histories stores the conversation history
-# 4. get_num_tokens calculates the number of tokens in the input text
-# 5. save_context stores new conversation details
-# 6. get_buffer_string converts historical conversation data to a string
-# 7. load_memory_variables loads memory variable information
-# 8. summary_text generates a new summary using the old summary and the new conversation
 class ConversationSummaryBufferMemory:
     """Summary Buffer Mixed Memory Class"""
+
+    # 1. max_tokens is used to determine if a new summary needs to be generated
+    # 2. summary stores the summary information
+    # 3. chat_histories stores the conversation history
+    # 4. get_num_tokens calculates the number of tokens in the input text
+    # 5. save_context stores new conversation details
+    # 6. get_buffer_string converts historical conversation data to a string
+    # 7. load_memory_variables loads memory variable information
+    # 8. summary_text generates a new summary using the old summary and the new conversation
 
     def __init__(self, summary: str = '', chat_histories: list = None, max_tokens: int = 300):
         self.summary = summary
         self.chat_histories = [] if chat_histories is None else chat_histories
         self.max_tokens = max_tokens
-        self._client = OpenAI(base_url='https://api.xty.app/v1')
+        self._client = OpenAI()
 
     @classmethod
     def get_num_tokens(cls, query: str) -> int:
@@ -99,7 +100,7 @@ Please generate a new summary for the user based on the above information."""
 
 
 # 1. Create OpenAI client
-client = OpenAI(base_url='https://api.xty.app/v1')
+client = OpenAI()
 memory = ConversationSummaryBufferMemory("", [], 300)
 
 # 2. Create an infinite loop for human-AI conversation
