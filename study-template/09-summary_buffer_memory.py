@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 @Author  : linghypshen@gmail.com
-@File    : 1.summary_buffer_memory.py
+@File    : 1.ConversationSummaryBufferMemory.py
 """
 from typing import Any
 
