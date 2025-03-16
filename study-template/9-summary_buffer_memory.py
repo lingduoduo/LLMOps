@@ -138,3 +138,83 @@ while True:
         print(content, flush=True, end="")
     print("")
     memory.save_context(query, ai_content)
+
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+@Author  : linghypshen@gmail.com
+@File    : 1. Langchain InMemoryChatMessageHistory.py
+"""
+from langchain_core.chat_history import InMemoryChatMessageHistory
+
+# Initialize chat history
+chat_history = InMemoryChatMessageHistory()
+
+# Add a user message
+chat_history.add_user_message("Hello, I'm Ling. Who are you?")
+# Add an AI message
+chat_history.add_ai_message("Hello, I'm ChatGPT. How can I help you?")
+
+# Print the chat history
+print(chat_history.messages)
+
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+@Author  : linghypshen@gmail.com
+@File    : 2.File_Conversation_Message_History_with_Memory.py
+"""
+import dotenv
+from langchain_community.chat_message_histories import FileChatMessageHistory
+from openai import OpenAI
+
+# Load environment variables from .env file
+dotenv.load_dotenv()
+
+# 1. Create a client and initialize memory
+client = OpenAI()
+chat_history = FileChatMessageHistory("./memory.txt")
+
+# 2. Start the conversation loop
+while True:
+    # 3. Get user input
+    query = input("Human: ")
+
+    # 4. Check if the user wants to exit the conversation
+    if query == "q":
+        exit(0)
+
+    # 5. Initiate the chat conversation
+    print("AI: ", flush=True, end="")
+
+    # System prompt for the AI with chat history context
+    system_prompt = (
+        "You are ChatGPT, a chatbot developed by OpenAI. "
+        "You can respond to user information based on the provided context, "
+        "which contains a list of conversation history between the human and you.\n\n"
+        f"<context>{chat_history}</context>\n\n"
+    )
+
+    # Generate the AI's response
+    response = client.chat.completions.create(
+        model='gpt-3.5-turbo-16k',
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": query}
+        ],
+        stream=True,  # Stream the response in chunks
+    )
+
+    # Collect the AI's response
+    ai_content = ""
+    for chunk in response:
+        content = chunk.choices[0].delta.content
+        if content is None:
+            break
+        ai_content += content
+        print(content, flush=True, end="")
+
+    # Store the conversation in chat history
+    chat_history.add_user_message(query)
+    chat_history.add_ai_message(ai_content)
+    print("")  # Print a new line for readability
