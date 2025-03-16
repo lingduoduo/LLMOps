@@ -8,10 +8,10 @@ from langchain_core.prompts import (
 )
 
 # Define a prompt template
-prompt_template = PromptTemplate.from_template("Tell me a cold joke about {subject}")
+prompt_template = PromptTemplate.from_template("What is our 401k {subject}")
 
 # Format the prompt with a specific subject
-prompt_str = prompt_template.format(subject="programmers")
+prompt_str = prompt_template.format(subject="Benefits")
 print(prompt_str + "\n")
 print("==========\n")
 
@@ -19,14 +19,14 @@ print("==========\n")
 chat_prompt = ChatPromptTemplate.from_messages([
     ("system", "You are a chatbot. Please respond to the user's question. The current time is {now}"),
     MessagesPlaceholder(variable_name="chat_history"),
-    HumanMessagePromptTemplate.from_template("Tell me a cold joke about {subject}")
-]).partial(now=datetime.now())
+    HumanMessagePromptTemplate.from_template("What is our 401k about {subject}")
+]).partial(now=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 # Invoke the chat prompt with user input
 chat_prompt_value = chat_prompt.invoke({
     "chat_history": [
         ("human", "My name is Ling"),
-        ("AIMessage", "I am ChatGPT. How can I help you?"),
+        ("ai", "I am ChatGPT. How can I help you?"),  # FIXED: Changed "AIMessage" to "ai"
     ],
     "subject": "programmers",
 })
