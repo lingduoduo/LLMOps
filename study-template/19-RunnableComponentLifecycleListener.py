@@ -42,3 +42,5 @@ chain = runnable
 
 # 2. Invoke and execute the chain
 chain.invoke(2, config={"configurable": {"name": "Ling"}})
+
+# https://github.com/geekan/MetaGPT/tree/main/metagpt/memory
