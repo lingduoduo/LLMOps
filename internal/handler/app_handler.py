@@ -7,15 +7,17 @@
 import uuid
 from dataclasses import dataclass
 from operator import itemgetter
+from typing import Any, Dict
 
 from injector import inject
 from langchain.memory import ConversationBufferWindowMemory
 from langchain_community.chat_message_histories import FileChatMessageHistory
+from langchain_core.memory import BaseMemory
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.runnables import RunnableLambda, RunnablePassthrough
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda, RunnableConfig
+from langchain_core.tracers import Run
 from langchain_openai import ChatOpenAI
-from openai import OpenAI
 
 from internal.schema.app_schema import CompletionReq
 from internal.service import AppService
@@ -56,7 +58,7 @@ class AppHandler:
             return validate_error_json(req.errors)
 
         # 2. Initialize the OpenAI client and send a request
-        client = OpenAI()
+        client = ChatOpenAI()
 
         # 3. Get the response and pass it to the frontend
         completion = client.chat.completions.create(
@@ -72,6 +74,23 @@ class AppHandler:
         content = completion.choices[0].message.content
 
         return success_json({"content": content})
+
+    @classmethod
+    def _load_memory_variables(cls, input: Dict[str, Any], config: RunnableConfig) -> Dict[str, Any]:
+        """Load memory variable information"""
+        configurable = config.get("configurable", {})
+        configurable_memory = configurable.get("memory", None)
+        if configurable_memory is not None and isinstance(configurable_memory, BaseMemory):
+            return configurable_memory.load_memory_variables(input)
+        return {"history": []}
+
+    @classmethod
+    def _save_context(cls, run_obj: Run, config: RunnableConfig) -> None:
+        """Store context information into the memory entity"""
+        configurable = config.get("configurable", {})
+        configurable_memory = configurable.get("memory", None)
+        if configurable_memory is not None and isinstance(configurable_memory, BaseMemory):
+            configurable_memory.save_context(run_obj.inputs, run_obj.outputs)
 
     def debug(self, app_id: uuid.UUID):
         """Chat Interface"""
@@ -90,24 +109,23 @@ class AppHandler:
 
         memory = ConversationBufferWindowMemory(
             k=3,  # Tracks the last 3 exchanges in memory
-            input_key="query",  # Key for the user's query input
-            output_key="output",  # Key for the AI's output
-            return_messages=True,  # Ensures messages are returned as part of the response
-            chat_memory=FileChatMessageHistory("./storage/memory/chat_history.txt"),  # Stores chat history in a file
+            input_key="query",
+            output_key="output",
+            return_messages=True,
+            chat_memory=FileChatMessageHistory("./storage/memory/chat_history.txt"),
         )
 
         # 3. Create the language model
         llm = ChatOpenAI(model="gpt-3.5-turbo-16k")
 
         # 4. Create the application chain
-        chain = RunnablePassthrough.assign(
-            history=RunnableLambda(memory.load_memory_variables) | itemgetter("history")
-        ) | prompt | llm | StrOutputParser()
+        chain = (RunnablePassthrough.assign(
+            history=RunnableLambda(self._load_memory_variables) | itemgetter("history")
+        ) | prompt | llm | StrOutputParser()).with_listeners(on_end=self._save_context)
 
         # 5. Invoke the chain to generate content
         chain_input = {"query": req.query.data}
-        content = chain.invoke(chain_input)
-        memory.save_context(chain_input, {"output": content})
+        content = chain.invoke(chain_input, config={"configurable": {"memory": memory}})
 
         return success_json({"content": content})
 
