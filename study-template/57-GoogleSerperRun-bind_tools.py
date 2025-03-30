@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@Time    : 2024/7/9 17:53
-@Author  : thezehui@gmail.com
+@Author  : linghypshen@gmail.com
 @File    : 1.GPT_Model_Bound_Tools.py
 """
 
