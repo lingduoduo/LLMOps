@@ -19,5 +19,4 @@ print("Return Directly:", search.return_direct)
 
 # Invoke the search tool with a query about the latest version of LangChain
 print(search.invoke("What is the latest version of LangChain?"))
-
 print(convert_to_openai_tool(search))
