@@ -54,7 +54,7 @@ model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
 # 3. Create the ReACT agent using a prebuilt helper
 checkpointer = MemorySaver()
-config = {"configurable": {"thread_id": "user-001"}}
+config = {"configurable": {"thread_id": 1}}
 
 agent = create_react_agent(
     model=model,
@@ -71,5 +71,10 @@ print(agent.invoke(
 # 5. Second invocation to test memory retention
 print(agent.invoke(
     {"messages": [("human", "Do you remember my name?")]},
-    config=config,
+    config={"configurable": {"thread_id": 2}},
+))
+
+print(agent.invoke(
+    {"messages": [("human", "Do you remember my name?")]},
+    config={"configurable": {"thread_id": 1}},
 ))
