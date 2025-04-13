@@ -14,3 +14,4 @@ flask-cors==5.0.1
 langgraph==0.3.21
 sentence-transformers==4.0.2
 faiss-cpu==1.10.0
+langchain-pinecone==0.1.3
