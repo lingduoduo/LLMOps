@@ -12,6 +12,7 @@ from typing import Any, Dict
 from injector import inject
 from langchain.memory import ConversationBufferWindowMemory
 from langchain_community.chat_message_histories import FileChatMessageHistory
+from langchain_core.documents import Document
 from langchain_core.memory import BaseMemory
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -20,7 +21,7 @@ from langchain_core.tracers import Run
 from langchain_openai import ChatOpenAI
 
 from internal.schema.app_schema import CompletionReq
-from internal.service import AppService
+from internal.service import AppService, VectorDatabaseService
 from pkg.response import success_json, validate_error_json, success_message
 
 
@@ -29,6 +30,7 @@ from pkg.response import success_json, validate_error_json, success_message
 class AppHandler:
     """Application Controller"""
     app_service: AppService
+    vector_database_service: VectorDatabaseService
 
     def create_app(self):
         """Calls the service to create a new app record"""
@@ -101,8 +103,13 @@ class AppHandler:
             return validate_error_json(req.errors)
 
         # 2. Create the prompt and memory
+        system_prompt = (
+            "You are a powerful chatbot capable of answering user questions "
+            "based on the given context and conversation history.\n\n<context>{context}</context>"
+        )
+
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "You are a powerful chatbot that can respond to user questions accordingly."),
+            ("system", system_prompt),
             MessagesPlaceholder("history"),  # Placeholder for conversation history
             ("human", "{query}"),  # User's query
         ])
@@ -119,8 +126,10 @@ class AppHandler:
         llm = ChatOpenAI(model="gpt-3.5-turbo-16k")
 
         # 4. Create the application chain
+        retriever = self.vector_database_service.get_retriever() | self.vector_database_service.combine_documents
         chain = (RunnablePassthrough.assign(
-            history=RunnableLambda(self._load_memory_variables) | itemgetter("history")
+            history=RunnableLambda(self._load_memory_variables) | itemgetter("history"),
+            context=itemgetter("query") | retriever
         ) | prompt | llm | StrOutputParser()).with_listeners(on_end=self._save_context)
 
         # 5. Invoke the chain to generate content
@@ -128,6 +137,11 @@ class AppHandler:
         content = chain.invoke(chain_input, config={"configurable": {"memory": memory}})
 
         return success_json({"content": content})
+
+    @classmethod
+    def _combine_documents(cls, documents: list[Document]) -> str:
+        """Combine a list of input documents into a single string"""
+        return "\n\n".join([document.page_content for document in documents])
 
     def ping(self):
         """Health check endpoint"""
