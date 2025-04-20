@@ -15,3 +15,38 @@ documents = loader.load()
 print(documents)
 print(len(documents))
 print(documents[0].metadata)
+
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+@Time    : 2024/7/1 18:46
+@File    : 2.office_document_loader.py
+"""
+
+# Example Excel loader (commented out):
+from langchain_community.document_loaders import UnstructuredExcelLoader, UnstructuredPowerPointLoader
+
+excel_loader = UnstructuredExcelLoader("./staff_attendance.xlsx", mode="elements")
+excel_documents = excel_loader.load()
+
+print(excel_documents)
+print(len(excel_documents))
+
+# Example Word loader (commented out):
+from langchain_community.document_loaders import UnstructuredWordDocumentLoader
+
+word_loader = UnstructuredWordDocumentLoader("./meow_meow.docx")
+documents = word_loader.load()
+
+print(documents)
+print(len(documents))
+
+# 1. Create the PowerPoint loader
+ppt_loader = UnstructuredPowerPointLoader("./chapter_introduction.pptx")
+
+# 2. Load the slides
+documents = ppt_loader.load()
+
+print(documents)
+print(len(documents))
+print(documents[0].metadata)
