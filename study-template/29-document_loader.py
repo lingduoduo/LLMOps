@@ -50,3 +50,33 @@ documents = ppt_loader.load()
 print(documents)
 print(len(documents))
 print(documents[0].metadata)
+
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
+# """
+# @Time    : 2024/7/1 23:17
+# @File    : 3.WebBaseLoader.py
+# """
+from langchain_community.document_loaders import WebBaseLoader
+
+loader = WebBaseLoader("https://imooc.com")
+documents = loader.load()
+
+print(documents)
+print(len(documents))
+print(documents[0].metadata)
+
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+@Time    : 2024/7/1 23:30
+@File    : 4.UnstructuredFileLoader.py
+"""
+from langchain_community.document_loaders import UnstructuredFileLoader
+
+loader = UnstructuredFileLoader("./project_api_docs.md")
+documents = loader.load()
+
+print(documents)
+print(len(documents))
+print(documents[0].metadata)
