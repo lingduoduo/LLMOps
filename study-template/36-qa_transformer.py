@@ -1,55 +1,55 @@
-# #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
-# """
-# @Author  : linghypshen@gmail.com
-# @File    : qa_transformer_example.py
-# """
-# import dotenv
-# from langchain_community.document_transformers import DoctranQATransformer
-# from langchain_core.documents import Document
-#
-# dotenv.load_dotenv()
-#
-# # 1. Build the list of documents
-# page_content = """Confidential Document - For Internal Use Only
-# Date: July 1, 2023
-# Subject: Updates and Discussions on Various Topics
-#
-# Dear Team,
-#
-# I hope this email finds you well. In this document, I would like to provide you with some important updates and discuss various topics requiring our attention. Please treat the information contained herein as highly confidential.
-#
-# Security and Privacy Measures
-# As part of our ongoing commitment to ensuring customer data security and privacy, we have implemented robust measures across all systems. We want to commend John Doe (email: john.doe@example.com) from the IT department for his diligent work in enhancing our cybersecurity. Moving forward, we remind everyone to strictly adhere to our data protection policies and guidelines. Additionally, if you identify any potential security risks or incidents, please report them immediately to our dedicated team at security@example.com.
-#
-# Human Resources Updates and Employee Benefits
-# Recently, we welcomed several new team members who have made significant contributions to their respective departments. I would like to recognize Jane Smith (SSN: 049-45-5928) for her outstanding performance in customer service. Jane has received positive feedback from customers. Additionally, please remember that the open enrollment period for our employee benefits program is approaching. If you have any questions or need assistance, please contact our HR representative Michael Johnson (phone: 418-492-3850, email: michael.johnson@example.com).
-#
-# Marketing Initiatives and Events
-# Our marketing team has been actively developing new strategies to raise brand awareness and drive customer engagement. We want to thank Sarah Thompson (phone: 415-555-1234) for her exceptional efforts in managing our social media platforms. Sarah successfully increased our follower base by 20% over the past month. Additionally, please note the upcoming product launch event on July 15. We encourage all team members to attend and support this important company milestone.
-#
-# R&D Projects
-# In our pursuit of innovation, our R&D department has been working tirelessly on various projects. I would like to commend David Rodriguez (email: david.rodriguez@example.com) for his outstanding work as project lead. David has made significant contributions to the development of our cutting-edge technologies. Furthermore, we encourage everyone to share their ideas and suggestions at the regular R&D brainstorming meeting on July 10 to explore potential new projects.
-#
-# Please treat the information in this document as highly confidential and ensure it is not shared with unauthorized personnel. If you have any questions or concerns regarding the topics discussed, feel free to contact me directly.
-#
-# Thank you for your attention, and let us continue working together to achieve our goals.
-#
-# Sincerely,
-# Jason Fan
-# Co-founder & CEO
-# Psychic
-# jason@psychic.dev"""
-#
-# documents = [Document(page_content=page_content)]
-#
-# # 2. Build the Q&A transformer and transform
-# doc_qa = DoctranQATransformer(openai_api_model="gpt-3.5-turbo-16k")
-# transformed_docs = doc_qa.transform_documents(documents)
-#
-# # 3. Output the Q&A data
-# for qa in transformed_docs[0].metadata.get("questions_and_answers", []):
-#     print("Q&A data:", qa)
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+@Author  : linghypshen@gmail.com
+@File    : qa_transformer_example.py
+"""
+import dotenv
+from langchain_community.document_transformers import DoctranQATransformer
+from langchain_core.documents import Document
+
+dotenv.load_dotenv()
+
+# 1. Build the list of documents
+page_content = """Confidential Document - For Internal Use Only
+Date: July 1, 2023
+Subject: Updates and Discussions on Various Topics
+
+Dear Team,
+
+I hope this email finds you well. In this document, I would like to provide you with some important updates and discuss various topics requiring our attention. Please treat the information contained herein as highly confidential.
+
+Security and Privacy Measures
+As part of our ongoing commitment to ensuring customer data security and privacy, we have implemented robust measures across all systems. We want to commend John Doe (email: john.doe@example.com) from the IT department for his diligent work in enhancing our cybersecurity. Moving forward, we remind everyone to strictly adhere to our data protection policies and guidelines. Additionally, if you identify any potential security risks or incidents, please report them immediately to our dedicated team at security@example.com.
+
+Human Resources Updates and Employee Benefits
+Recently, we welcomed several new team members who have made significant contributions to their respective departments. I would like to recognize Jane Smith (SSN: 049-45-5928) for her outstanding performance in customer service. Jane has received positive feedback from customers. Additionally, please remember that the open enrollment period for our employee benefits program is approaching. If you have any questions or need assistance, please contact our HR representative Michael Johnson (phone: 418-492-3850, email: michael.johnson@example.com).
+
+Marketing Initiatives and Events
+Our marketing team has been actively developing new strategies to raise brand awareness and drive customer engagement. We want to thank Sarah Thompson (phone: 415-555-1234) for her exceptional efforts in managing our social media platforms. Sarah successfully increased our follower base by 20% over the past month. Additionally, please note the upcoming product launch event on July 15. We encourage all team members to attend and support this important company milestone.
+
+R&D Projects
+In our pursuit of innovation, our R&D department has been working tirelessly on various projects. I would like to commend David Rodriguez (email: david.rodriguez@example.com) for his outstanding work as project lead. David has made significant contributions to the development of our cutting-edge technologies. Furthermore, we encourage everyone to share their ideas and suggestions at the regular R&D brainstorming meeting on July 10 to explore potential new projects.
+
+Please treat the information in this document as highly confidential and ensure it is not shared with unauthorized personnel. If you have any questions or concerns regarding the topics discussed, feel free to contact me directly.
+
+Thank you for your attention, and let us continue working together to achieve our goals.
+
+Sincerely,
+Jason Fan
+Co-founder & CEO
+Psychic
+jason@psychic.dev"""
+
+documents = [Document(page_content=page_content)]
+
+# 2. Build the Q&A transformer and transform
+doc_qa = DoctranQATransformer(openai_api_model="gpt-3.5-turbo-16k")
+transformed_docs = doc_qa.transform_documents(documents)
+
+# 3. Output the Q&A data
+for qa in transformed_docs[0].metadata.get("questions_and_answers", []):
+    print("Q&A data:", qa)
 
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
