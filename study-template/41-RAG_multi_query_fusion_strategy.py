@@ -90,5 +90,6 @@ rag_fusion_retriever = RAGFusionRetriever.from_llm(
 
 # Perform retrieval for an English query
 docs = rag_fusion_retriever.invoke('Which documents discuss LLMOps application configuration?')
+
 print(docs)
 print(len(docs))

@@ -4,6 +4,7 @@
 @Author  : linghypshen@gmail.com
 @File    : decomposition_strategy.py
 """
+import os
 from operator import itemgetter
 
 import dotenv
@@ -44,8 +45,8 @@ decomposition_chain = (
 # 3. Build the vector database and retriever
 db = WeaviateVectorStore(
     client=weaviate.connect_to_wcs(
-        cluster_url="https://mbakeruerziae6psyex7ng.c0.us-west3.gcp.weaviate.cloud",
-        auth_credentials=AuthApiKey("ZltPVa9ZSOxUcfafelsggGyyH6tnTYQYJvBx"),
+        cluster_url=os.environ.get("WC_CLUSTER_URL"),
+        auth_credentials=AuthApiKey(os.environ["WCD_API_KEY"]),
     ),
     index_name="DatasetDemo",
     text_key="text",
