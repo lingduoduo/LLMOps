@@ -1,47 +1,47 @@
-# #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
-# """
-# @Author  : linghypshen@gmail.com
-# @File    : 1.Few_example_prompt_template.py
-# """
-# import dotenv
-# from langchain_core.output_parsers import StrOutputParser
-# from langchain_core.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
-# from langchain_openai import ChatOpenAI
-#
-# dotenv.load_dotenv()
-#
-# # 1. Build the example prompt template and example pairs
-# example_prompt = ChatPromptTemplate.from_messages([
-#     ("human", "{question}"),
-#     ("ai", "{answer}"),
-# ])
-# examples = [
-#     {"question": "Please calculate: what is 2+2?", "answer": "4"},
-#     {"question": "Please calculate: what is 2+3?", "answer": "5"},
-#     {"question": "Please calculate: what is 20*15?", "answer": "300"},
-# ]
-#
-# # 2. Create the few-shot chat message prompt template
-# few_shot_prompt = FewShotChatMessagePromptTemplate(
-#     example_prompt=example_prompt,
-#     examples=examples,
-# )
-# print("Few-shot example template:", few_shot_prompt.format())
-#
-# # 3. Build the final prompt template
-# prompt = ChatPromptTemplate.from_messages([
-#     ("system", "You are a chatbot capable of solving complex math problems."),
-#     few_shot_prompt,
-#     ("human", "{question}"),
-# ])
-#
-# # 4. Initialize the language model and chain
-# llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0)
-# chain = prompt | llm | StrOutputParser()
-#
-# # 5. Invoke the chain to get results
-# print(chain.invoke("Please calculate: what is 14*15?"))
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+@Author  : linghypshen@gmail.com
+@File    : 1.Few_example_prompt_template.py
+"""
+import dotenv
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
+from langchain_openai import ChatOpenAI
+
+dotenv.load_dotenv()
+
+# 1. Build the example prompt template and example pairs
+example_prompt = ChatPromptTemplate.from_messages([
+    ("human", "{question}"),
+    ("ai", "{answer}"),
+])
+examples = [
+    {"question": "Please calculate: what is 2+2?", "answer": "4"},
+    {"question": "Please calculate: what is 2+3?", "answer": "5"},
+    {"question": "Please calculate: what is 20*15?", "answer": "300"},
+]
+
+# 2. Create the few-shot chat message prompt template
+few_shot_prompt = FewShotChatMessagePromptTemplate(
+    example_prompt=example_prompt,
+    examples=examples,
+)
+print("Few-shot example template:", few_shot_prompt.format())
+
+# 3. Build the final prompt template
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a chatbot capable of solving complex math problems."),
+    few_shot_prompt,
+    ("human", "{question}"),
+])
+
+# 4. Initialize the language model and chain
+llm = ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=0)
+chain = prompt | llm | StrOutputParser()
+
+# 5. Invoke the chain to get results
+print(chain.invoke("Please calculate: what is 14*15?"))
 
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
