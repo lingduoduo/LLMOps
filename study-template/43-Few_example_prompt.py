@@ -79,9 +79,9 @@ class StepBackRetriever(BaseRetriever):
         """Rewrites the input query to a fallback question and then retrieves documents."""
         # 1. Prepare few-shot examples for the fallback rewriting
         examples = [
-            {"input": "Are there any courses on AI application development on the MOOC platform?",
-             "output": "What courses does the MOOC platform offer?"},
-            {"input": "Which country was Muxiao Ke born in?", "output": "What is Muxiao Ke's background?"},
+            {"input": "Are there any courses on AI application development on the platform?",
+             "output": "What courses does the platform offer?"},
+            {"input": "Which country was Ling born in?", "output": "What is ling's background?"},
             {"input": "Can a driver drive at high speed?", "output": "What can a driver do?"},
         ]
         example_prompt = ChatPromptTemplate.from_messages([
