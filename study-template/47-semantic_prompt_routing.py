@@ -63,4 +63,5 @@ chain = (
 # 4. Test the chain
 print(chain.invoke("What is a black hole?"))
 print("======================")
-print(chain.invoke("Can you introduce the cosine formula?"))
+
+print(chain.invoke("Can you run 110 * 100?"))
