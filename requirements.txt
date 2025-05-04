@@ -25,5 +25,5 @@ tiktoken==0.9.0
 langchain-weaviate==0.0.4
 rank_bm25==0.2.2
 lark==1.2.2
-
+umap-learn==0.5.7
 
