@@ -1,0 +1,4 @@
+name: google_serper
+label: Google Serper Search
+description: This is a low-cost Google Search API. Use this tool when you need to look up current events; the input is a query string.
+params: [ ]
