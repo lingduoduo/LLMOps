@@ -16,7 +16,7 @@ from internal.core.tools.builtin_tools.entities import ProviderEntity, Provider
 
 @inject
 @singleton
-class ProviderFactory(BaseModel):
+class BuiltinProviderManager(BaseModel):
     """Factory class for service providers"""
     provider_map: dict[str, Provider] = Field(default_factory=dict)
 

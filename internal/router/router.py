@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from flask import Flask, Blueprint
 from injector import inject
 
-from internal.handler import AppHandler
+from internal.handler import AppHandler, BuiltinToolHandler
 
 
 @inject
@@ -18,6 +18,7 @@ from internal.handler import AppHandler
 class Router:
     """Router"""
     app_handler: AppHandler
+    builtin_tool_handler: BuiltinToolHandler
 
     def register_router(self, app: Flask):
         """Register routes"""
@@ -35,5 +36,9 @@ class Router:
         bp.add_url_rule("/app/<uuid:id>/delete", methods=["POST"], view_func=self.app_handler.delete_app)
         # bp.add_url_rule("/apps/<uuid:id>/debug", methods=["POST", "OPTION"], view_func=self.app_handler.completion)
 
+        # 3. Internal tool factory
+        bp.add_url_rule("/builtin-tools", view_func=self.builtin_tool_handler.get_builtin_tools)
+        bp.add_url_rule("/builtin-tools/<string:provider_name>/tools/<string:tool_name>",
+                        view_func=self.builtin_tool_handler.get_provider_tool)
         # 3. Register the blueprint with the application
         app.register_blueprint(bp)

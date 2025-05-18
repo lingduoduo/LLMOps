@@ -20,9 +20,10 @@ from langchain_core.runnables import RunnablePassthrough, RunnableLambda, Runnab
 from langchain_core.tracers import Run
 from langchain_openai import ChatOpenAI
 
-from internal.core.tools.builtin_tools.providers import ProviderFactory
 from internal.schema.app_schema import CompletionReq
+# from internal.service import ApiToolService
 from internal.service import AppService, VectorDatabaseService
+from internal.service import BuiltinToolService
 from pkg.response import success_json, validate_error_json, success_message
 
 
@@ -32,7 +33,10 @@ class AppHandler:
     """Application Controller"""
     app_service: AppService
     vector_database_service: VectorDatabaseService
-    provider_factory: ProviderFactory
+
+    # api_tool_service: ApiToolService
+
+    provider_factory: BuiltinToolService
 
     def create_app(self):
         """Calls the service to create a new app record"""
@@ -148,11 +152,16 @@ class AppHandler:
     def ping(self):
         """Health check endpoint"""
         # raise FailException("Data not found")
+        return {"ping": "pong"}
         # google_serper = self.provider_factory.get_tool("google", "google_serper")()
         # print(google_serper)
         # print(google_serper.invoke("What is the world record for marathon?"))
 
-        google = self.provider_factory.get_provider("google")
-        google_serper = google.get_tool_entity("google_serper")
-        print(google_serper)
-        return {"ping": "pong"}
+        # google = self.provider_factory.get_provider("google")
+        # google_serper = google.get_tool_entity("google_serper")
+        # print(google_serper)
+        # providers = self.provider_factory.get_builtin_tools()
+        # return success_json({
+        #     "providers": providers
+        # })
+        # return self.api_tool_service.api_tool_invoke()
