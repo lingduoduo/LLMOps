@@ -1,0 +1,4 @@
+name: current_time
+label: Current Time
+description: A tool for retrieving the current time.
+params: [ ]

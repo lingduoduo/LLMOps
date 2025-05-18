@@ -4,6 +4,6 @@
 @Author  : linghypshen@gmail.com
 @File    : __init__.py
 """
-from .duckduckgo_search import duckduckgo_search
+from .wikipedia_search import wikipedia_search
 
-__all__ = ["duckduckgo_search"]
+__all__ = ["wikipedia_search"]

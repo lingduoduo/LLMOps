@@ -148,11 +148,13 @@ class AppHandler:
     def ping(self):
         """Health check endpoint"""
         # raise FailException("Data not found")
+        # return {"ping": "pong"}
         # google_serper = self.provider_factory.get_tool("google", "google_serper")()
         # print(google_serper)
         # print(google_serper.invoke("What is the world record for marathon?"))
 
-        google = self.provider_factory.get_provider("google")
-        google_serper = google.get_tool_entity("google_serper")
-        print(google_serper)
-        return {"ping": "pong"}
+        # google = self.provider_factory.get_provider("google")
+        # google_serper = google.get_tool_entity("google_serper")
+        # print(google_serper)
+        providers = self.provider_factory.get_provider_entities()
+        return success_json({"providers": [provider.dict() for provider in providers]})
