@@ -13,6 +13,7 @@ from flask import current_app
 from injector import inject
 from langchain_core.pydantic_v1 import BaseModel
 
+from internal.core.tools.builtin_tools.categories import BuiltinCategoryManager
 from internal.core.tools.builtin_tools.providers import BuiltinProviderManager
 from internal.exception import NotFoundException
 
@@ -22,8 +23,7 @@ from internal.exception import NotFoundException
 class BuiltinToolService:
     """Service for managing built-in tools"""
     builtin_provider_manager: BuiltinProviderManager
-
-    # builtin_category_manager: BuiltinCategoryManager
+    builtin_category_manager: BuiltinCategoryManager
 
     def get_builtin_tools(self) -> list:
         """Retrieve information about all built-in providers and their associated tools"""
