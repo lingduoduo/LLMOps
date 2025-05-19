@@ -4,8 +4,10 @@
 @Author  : linghypshen@gmail.com
 @File    : builtin_tool_handler.py
 """
+import io
 from dataclasses import dataclass
 
+from flask import send_file
 from injector import inject
 
 from internal.service import BuiltinToolService
@@ -31,12 +33,10 @@ class BuiltinToolHandler:
 
     def get_provider_icon(self, provider_name: str):
         """Fetch the icon image stream for the specified provider"""
-        # icon, mimetype = self.builtin_tool_service.get_provider_icon(provider_name)
-        # return send_file(io.BytesIO(icon), mimetype)
-        pass
+        icon, mimetype = self.builtin_tool_service.get_provider_icon(provider_name)
+        return send_file(io.BytesIO(icon), mimetype)
 
     def get_categories(self):
         """Retrieve category information for all built-in providers"""
-        # categories = self.builtin_tool_service.get_categories()
-        # return success_json(categories)
-        pass
+        categories = self.builtin_tool_service.get_categories()
+        return success_json(categories)

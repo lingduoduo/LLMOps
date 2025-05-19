@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 @Author  : linghypshen@gmail.com
-@File    : __init__.py.py
+@File    : __init__.py
 """
 from .google_serper import google_serper
 
