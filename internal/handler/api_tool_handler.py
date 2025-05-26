@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@Time    : 2024/8/1 10:16
-@Author  : thezehui@gmail.com
+@Author  : linghypshen@gmail.com
 @File    : api_tool_handler.py
 """
+
 from dataclasses import dataclass
 from uuid import UUID
 
-from flask import request
 from injector import inject
 
 from internal.schema.api_tool_schema import (
@@ -16,13 +15,15 @@ from internal.schema.api_tool_schema import (
     CreateApiToolReq,
     GetApiToolProviderResp,
     GetApiToolResp,
-    GetApiToolProvidersWithPageReq,
-    GetApiToolProvidersWithPageResp,
+    # GetApiToolProvidersWithPageReq,
+    # GetApiToolProvidersWithPageResp,
     UpdateApiToolProviderReq,
 )
 from internal.service import ApiToolService
-from pkg.paginator import PageModel
 from pkg.response import validate_error_json, success_message, success_json
+
+
+# from pkg.paginator import PageModel
 
 
 @inject
@@ -32,16 +33,15 @@ class ApiToolHandler:
     api_tool_service: ApiToolService
 
     def get_api_tool_providers_with_page(self):
+        pass
         """Retrieve a paginated list of API tool providers"""
-        req = GetApiToolProvidersWithPageReq(request.args)
-        if not req.validate():
-            return validate_error_json(req.errors)
+        # req = GetApiToolProvidersWithPageReq(request.args)
+        # if not req.validate():
+        #     return validate_error_json(req.errors)
 
-        api_tool_providers, paginator = self.api_tool_service.get_api_tool_providers_with_page(req)
-
-        resp = GetApiToolProvidersWithPageResp(many=True)
-
-        return success_json(PageModel(list=resp.dump(api_tool_providers), paginator=paginator))
+        # api_tool_providers, paginator = self.api_tool_service.get_api_tool_providers_with_page(req)
+        # resp = GetApiToolProvidersWithPageResp(many=True)
+        # return success_json(PageModel(list=resp.dump(api_tool_providers), paginator=paginator))
 
     def create_api_tool_provider(self):
         """Create a new custom API tool"""
