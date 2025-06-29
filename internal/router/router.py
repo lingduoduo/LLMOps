@@ -52,7 +52,8 @@ class Router:
         # 4. Custom API plugin module
         bp.add_url_rule(
             "/api-tools",
-            view_func=self.api_tool_handler.get_api_tool_providers_with_page,
+            view_func=self.api_tool_handler.get_api_tool,
+            # view_func=self.api_tool_handler.get_api_tool_providers_with_page,
         )
         bp.add_url_rule(
             "/api-tools/validate-openapi-schema",
