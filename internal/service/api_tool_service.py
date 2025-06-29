@@ -5,11 +5,14 @@
 @File    : api_tool_service.py
 """
 
+import json
 from dataclasses import dataclass
+from typing import Any
 from uuid import UUID
 
 from injector import inject
 
+from internal.core.tools.api_tools.entities import OpenAPISchema
 from internal.core.tools.api_tools.providers import ApiProviderManager
 from internal.exception import (
     ValidateErrorException,
@@ -174,3 +177,15 @@ class ApiToolService(BaseService):
     def delete_api_tool_provider(self, provider_id: UUID):
         """Delete a tool provider and all associated tools by provider_id"""
         # TODO:
+
+    @classmethod
+    def parse_openapi_schema(cls, openapi_schema_str: str) -> Any:
+        """Parse the provided openapi_schema string and raise an error if invalid."""
+        try:
+            data = json.loads(openapi_schema_str)
+            if not isinstance(data, dict):
+                raise ValueError("Parsed data must be a JSON object")
+        except Exception:
+            raise ValidateErrorException("The provided data must be a valid OpenAPI-compliant JSON string")
+
+        return OpenAPISchema(**data)
