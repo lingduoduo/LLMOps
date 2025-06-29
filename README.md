@@ -101,3 +101,21 @@ graph TD;
 brew services restart postgresql@16
 brew services stop postgresql@16
 ```
+
+### Flask-Migrate
+
+````
+pip install flask-migrate
+```
+
+```
+flask db init
+
+flask --app app.http.app routes
+
+flask --app app.http.app db init
+
+flask --app app.http.app db migrate -m "init db migration"
+```
+
+
