@@ -27,5 +27,7 @@ rank_bm25==0.2.2
 lark==1.2.2
 umap-learn==0.5.7
 langchain-cohere==0.2.4
+marshmallow==3.26.1
+wtforms
 
 

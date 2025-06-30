@@ -1,85 +1,101 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@Author  : linghypshen@gmail.com
+@Time    : 2024/8/1 10:18
+@Author  : thezehui@gmail.com
 @File    : api_tool_schema.py
 """
+
 from flask_wtf import FlaskForm
 from marshmallow import Schema, fields, pre_dump
-# from pkg.paginator import PaginatorReq
 from wtforms import StringField, ValidationError
-from wtforms.validators import DataRequired, Length, URL
+from wtforms.validators import DataRequired, Length, URL, Optional
 
 from internal.model import ApiToolProvider, ApiTool
+from pkg.paginator import PaginatorReq
 from .schema import ListField
 
 
 class ValidateOpenAPISchemaReq(FlaskForm):
-    """Request for validating an OpenAPI schema string"""
+    """
+    Request schema for validating OpenAPI-compliant JSON strings.
+    """
     openapi_schema = StringField("openapi_schema", validators=[
-        DataRequired(message="The openapi_schema string cannot be empty")
+        DataRequired(message="openapi_schema string cannot be empty")
     ])
 
 
-# class GetApiToolProvidersWithPageReq(PaginatorReq):
-#     """Request for retrieving a paginated list of API tool providers"""
-#     search_word = StringField("search_word", validators=[Optional()])
+class GetApiToolProvidersWithPageReq(PaginatorReq):
+    """
+    Request schema for getting a paginated list of API tool providers.
+    """
+    search_word = StringField("search_word", validators=[
+        Optional()
+    ])
 
 
 class CreateApiToolReq(FlaskForm):
-    """Request to create a custom API tool provider"""
+    """
+    Request schema for creating a custom API tool provider.
+    """
     name = StringField("name", validators=[
-        DataRequired(message="Tool provider name cannot be empty"),
-        Length(min=1, max=30, message="Tool provider name must be between 1 and 30 characters"),
+        DataRequired(message="Provider name cannot be empty"),
+        Length(min=1, max=30, message="Provider name length must be between 1 and 30"),
     ])
     icon = StringField("icon", validators=[
-        DataRequired(message="Tool provider icon cannot be empty"),
-        URL(message="Tool provider icon must be a valid URL"),
+        DataRequired(message="Provider icon cannot be empty"),
+        URL(message="Provider icon must be a valid URL"),
     ])
     openapi_schema = StringField("openapi_schema", validators=[
-        DataRequired(message="The openapi_schema string cannot be empty")
+        DataRequired(message="openapi_schema string cannot be empty")
     ])
-
     headers = ListField("headers", default=[])
 
     @classmethod
     def validate_headers(cls, form, field):
-        """Validate the headers field: must be a list of dictionaries with 'key' and 'value' keys only"""
+        """
+        Validate that headers is a list of dictionaries with exactly 'key' and 'value' keys.
+        """
         for header in field.data:
             if not isinstance(header, dict):
-                raise ValidationError("Each element in headers must be a dictionary")
+                raise ValidationError("Each item in headers must be a dictionary")
             if set(header.keys()) != {"key", "value"}:
-                raise ValidationError("Each header must only contain 'key' and 'value' keys")
+                raise ValidationError("Each header dictionary must contain exactly 'key' and 'value' fields")
 
 
 class UpdateApiToolProviderReq(FlaskForm):
-    """Request to update an existing API tool provider"""
+    """
+    Request schema for updating an API tool provider.
+    """
     name = StringField("name", validators=[
-        DataRequired(message="Tool provider name cannot be empty"),
-        Length(min=1, max=30, message="Tool provider name must be between 1 and 30 characters"),
+        DataRequired(message="Provider name cannot be empty"),
+        Length(min=1, max=30, message="Provider name length must be between 1 and 30"),
     ])
     icon = StringField("icon", validators=[
-        DataRequired(message="Tool provider icon cannot be empty"),
-        URL(message="Tool provider icon must be a valid URL"),
+        DataRequired(message="Provider icon cannot be empty"),
+        URL(message="Provider icon must be a valid URL"),
     ])
     openapi_schema = StringField("openapi_schema", validators=[
-        DataRequired(message="The openapi_schema string cannot be empty")
+        DataRequired(message="openapi_schema string cannot be empty")
     ])
-
     headers = ListField("headers", default=[])
 
     @classmethod
     def validate_headers(cls, form, field):
-        """Validate the headers field: must be a list of dictionaries with 'key' and 'value' keys only"""
+        """
+        Validate that headers is a list of dictionaries with exactly 'key' and 'value' keys.
+        """
         for header in field.data:
             if not isinstance(header, dict):
-                raise ValidationError("Each element in headers must be a dictionary")
+                raise ValidationError("Each item in headers must be a dictionary")
             if set(header.keys()) != {"key", "value"}:
-                raise ValidationError("Each header must only contain 'key' and 'value' keys")
+                raise ValidationError("Each header dictionary must contain exactly 'key' and 'value' fields")
 
 
 class GetApiToolProviderResp(Schema):
-    """Response for getting API tool provider details"""
+    """
+    Response schema for returning details of an API tool provider.
+    """
     id = fields.UUID()
     name = fields.String()
     icon = fields.String()
@@ -100,7 +116,9 @@ class GetApiToolProviderResp(Schema):
 
 
 class GetApiToolResp(Schema):
-    """Response for getting details of a specific API tool"""
+    """
+    Response schema for returning details of an API tool and its parameters.
+    """
     id = fields.UUID()
     name = fields.String()
     description = fields.String()
@@ -114,7 +132,10 @@ class GetApiToolResp(Schema):
             "id": data.id,
             "name": data.name,
             "description": data.description,
-            "inputs": [{k: v for k, v in parameter.items() if k != "in"} for parameter in data.parameters],
+            "inputs": [
+                {k: v for k, v in parameter.items() if k != "in"}
+                for parameter in data.parameters
+            ],
             "provider": {
                 "id": provider.id,
                 "name": provider.name,
@@ -122,4 +143,40 @@ class GetApiToolResp(Schema):
                 "description": provider.description,
                 "headers": provider.headers,
             }
+        }
+
+
+class GetApiToolProvidersWithPageResp(Schema):
+    """
+    Response schema for returning a paginated list of API tool providers with their tools.
+    """
+    id = fields.UUID()
+    name = fields.String()
+    icon = fields.String()
+    description = fields.String()
+    headers = fields.List(fields.Dict, default=[])
+    tools = fields.List(fields.Dict, default=[])
+    created_at = fields.Integer(default=0)
+
+    @pre_dump
+    def process_data(self, data: ApiToolProvider, **kwargs):
+        tools = data.tools
+        return {
+            "id": data.id,
+            "name": data.name,
+            "icon": data.icon,
+            "description": data.description,
+            "headers": data.headers,
+            "tools": [
+                {
+                    "id": tool.id,
+                    "description": tool.description,
+                    "name": tool.name,
+                    "inputs": [
+                        {k: v for k, v in parameter.items() if k != "in"}
+                        for parameter in tool.parameters
+                    ]
+                } for tool in tools
+            ],
+            "created_at": int(data.created_at.timestamp())
         }
