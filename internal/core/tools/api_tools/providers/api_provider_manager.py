@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@Time    : 2024/8/4 10:25
-@Author  : thezehui@gmail.com
+@Author  : linghypshen@gmail.com
 @File    : api_provider_manager.py
 """
 from dataclasses import dataclass
@@ -19,15 +18,15 @@ from internal.core.tools.api_tools.entities import ToolEntity, ParameterTypeMap,
 @inject
 @dataclass
 class ApiProviderManager(BaseModel):
-    """API工具提供者管理器，能根据传递的工具配置信息生成自定义LangChain工具"""
+    """API Tool Provider Manager - generates custom LangChain tools based on provided tool configuration"""
 
     @classmethod
     def _create_tool_func_from_tool_entity(cls, tool_entity: ToolEntity) -> Callable:
-        """根据传递的信息创建发起API请求的函数"""
+        """Create a function to perform an API request based on the provided tool information"""
 
         def tool_func(**kwargs) -> str:
-            """API工具请求函数"""
-            # 1.定义变量存储来自path/query/header/cookie/request_body中的数据
+            """API tool request function"""
+            # 1. Define variables to store data from path/query/header/cookie/request_body
             parameters = {
                 ParameterIn.PATH: {},
                 ParameterIn.HEADER: {},
@@ -36,21 +35,21 @@ class ApiProviderManager(BaseModel):
                 ParameterIn.REQUEST_BODY: {}
             }
 
-            # 2.更改参数结构映射
+            # 2. Create mappings for parameter structures
             parameter_map = {parameter.get("name"): parameter for parameter in tool_entity.parameters}
             header_map = {header.get("key"): header.get("value") for header in tool_entity.headers}
 
-            # 3.循环遍历传递的所有字段并校验
+            # 3. Iterate over all provided fields and validate
             for key, value in kwargs.items():
-                # 4.提取键值对关联的字段并校验
+                # 4. Extract and validate each key-value pair
                 parameter = parameter_map.get(key)
                 if parameter is None:
                     continue
 
-                # 5.将参数存储到合适的位置上，默认在query上
+                # 5. Store the parameter in the appropriate location (default to query)
                 parameters[parameter.get("in", ParameterIn.QUERY)][key] = value
 
-            # 6.构建request请求并返回采集的内容
+            # 6. Build and execute the request, returning the response content
             return requests.request(
                 method=tool_entity.method,
                 url=tool_entity.url.format(**parameters[ParameterIn.PATH]),
@@ -64,7 +63,7 @@ class ApiProviderManager(BaseModel):
 
     @classmethod
     def _create_model_from_parameters(cls, parameters: list[dict]) -> Type[BaseModel]:
-        """根据传递的parameters参数创建BaseModel子类"""
+        """Create a Pydantic BaseModel subclass from the provided parameters"""
         fields = {}
         for parameter in parameters:
             field_name = parameter.get("name")
@@ -80,7 +79,7 @@ class ApiProviderManager(BaseModel):
         return create_model("DynamicModel", **fields)
 
     def get_tool(self, tool_entity: ToolEntity) -> BaseTool:
-        """根据传递的配置获取自定义API工具"""
+        """Return a custom API tool built from the provided configuration"""
         return StructuredTool.from_function(
             func=self._create_tool_func_from_tool_entity(tool_entity),
             name=f"{tool_entity.id}_{tool_entity.name}",
