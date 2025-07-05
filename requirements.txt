@@ -29,5 +29,7 @@ umap-learn==0.5.7
 langchain-cohere==0.2.4
 marshmallow==3.26.1
 wtforms
+langfuse==2.60.9
+
 
 

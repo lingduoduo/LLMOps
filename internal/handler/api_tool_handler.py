@@ -30,7 +30,8 @@ class ApiToolHandler:
     """Custom API Plugin Handler"""
     api_tool_service: ApiToolService
 
-    def get_api_tool_providers_with_page(self):
+    def \
+            get_api_tool_providers_with_page(self):
         """Get a paginated list of API tool providers"""
         req = GetApiToolProvidersWithPageReq(request.args)
         if not req.validate():
