@@ -1,3 +1,11 @@
+Objective: 
+Conduct a high-level review of leading LLM evaluation platforms (Arize Phoenix, Langfuse, Confident AI/DeepEval) focusing on their core features relevant to lyric products.
+Deliverables: A comparative analysis document highlighting strengths, weaknesses, and potential fit for lyric generation, specifically considering custom/multimodal evaluations and human annotation capabilities.
+Focus Areas: Tracing capabilities
+evaluation methods (pre-built, custom, LLM-as-a-judge, human-in-the-loop), prompt management, and dataset management
+
+Outcomes:
+
 Langfuse is building the **open source LLM Engineering Platform**. We are building *the* platform to observe and improve LLM applications.
 
 - **Full context capture:** Track the complete execution flow including API calls, context, prompts, parallelism and more
@@ -6,8 +14,6 @@ Langfuse is building the **open source LLM Engineering Platform**. We are buildi
 - **Dataset creation:** Build high-quality datasets for fine-tuning and testing
 - **Root cause analysis:** Quickly identify and debug issues in complex LLM applications
 
-
-
 ![Screenshot 2025-07-03 at 1.40.05 PM](/Users/huanglin/Library/CloudStorage/OneDrive-AutomaticDataProcessingInc/Desktop/Screenshot 2025-07-03 at 1.40.05 PM.png)
 
 Two versions:
@@ -15,7 +21,7 @@ Two versions:
 - Langfuse cloud
 - Self Host - https://langfuse.com/self-hosting/v2
 
-**Demo**
+**Examples**
 
 - Core Platform
 - LLM-as-Judge
@@ -24,7 +30,6 @@ Two versions:
 - Annotation / Data Labeling
 
 ![Screenshot 2025-07-03 at 2.22.37 PM](/Users/huanglin/Library/CloudStorage/OneDrive-AutomaticDataProcessingInc/Desktop/Screenshot 2025-07-03 at 2.22.37 PM.png)
-
 
 
 ## Core Features
@@ -67,23 +72,6 @@ Simply, datasets can be used in development to test your LLM applications. A dat
 With the LLM playground, you can now test and iterate your prompts directly in Langfuse. Either start from scratch or jump into the playground.
 
 
-
-**Use cases**
-
-Embedding model
-
-Intent Classification
-
-Hybrid Search
-
-Reranker
-
-Parameter Extraction
-
-
-
-
-
 https://confluence.es.ad.adp.com/spaces/Sfe/pages/758450212/1NAS+Team+Structure
 
 Question to get team email.
@@ -96,8 +84,6 @@ pk-lf-49583f62-2dee-4898-a21a-099d0ee5dcf9
 
 http://localhost:3000
 
-
-
 **LLM Models**
 
 our dashboards if you wanna bookmark somewhere -
@@ -106,9 +92,6 @@ Prod: https://adp-cloud.splunkcloud.com/en-US/app/lifion/lyric_ai_gateway_metric
 
 Non-Prod: https://adpdev.splunkcloud.com/en-US/app/lifion/lyric_ai_gateway_metrics
 
-
-
-**7/8/2025**
 
 **Dataset Get Started**
 
@@ -124,7 +107,20 @@ Step into the world of LLMs with this practical guide that takes you from the fu
 
 Prompt engineering is a crucial aspect of generative AI, but it can be difficult to make the leap from writing simple prompts to using generative AI to build a minimum viable product (MVP). Equally challenging can be determining which tools are best for the job. This head-to-head competition harnesses the power of generative AI and offers guidance on what tools and techniques can help you get from prompt to product.
 
+Data Sources
 
+- Action and Smart Action Data
+- Question and Answer Data
+
+Embedding model
+
+Intent Classification
+
+Hybrid Search
+
+Reranker
+
+Parameter Extraction
 
 Python Ecosystem
 
@@ -133,37 +129,46 @@ MLOps and LLMOps tooling
 Databases for storing unstructured and vector data
 
 
+This notebook shows the overall workflow with the recommended configurations from a user's query.
 
-## Prompt monitoring tools
+* Embedding model: Titan V2 - 1024
+* OpenSearch instance: c7g.large
+* Reranking LLM: Nova Lite
+* Parameter extraction: Nova Pro
 
-Langfuse (open source, [https://langfuse.com](https://langfuse.com/))
+6.1. Comprehensive Tracing
+  - Capture all LLM and non-LLM calls: Including retrieval, embedding, and external API calls within lyric generation workflows
+  - Support for multi-turn conversations/sessions: To track the context of lyric generation over time
+  - Detailed span attributes/metadata: To allow for granular analysis and debugging
+  - Cost and Latency Tracking: Monitor LLM usage and associated costs for optimization
+  - Integration with existing frameworks/SDKs: Compatibility with popular LLM libraries (e.g., LangChain, LlamaIndex, OpenAI, Bedrock, Mistral) and languages (Python, JS/TS)
+  - Multimodal Trace Capture: Ability to track and visualize multimodal inputs/outputs if our lyric products expand beyond text
 
-LangSmith (not open source, https://www.langchain.com/langsmith)
+6.2. Robust Evaluation Capabilities
+  - Support for Pre-Built Evals: Utilize common LLM evaluation metrics (e.g., toxicity, summarization quality) where applicable
+  - LLM-as-a-Judge: Capability to use an LLM to evaluate the quality of generated lyrics against predefined criteria
+  - Custom Evaluation Metrics: Crucial for subjective lyric quality, the ability to define and integrate our own code-based or prompt-based evaluation functions
+  - Human Annotation / Feedback: Streamlined workflows for collecting human ground truth labels and user/internal feedback on lyric quality
+  - Evaluation in Development & Production: Support for running evaluations on both development datasets and real-time production traces
+  - Multimodal Evaluation: The ability to build and run evaluations that incorporate multimodal data relevant to lyric context
 
-Galileo (not open source, [rungalileo.io](https://rungalileo.io/))
+6.3. Efficient Prompt Management
+  - Prompt Versioning: Track changes to prompts over time, allowing for easy rollback and comparison
+  - Prompt Playground: An interactive environment to test different prompts, models, and invocation parameters
+  - Prompt Experiments: Ability to run controlled experiments comparing different prompt versions against datasets to assess impact on lyric quality
+  - Prompts in Code (Syncing): SDKs or APIs to keep prompts synchronized across different applications and environments
 
-Opik (open source, https://github.com/comet-ml/opik.)
+6.4. Dataset Management
+  - Creation & Storage: Create, store, and manage datasets of inputs and desired outputs (goldens) for systematic testing of lyric generation
+  - Import/Export: Easily import data from various sources (e.g., CSV) and export traces/datasets for further analysis or fine-tuning
+
+6.5. Analytics & Reporting
+  - Custom Dashboards/Metrics: Visualize key performance indicators and track trends related to lyric quality, cost, and latency
+  - Performance Alerting: Set up alerts for deviations in performance metrics or quality degradation in production
+  - A/B Regression Testing: Compare different versions of the application or prompts through A/B testing
+    
+Monitorying and Feedback Loop:
+
+Constraints and Considerations:
 
 
-
-## Vector Database
-
-Milvus
-
-Solr
-
-Redis
-
-Qdrant: vector database
-
-Weaviate
-
-Pinecone
-
-Chroma
-
-pgvector (a PostgreSQL plugin for vector indexes)
-
-Step into the world of LLMs with this practical guide that takes you from the fundamentals to deploying advanced applications using LLMOps best practices Key Features Build and refine LLMs step by step, covering data preparation, RAG, and fine-tuning Learn essential skills for deploying and monitoring LLMs, ensuring optimal performance in production Utilize preference alignment, evaluation, and inference optimization to enhance performance and adaptability of your LLM applications.
-
-Prompt engineering is a crucial aspect of generative AI, but it can be difficult to make the leap from writing simple prompts to using generative AI to build a minimum viable product (MVP). Equally challenging can be determining which tools are best for the job. This head-to-head competition harnesses the power of generative AI and offers guidance on what tools and techniques can help you get from prompt to product.
