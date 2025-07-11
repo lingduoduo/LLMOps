@@ -1,174 +1,80 @@
-Objective: 
-Conduct a high-level review of leading LLM evaluation platforms (Arize Phoenix, Langfuse, Confident AI/DeepEval) focusing on their core features relevant to lyric products.
-Deliverables: A comparative analysis document highlighting strengths, weaknesses, and potential fit for lyric generation, specifically considering custom/multimodal evaluations and human annotation capabilities.
-Focus Areas: Tracing capabilities
-evaluation methods (pre-built, custom, LLM-as-a-judge, human-in-the-loop), prompt management, and dataset management
+Objectives
 
-Outcomes:
+This project will deliver a proof-of-concept implementation using Langfuse to evaluate lyric generation outputs, demonstrating tracing, prompt management, and dataset management in practice. It will also produce a comparative analysis document that summarizes Langfuse’s suitability relative to other tools (such as Arize Phoenix and Confident AI/DeepEval), with particular attention to support for custom metrics, human annotation workflows and results. Key focus areas include tracing and observability of LLM outputs, evaluation methods (including pre-built options, custom metrics, LLM-as-a-judge, and human-in-the-loop workflows), and robust prompt and dataset management capabilities.
 
-Langfuse is building the **open source LLM Engineering Platform**. We are building *the* platform to observe and improve LLM applications.
+Outcomes
 
-- **Full context capture:** Track the complete execution flow including API calls, context, prompts, parallelism and more
-- **Cost monitoring:** Track model usage and costs across your application
-- **Quality insights:** Collect user feedback and identify low-quality outputs
-- **Dataset creation:** Build high-quality datasets for fine-tuning and testing
-- **Root cause analysis:** Quickly identify and debug issues in complex LLM applications
+By leveraging Langfuse, we aim to demonstrate how it can effectively support the evaluation and improvement of lyric generation applications. Langfuse enables full context capture by tracking complete execution flows, including API calls, prompts, parallelism, and more. It offers cost monitoring to track model usage and spending across the application. Quality insights are generated through user feedback collection and identification of low-quality outputs. Additionally, Langfuse facilitates high-quality dataset creation for fine-tuning and testing while supporting robust root cause analysis to quickly identify and debug issues in complex LLM workflows.
 
-![Screenshot 2025-07-03 at 1.40.05 PM](/Users/huanglin/Library/CloudStorage/OneDrive-AutomaticDataProcessingInc/Desktop/Screenshot 2025-07-03 at 1.40.05 PM.png)
+Langfuse supports two deployment models to fit different operational needs: Langfuse Cloud, a fully managed service for ease of use and scalability, and a Self-Hosted option (detailed in their Self-Hosting Guide) for teams needing greater control over data, security, and infrastructure. For this proof-of-concept evaluation, we are using the self-hosted deployment to test and validate features in an environment that mirrors our production requirements.
 
-Two versions:
+Core Features
 
-- Langfuse cloud
-- Self Host - https://langfuse.com/self-hosting/v2
+Langfuse Dashboard
+ The Langfuse dashboard provides a comprehensive view of all critical metrics for monitoring LLM applications. It includes detailed insights such as overall volume usage by model or token type, cost breakdowns by user, latency distributions, and quality metrics. Tracing is at the core of the platform, enabling teams to deeply understand and optimize their LLM workflows.
 
-**Examples**
+Tracing
+ Langfuse’s tracing feature captures all interactions within your LLM application, offering end-to-end visibility. For example, in a typical retrieval-augmented generation (RAG) application, traces reveal the complete interaction flow—from which documents were retrieved from the corpus and how the embedding workflow operated, to the final context that shaped the response. This level of detail helps teams analyze and debug generation quality, optimize prompts, and understand cost and latency drivers. Log traces deliver the lowest level of transparency, empowering developers to identify performance bottlenecks and cost hotspots with precision.
 
-- Core Platform
-- LLM-as-Judge
-- Playground
-- Prompt Engineering
-- Annotation / Data Labeling
+Prompts
+ In simple terms, Langfuse’s prompt management acts as a Prompt Content Management System, making it easy to version, edit, and deploy prompts to production while enabling instant rollbacks when needed. This ensures that everyone on the team can contribute to prompt development and see exactly which prompts are in use—without touching the codebase.
 
-![Screenshot 2025-07-03 at 2.22.37 PM](/Users/huanglin/Library/CloudStorage/OneDrive-AutomaticDataProcessingInc/Desktop/Screenshot 2025-07-03 at 2.22.37 PM.png)
+Prompts in Langfuse are tightly integrated with tracing, so you can link any specific trace—good or bad—back to the exact prompt that produced it. This connection allows for meaningful root cause analysis and continuous improvement. Langfuse’s prompt management features support version control and deployment, collaborative editing, and testing of prompts and models, streamlining the workflow for prompt engineering teams.
 
+Evals
+ Evaluation in Langfuse is essential for truly understanding how your LLM-powered application performs in practice. The Langfuse interface makes it easy to apply different evaluation methods to production applications, capturing user feedback and comments directly through the SDKs. You can configure Langfuse to automatically run evaluators—such as element-based checks or LLM-judge evaluations—on all newly created traces. These evaluators can analyze the entire trace, including inputs and outputs, or focus on specific sections of the interaction.
 
-## Core Features
+This flexible evaluation approach allows you to measure output quality, monitor production health, and test changes safely in development, ensuring continuous improvement and reliability in your LLM workflows.
 
-**Langfuse Dashboard**
+Datasets and Experiments
+ Put simply, datasets in Langfuse are collections of example inputs and expected outputs that can be used during development to test and evaluate your LLM applications. Langfuse’s datasets and experiments functionality helps you systematically compare different prompt versions, so you can make informed decisions about which ones to promote to production.
 
-With langfuse dashboard you can see all important metrics to monitor your LLM application that includes overall volume usage by model or token types, cost breakdowns by user, latency distributions and quality metrics tracing is at the very core of platform.
+This capability is especially valuable for teams that want to rapidly iterate on new ideas each week—whether it’s refining prompts, testing a new model checkpoint, exploring a different agent strategy, trying an updated retrieval method, or adjusting configurations. Experimentation in Langfuse makes it easy to validate these changes in a controlled way before deploying them to production, supporting a culture of continuous improvement and safe innovation.
 
-**Tracing**
+Playground
+ The Langfuse playground provides an interactive environment for testing and iterating on your prompts directly within the platform. You can start from scratch to design new prompts or quickly jump in to refine existing ones. This streamlined workflow makes it easy to experiment, validate changes, and fine-tune prompts before deploying them to production, ensuring higher quality and consistency in your LLM applications.
 
-It will capture all the interactions with your LLM-application. For e.g. in a typical RAG application you will see traces of the interaction and length view which highlights which documents actually went into producing the answer as they were fetched from our corpus, how the embedding workflow worked and then the context and to understand how it reached the response.
+Evaluation Platform Setup
 
-- Log traces
-- Lowest level transparency 
-- Understand cost and latency
+*Data Preparation:
+ To enable effective evaluation of our LLM-powered applications, we will prepare and organize relevant data sources to serve as test and evaluation sets within the platform.
 
-**Prompts**
+Data Sources:
 
-In simple layman terms, Langfuse prompt management is a Prompt Content Management System.  Langfuse prompt management helps to version edit prompt to production and instantly roll back prompts, thereby everyone on the team can contribute and see which prompts are used without touching the code- base. Langfuse prompts are linked to traces as we can see which prompt was used when a specific good or bad trace has happened going back to the
-prompt.
+- Action and Smart Action Data: Includes logs and structured records of user actions and smart actions taken in the application. This data helps evaluate how well the LLM understands context and suggests appropriate actions.
+- Question and Answer Data: Consists of question-answer pairs, representing realistic user queries and expected responses. This data is crucial for testing prompt quality, model accuracy, and consistency in generating relevant, high-quality answers.
 
-- Vision control and deploy
-- Collaborate on prompts
-- Test prompts and models.
+These curated datasets will be used to configure evaluations, run experiments, and analyze LLM performance across key workflows, supporting continuous improvement of our application.
 
-**Evals**
+Evaluating LLM Application Components
 
-Langfuse interface evaluation is super important to understand how the LLM-powered application actually works. You can use different evaluation methods for production applications, you can capture user-feedback and any comments via the SDKs. You can configure Langfuse to run element, judge evaluators on all new created traces, these evaluators can run on the whole trace input and output or also evaluate a section of the trace, etc.
+To ensure high-quality performance and reliability, our evaluation framework will include targeted functions for assessing the following critical components of the LLM application. This notebook outlines the overall evaluation workflow along with recommended configurations for processing typical user queries.
 
-- Measure output quality
-- Monitor production health
-- Test changes in development
+- Embedding Model (OpenAI Embedding, Titan V2 - 1024, etc.): Evaluate the quality and relevance of generated embeddings using models like Titan V2 - 1024 or OpenAI’s embedding offerings. Assess semantic similarity to ground truth examples and effectiveness in retrieval tasks through metrics such as cosine similarity, retrieval precision, and qualitative analyses of the embedding space.
+- Intent Classification: Measure the accuracy and consistency of intent recognition to ensure the model correctly identifies user goals. Evaluation methods will include comparison against labeled intent data, confusion matrix analysis, and calculation of precision, recall, and F1 scores to quantify classification performance.
+- Hybrid Search (Redis VL, OpenSearch c7g.large, etc.): Assess the effectiveness of combining semantic and keyword-based search strategies using systems like Redis Vector Layer or OpenSearch (e.g., c7g.large instances). Focus will be on relevance ranking quality, retrieval coverage, and user-centric metrics such as top-k accuracy and mean reciprocal rank (MRR).
+- Reranker (Coherent, Nova Lite, etc.): Evaluate reranking models and strategies—such as Coherent or Nova Lite—that reorder initial retrieval results for greater relevance. Metrics will include ranking accuracy, NDCG (Normalized Discounted Cumulative Gain), and qualitative analyses comparing improvements over baseline rankings.
+- Parameter Extraction (LangChain Tool Calling, Nova Pro, etc.): Assess the model’s ability to accurately extract structured parameters or entities from user input using tools like LangChain’s Tool Calling or Nova Pro. Evaluation will focus on precision and recall of extracted parameters, along with consistency and robustness across diverse input types and edge cases.
 
-**Datasets and Experiments**
+These targeted evaluation functions, combined with the recommended configurations, will provide comprehensive insights into the performance of each component, supporting continuous improvement and the development of robust, production-ready LLM workflows.
 
-Simply, datasets can be used in development to test your LLM applications. A data set is a test set of example inputs and outputs. Langfuse datasets & experiments can be used to test which of our prompt versions is actually better to make a good decision before moving them to production. Say if there are some new ideas that you want to test every week and you need to do prompt iteration, a new model checkpoint or a new agent strategy or a new retrieval method or change configuration etc this is where experimentation comes into play.
+Key Functions for Evaluating LLM Application Components
 
-**Playground**
+- 6.1 Comprehensive Tracing
+ Langfuse provides thorough tracing capabilities designed to capture and visualize every step in your lyric generation workflow. It tracks all LLM and non-LLM calls, including retrieval operations, embedding generation, and external API interactions, giving full transparency into system behavior. Multi-turn conversation support ensures context is preserved and analyzed across sessions, which is critical for understanding how lyrical responses evolve over time. Detailed span attributes and metadata enable fine-grained debugging and root cause analysis. With cost and latency tracking, teams can monitor resource usage and optimize for both budget and performance. Langfuse also offers seamless integration with popular frameworks and SDKs such as LangChain, LlamaIndex, OpenAI, AWS Bedrock, and Mistral, across languages like Python and JavaScript/TypeScript. Finally, multimodal trace capture supports expanding beyond text to images, audio, or other media as lyric products evolve.
+  ---
+  6.2 Robust Evaluation Capabilities
+ Langfuse delivers a flexible and powerful evaluation framework tailored for LLM-powered lyric generation. It includes support for pre-built evaluation metrics such as toxicity checks or summarization quality where applicable. The LLM-as-a-Judge capability enables using an LLM itself to score generated lyrics against predefined criteria. For more nuanced, subjective measures of lyric quality, custom evaluation metrics can be defined and integrated—whether through code-based functions or prompt-based scoring. Langfuse also streamlines human annotation and feedback collection, making it easy to gather ground truth labels and user or internal reviewer input. Critically, evaluations can be run in both development (on curated datasets) and production (on live traces), ensuring continuous monitoring and improvement. Support for multimodal evaluation means the framework can incorporate non-text data relevant to the creative lyric context.
+  ---
+  6.3 Efficient Prompt Management
+ Langfuse treats prompt engineering as a first-class citizen with rich prompt management capabilities. Prompt versioning tracks changes over time, enabling easy rollback and side-by-side comparisons of different approaches. The prompt playground offers an interactive environment to test and refine prompts, models, and invocation parameters before deployment. Teams can conduct prompt experiments, running controlled comparisons of different prompt versions against datasets to quantify impact on lyric quality. Prompts in code are kept in sync via SDKs or APIs, ensuring consistent prompt usage across development and production environments without manual error-prone updates.
+  ---
+  6.4 Dataset Management
+ Langfuse simplifies the management of evaluation datasets critical for systematic testing. Teams can create, store, and manage datasets of inputs and desired outputs (goldens) to standardize evaluation processes for lyric generation. The platform supports easy import and export, enabling integration with external tools, CSV files, or other data sources, as well as exporting traces and datasets for further analysis, model fine-tuning, or auditing.
+  ---
+  6.5 Analytics & Reporting
+ To support ongoing monitoring and improvement, Langfuse provides robust analytics and reporting features. Teams can build custom dashboards and metrics to visualize key performance indicators such as lyric quality scores, cost trends, and latency distributions. Performance alerting can be configured to automatically detect and flag deviations from expected quality or latency baselines in production. Langfuse also enables A/B regression testing, allowing teams to systematically compare different versions of the application or prompt configurations and measure their impact on generation quality, supporting data-driven decision-making.
 
-With the LLM playground, you can now test and iterate your prompts directly in Langfuse. Either start from scratch or jump into the playground.
 
-
-https://confluence.es.ad.adp.com/spaces/Sfe/pages/758450212/1NAS+Team+Structure
-
-Question to get team email.
-
-https://ajay-arunachalam08.medium.com/exploring-langfuse-an-open-source-llm-engineering-platform-38cf5fe746e6
-
-sk-lf-933804bd-1a74-429f-917d-954359d4b1aa
-
-pk-lf-49583f62-2dee-4898-a21a-099d0ee5dcf9
-
-http://localhost:3000
-
-**LLM Models**
-
-our dashboards if you wanna bookmark somewhere -
-
-Prod: https://adp-cloud.splunkcloud.com/en-US/app/lifion/lyric_ai_gateway_metrics
-
-Non-Prod: https://adpdev.splunkcloud.com/en-US/app/lifion/lyric_ai_gateway_metrics
-
-
-**Dataset Get Started**
-
-https://langfuse.com/self-hosting/v2
-
-https://github.com/orgs/langfuse/discussions/3824 - unable to find all 
-
-
-
-Step into the world of LLMs with this practical guide that takes you from the fundamentals to deploying advanced applications using LLMOps best practices Key Features Build and refine LLMs step by step, covering data preparation, RAG, and fine-tuning Learn essential skills for deploying and monitoring LLMs, ensuring optimal performance in production Utilize preference alignment, evaluation, and inference optimization to enhance performance and adaptability of your LLM applications.
-
-
-
-Prompt engineering is a crucial aspect of generative AI, but it can be difficult to make the leap from writing simple prompts to using generative AI to build a minimum viable product (MVP). Equally challenging can be determining which tools are best for the job. This head-to-head competition harnesses the power of generative AI and offers guidance on what tools and techniques can help you get from prompt to product.
-
-Data Sources
-
-- Action and Smart Action Data
-- Question and Answer Data
-
-Embedding model
-
-Intent Classification
-
-Hybrid Search
-
-Reranker
-
-Parameter Extraction
-
-Python Ecosystem
-
-MLOps and LLMOps tooling
-
-Databases for storing unstructured and vector data
-
-
-This notebook shows the overall workflow with the recommended configurations from a user's query.
-
-* Embedding model: Titan V2 - 1024
-* OpenSearch instance: c7g.large
-* Reranking LLM: Nova Lite
-* Parameter extraction: Nova Pro
-
-6.1. Comprehensive Tracing
-  - Capture all LLM and non-LLM calls: Including retrieval, embedding, and external API calls within lyric generation workflows
-  - Support for multi-turn conversations/sessions: To track the context of lyric generation over time
-  - Detailed span attributes/metadata: To allow for granular analysis and debugging
-  - Cost and Latency Tracking: Monitor LLM usage and associated costs for optimization
-  - Integration with existing frameworks/SDKs: Compatibility with popular LLM libraries (e.g., LangChain, LlamaIndex, OpenAI, Bedrock, Mistral) and languages (Python, JS/TS)
-  - Multimodal Trace Capture: Ability to track and visualize multimodal inputs/outputs if our lyric products expand beyond text
-
-6.2. Robust Evaluation Capabilities
-  - Support for Pre-Built Evals: Utilize common LLM evaluation metrics (e.g., toxicity, summarization quality) where applicable
-  - LLM-as-a-Judge: Capability to use an LLM to evaluate the quality of generated lyrics against predefined criteria
-  - Custom Evaluation Metrics: Crucial for subjective lyric quality, the ability to define and integrate our own code-based or prompt-based evaluation functions
-  - Human Annotation / Feedback: Streamlined workflows for collecting human ground truth labels and user/internal feedback on lyric quality
-  - Evaluation in Development & Production: Support for running evaluations on both development datasets and real-time production traces
-  - Multimodal Evaluation: The ability to build and run evaluations that incorporate multimodal data relevant to lyric context
-
-6.3. Efficient Prompt Management
-  - Prompt Versioning: Track changes to prompts over time, allowing for easy rollback and comparison
-  - Prompt Playground: An interactive environment to test different prompts, models, and invocation parameters
-  - Prompt Experiments: Ability to run controlled experiments comparing different prompt versions against datasets to assess impact on lyric quality
-  - Prompts in Code (Syncing): SDKs or APIs to keep prompts synchronized across different applications and environments
-
-6.4. Dataset Management
-  - Creation & Storage: Create, store, and manage datasets of inputs and desired outputs (goldens) for systematic testing of lyric generation
-  - Import/Export: Easily import data from various sources (e.g., CSV) and export traces/datasets for further analysis or fine-tuning
-
-6.5. Analytics & Reporting
-  - Custom Dashboards/Metrics: Visualize key performance indicators and track trends related to lyric quality, cost, and latency
-  - Performance Alerting: Set up alerts for deviations in performance metrics or quality degradation in production
-  - A/B Regression Testing: Compare different versions of the application or prompts through A/B testing
-    
-Monitorying and Feedback Loop:
-
-Constraints and Considerations:
 
 
