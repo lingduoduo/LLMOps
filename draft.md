@@ -8,13 +8,11 @@ Deployment models at a glance
 
 | Framework                   | Cloud (Managed)           | Self-Hosted                                             | Notes                                                                                                                                              |
 |----------------------------|---------------------------|----------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Langfuse**                | ✔ Fully managed, scalable | ✔ Full control over data/security                        | Evaluating self-hosted option to mirror production.                                                                                                |
+| **Langfuse**                | ✔ Fully managed, scalable | ✔ Full control over data/security                        | Langfuse cloud is a fully managed service for ease of use and scalability. Self-hosted option for teams needing greater control over data, security, and infrastructure. |
 | **Arize Phoenix**           | ✔ Hosted SaaS             | ✔ Deployable via Docker, terminal, Colab, SageMaker, etc.| Easy local start-up with flexible production deployment options.                                                                                   |
 | **Confident AI / DeepEval** | ✔ Confident AI SaaS*      | ✖ Not self-hostable                                      | *SaaS meets most needs except multimodal. DeepEval library enables offline eval but lacks tracing, prompt/dataset management, and dashboards. ADP access to documentation is currently blocked. |
 
 Both Langfuse and Phoenix provide dual deployment paths—managed cloud for quick scalability and turnkey maintenance, or self-hosted installs for teams that need granular control over infrastructure and data governance. Confident AI / DeepEval, by contrast, centers on a SaaS offering (plus an open-source library) with no self-hosted alternative, leaving gaps in tracing, prompt management, and dashboarding if you opt for library-only use.
-
-
 
 
 By leveraging Langfuse, we aim to demonstrate how it can effectively support the evaluation and improvement of lyric applications.
