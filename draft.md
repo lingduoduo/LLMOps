@@ -15,6 +15,54 @@ Deployment models at a glance
 Both Langfuse and Phoenix provide dual deployment paths—managed cloud for quick scalability and turnkey maintenance, or self-hosted installs for teams that need granular control over infrastructure and data governance. Confident AI / DeepEval, by contrast, centers on a SaaS offering (plus an open-source library) with no self-hosted alternative, leaving gaps in tracing, prompt management, and dashboarding if you opt for library-only use.
 
 
+Tracing for Phoenix
+Phoenix automatically logs events, model invocations, prompt inputs/outputs, and metadata at each stage—creating detailed execution graphs. Its integrated tracing interface makes it easy to visualize the processing chain, diagnose issues, track latency, and maintain a complete audit trail of LLM application runs.
+Here are the main ways to use tracing in Phoenix:
+With Code Instrumentation (Python SDK)
+You can add tracing directly in your code using the Phoenix SDK.
+Auto-Tracing with LangChain or LlamaIndex Integrations
+Phoenix makes it simple to trace and debug your AI agent workflows, especially when you’re using popular frameworks like LangChain or LlamaIndex. When tracing is enabled in Phoenix, it automatically captures and logs the different steps and calls made by your agent’s chain or tools, without you having to manually add trace statements for every part of your code.
+Agent frameworks such as LangChain and LlamaIndex are designed to “emit” events or signals during their execution (for example, when a tool is called, when the language model generates a response, etc.). Phoenix provides special callback handlers or tracing integrations that listen for these events and record rich trace logs automatically.
+OpenTelemetry-Compatible Tracing
+OpenTelemetry is an open-source standard that helps developers collect and export telemetry data (like traces, metrics, and logs) from their applications. It’s supported by many popular observability tools such as Jaeger, Zipkin, and DataDog.
+Phoenix has built-in support for OpenTelemetry. Enabling tracing in Phoenix usually involves setting a few environment variables so that Phoenix knows where to send the collected trace data.
+
+Tracing Dashboard
+For visual tracing, Phoenix provides a dashboard where you can live-inspect all traces, see sequence of steps, inputs, outputs, errors, latencies, and more. Open the dashboard in your browser (often at http://localhost:6006).
+
+Strengths
+1.	Deep Visibility: You get granular, step-by-step visibility into how your AI agent works, what tools/functions are called, what the input/output is, and where things slow down or fail.
+2.	Error Tracking and Reproducibility: Quickly see where and why errors happen, and reproduce the exact agent steps for debugging or improvement.
+3.	Visual Dashboard: Powerful visual tools to explore, filter, and analyze traces and agent runs, making debugging much faster.
+4.	Easy Integration: Simple to set up—can be integrated in a few lines, often without code change (if using popular AI agent libraries).
+5.	OpenTelemetry Support: Works with industry-standard tracing systems, so DevOps/SRE teams can monitor agents with their existing tools.
+6.	Works with Multiple Frameworks: Native support for popular frameworks (e.g., LangChain, LlamaIndex), as well as custom Python code.
+Weaknesses
+1.	SLA Impact: Tracing adds small runtime overhead. It can matter for high-frequency, low-latency applications.
+2.	Limited Offline Use: Full tracing experience is tied to the Phoenix dashboard, which is a live server app. Traces may not be as accessible offline.
+3.	Possible Volume of Data: Tracing everything in large or long-running agents can generate a lot of data, which can be overwhelming to sift through without filters.
+
+1 Comprehensive Tracing for Confident AI
+Feature	Confident AI: Rationale & Source
+✅ LLM & non-LLM calls	Confident AI’s SaaS platform (not just DeepEval OSS) supports end-to-end “inference pipelines” tracing. They explicitly state you can monitor LLM calls with inputs/outputs and attach metadata. However, non-LLM spans (e.g., DB queries, vectorstore retrievals) are not first-class citizens yet — unlike Arize and Langfuse.
+✅ Multi-turn context	They describe “session-level” monitoring to track context over a conversation.
+✅ Metadata / span details	Supported through custom attributes on traces.
+✅ Cost & latency tracking	Their dashboards show latency, throughput, and API costs.
+✅ SDK integrations	Python SDK is officially supported. Confident AI also offers DeepEval.ts, which supports tracing in JS/Typescript in the form of wrapper functions to easily capture traces in JS/TS-native applications. 
+
+https://documentation.confident-ai.com/docs/llm-tracing/integrations/typescript#code--video-demo
+🚫 Multimodal	No mention of image/audio tracing in Confident AI docs as of today.
+Arize Phoenix & Langfuse:
+Both are designed for ML observability and LLMops. Both already trace arbitrary spans, multimodal (to some extent), with mature OpenTelemetry-inspired designs. That’s why they score slightly better on non-LLM calls & multimodal today.
+Confident AI Tracing:
+ 
+Running an LLM application in ADP environment and tracing it to the dashboard is feasible. DeepEval.ts is potentially useful if we want to trace our Typescript services.  
+
+
+
+
+
+
 By leveraging Langfuse, we aim to demonstrate how it can effectively support the evaluation and improvement of lyric applications.
 Langfuse supports two deployment models to fit different operational needs:
 -	Langfuse Cloud, a fully managed service for ease of use and scalability
