@@ -2,6 +2,15 @@ Large Language Models (LLMs) have demonstrated exceptional capabilities in langu
 
 Evaluation frameworks for LLM observability and tracing have rapidly evolved to meet the growing demand for transparency, reliability, and performance monitoring in generative AI systems. Tools like Arize Phoenix and Langfuse provide comprehensive observability, supporting both LLM and traditional ML workflows, with features such as token-level analysis, deep tracing, and prompt management. Confident AI / DeepEval focuses on test-based evaluation, enabling CI/CD-style checks to ensure model quality and consistency. Platforms like LangSmith and Traceloop offer tight integration with popular frameworks and structured logging for robust debugging. Lightweight tools such as PromptLayer and Helicone specialize in OpenAI-specific logging, cost tracking, and prompt analytics. This project represents the first phase of our evaluation initiative, with the primary goal of researching and comparing Langfuse (Github 13.9k star), Arize Phoenix (Github star), and Confident AI / DeepEval (Github 9.3k), focusing on core capabilities including tracing, prompt and dataset management, custom metrics, and human annotation workflows.
 
+This project marks the first phase of our evaluation initiative, aimed at comparing three leading LLM observability frameworks—Langfuse (13.9k GitHub stars), Arize Phoenix (GitHub stars not listed), and Confident AI / DeepEval (9.3k GitHub stars)—across four core capabilities: tracing, prompt and dataset management, custom metrics, and human-annotation workflows.
+
+Deployment models at a glance
+Framework	Cloud (Managed)	Self-Hosted	Notes
+Langfuse	✔ Fully managed, scalable	✔ Full control over data/security	We are evaluating the self-hosted option to mirror production.
+Arize Phoenix	✔ Hosted SaaS	✔ Deployable via Docker, terminal, Colab, SageMaker, etc.	Easy local start-up, then flexible production deployment.
+Confident AI / DeepEval	✔ Confident AI SaaS*	✖ Not self-hostable	*SaaS covers most needs except multimodal; DeepEval library alone adds offline custom eval but lacks tracing, UI, and management features. ADP access to Confident AI docs is currently blocked.
+
+Both Langfuse and Phoenix provide dual deployment paths—managed cloud for quick scalability and turnkey maintenance, or self-hosted installs for teams that need granular control over infrastructure and data governance. Confident AI / DeepEval, by contrast, centers on a SaaS offering (plus an open-source library) with no self-hosted alternative, leaving gaps in tracing, prompt management, and dashboarding if you opt for library-only use.
 
 
 
