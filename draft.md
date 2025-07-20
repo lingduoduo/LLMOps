@@ -1,5 +1,10 @@
-Objectives
-This project will deliver a proof-of-concept implementation using Langfuse to evaluate lyric generation outputs, demonstrating tracing, prompt management, and dataset management in practice. It will also produce a comparative analysis document that summarizes Langfuse’s suitability relative to other tools (such as Arize Phoenix and Confident AI/DeepEval), with particular attention to support for custom metrics, human annotation workflows and results. 
+Large Language Models (LLMs) have demonstrated exceptional capabilities in language understanding and generation, fueling a wide range of Lyric applications from Global Search to ADP Assist. However, ensuring the reliability, transparency, and trustworthiness of LLM-based systems remains a critical challenge. Implementing a robust LLM evaluation framework is essential to address these challenges, showing how tracing and evaluation tools can support transparency, reliability, and continuous improvement in our applications. 
+
+Evaluation frameworks for LLM observability and tracing have rapidly evolved to meet the growing demand for transparency, reliability, and performance monitoring in generative AI systems. Tools like Arize Phoenix and Langfuse provide comprehensive observability, supporting both LLM and traditional ML workflows, with features such as token-level analysis, deep tracing, and prompt management. Confident AI / DeepEval focuses on test-based evaluation, enabling CI/CD-style checks to ensure model quality and consistency. Platforms like LangSmith and Traceloop offer tight integration with popular frameworks and structured logging for robust debugging. Lightweight tools such as PromptLayer and Helicone specialize in OpenAI-specific logging, cost tracking, and prompt analytics. This project represents the first phase of our evaluation initiative, with the primary goal of researching and comparing Langfuse, Arize Phoenix, and Confident AI / DeepEval, focusing on core capabilities including tracing, prompt and dataset management, custom metrics, and human annotation workflows.
+
+
+
+
 
 By leveraging Langfuse, we aim to demonstrate how it can effectively support the evaluation and improvement of lyric applications.
  
@@ -105,6 +110,12 @@ Pain Points
 The SSL certificate error during span export is likely due to the OpenTelemetry (OTEL) exporter in the Langfuse SDK not respecting global SSL disable flags or the httpx client settings you tried. This is a known pain point with self-signed or custom CA certificates in Langfuse SDK v3.x.
 Security and Compliance
 https://langfuse.com/security
+
+
+
+Objectives
+This project will deliver a proof-of-concept implementation using Langfuse to evaluate lyric generation outputs, demonstrating tracing, prompt management, and dataset management in practice. It will also produce a comparative analysis document that summarizes Langfuse’s suitability relative to other tools (such as Arize Phoenix and Confident AI/DeepEval), with particular attention to support for custom metrics, human annotation workflows and results. 
+
 Overall Takeaway
 The Langfuse platform offers an impressively holistic set of capabilities for evaluating, monitoring, and improving LLM-powered lyric generation. Its strengths lie in unifying tracing, evaluation, prompt management, datasets, and analytics into a single workflow. The key considerations will be managing complexity, ensuring robust data practices, and balancing automated evaluations with human insight, especially given the creative, subjective nature of lyric content.
 <img width="468" height="646" alt="image" src="https://github.com/user-attachments/assets/91bebd27-4963-4811-a320-8f0b0ef50906" />
