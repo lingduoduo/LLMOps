@@ -1,17 +1,23 @@
 Large Language Models (LLMs) have demonstrated exceptional capabilities in language understanding and generation, fueling a wide range of Lyric applications from Global Search to ADP Assist. However, ensuring the reliability, transparency, and trustworthiness of LLM-based systems remains a critical challenge. Implementing a robust LLM evaluation framework is essential to address these challenges, showing how tracing and evaluation tools can support transparency, reliability, and continuous improvement in our applications. 
 
-Evaluation frameworks for LLM observability and tracing have rapidly evolved to meet the growing demand for transparency, reliability, and performance monitoring in generative AI systems. Tools like Arize Phoenix and Langfuse provide comprehensive observability, supporting both LLM and traditional ML workflows, with features such as token-level analysis, deep tracing, and prompt management. Confident AI / DeepEval focuses on test-based evaluation, enabling CI/CD-style checks to ensure model quality and consistency. Platforms like LangSmith and Traceloop offer tight integration with popular frameworks and structured logging for robust debugging. Lightweight tools such as PromptLayer and Helicone specialize in OpenAI-specific logging, cost tracking, and prompt analytics. This project represents the first phase of our evaluation initiative, with the primary goal of researching and comparing Langfuse, Arize Phoenix, and Confident AI / DeepEval, focusing on core capabilities including tracing, prompt and dataset management, custom metrics, and human annotation workflows.
+Evaluation frameworks for LLM observability and tracing have rapidly evolved to meet the growing demand for transparency, reliability, and performance monitoring in generative AI systems. Tools like Arize Phoenix and Langfuse provide comprehensive observability, supporting both LLM and traditional ML workflows, with features such as token-level analysis, deep tracing, and prompt management. Confident AI / DeepEval focuses on test-based evaluation, enabling CI/CD-style checks to ensure model quality and consistency. Platforms like LangSmith and Traceloop offer tight integration with popular frameworks and structured logging for robust debugging. Lightweight tools such as PromptLayer and Helicone specialize in OpenAI-specific logging, cost tracking, and prompt analytics. This project represents the first phase of our evaluation initiative, with the primary goal of researching and comparing Langfuse (Github 13.9k star), Arize Phoenix (Github star), and Confident AI / DeepEval (Github 9.3k), focusing on core capabilities including tracing, prompt and dataset management, custom metrics, and human annotation workflows.
 
 
 
 
 
 By leveraging Langfuse, we aim to demonstrate how it can effectively support the evaluation and improvement of lyric applications.
- 
 Langfuse supports two deployment models to fit different operational needs:
 -	Langfuse Cloud, a fully managed service for ease of use and scalability
 -	a Self-Hosted option for teams needing greater control over data, security, and infrastructure. 
 For this proof-of-concept evaluation, we are using the self-hosted deployment to test and validate features in an environment that mirrors our production requirements.
+
+Confident AI is the SasS platform for DeepEval, the most widely adopted open-source framework to evaluate LLM applications. If we were to opt for purchasing the SasS version, the platform almost provides all functional requirements except for multimodal capabilities. The other option is to leverage the DeepEval library only, which provides the customized evaluation for LLM applications offline with curated datasets but other functionalities (tracing, prompt management, dataset management, UI dashboard/reporting) do not exist. It is not self-hostable. Another reality as of today is that we have access to Confident AI documentation is automatically deniied by ADP.
+
+With Arize Phoenix, getting started is relatively straightforward because you can run it locally and start iterating quickly during the development and experiment phases. However, once you’re ready for production — or if you want to collaborate with your teammates — it’s time to deploy Phoenix. In addition to a managed hosted version of Phoenix, there are self-hosted options. The Phoenix app can be run in various environments such as Colab and SageMaker notebooks, as well as be served via the terminal or a docker container.
+
+
+
 Core Features
 Langfuse Dashboard
 The Langfuse dashboard provides a comprehensive view of all critical metrics for monitoring LLM applications. It includes detailed insights such as overall volume usage by model or token type, cost breakdowns by user, latency distributions, and quality metrics. Tracing is at the core of the platform, enabling teams to deeply understand and optimize their LLM workflows.
