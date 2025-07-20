@@ -58,7 +58,11 @@ Confident AI Tracing:
  
 Running an LLM application in ADP environment and tracing it to the dashboard is feasible. DeepEval.ts is potentially useful if we want to trace our Typescript services.  
 
+Langfuse is a great choice for most production use cases, particularly when comprehensive tracing, prompt management, deep evaluation capabilities, and robust usage monitoring are critical. Its ability to provide detailed insights into both LLM and non-LLM activities, along with support for asynchronous logging and various framework integrations, makes it ideal for complex applications requiring thorough observability. How Langfuse provides detailed tracing and quality monitoring through developer-friendly APIs. While it supports multi-step workflows effectively, it lacks support for the OpenTelemetry protocol and can be difficult to customize for non-standard use cases.
 
+Arize Phoenix is a strong option if your company already uses Arize AI’s enterprise platform and is focused on the experimental and development stages of LLM applications. It offers tools for evaluation and troubleshooting . However, its lack of prompt management and comprehensive LLM usage monitoring features may limit its effectiveness in production environments, making it less suitable for teams requiring these capabilities. Where Phoenix fits into the process by combining experimentation and debugging capabilities with evaluation pipelines. Its strength lies in development-focused observability, but it has limitations in handling real-time tracing once systems are in production.
+
+Langfuse has a polished UI and solid community momentum, but imposes friction around hosting and feature access. Arize Phoenix offers a more open, developer-friendly experience—especially for those who want a single-container solution with built-in instrumentation and evaluation tools.
 
 
 
