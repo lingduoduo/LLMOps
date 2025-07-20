@@ -6,11 +6,11 @@ This project marks the first phase of our evaluation initiative, aimed at compar
 
 Deployment models at a glance
 
-| Framework                   | Cloud (Managed)           | Self-Hosted                                               | Notes                                                        |
-| --------------------------- | ------------------------- | --------------------------------------------------------- | ------------------------------------------------------------ |
-| **Langfuse**                | ✔ Fully managed, scalable | ✔ Full control over data/security                         | We are evaluating the self-hosted option to mirror production. |
-| **Arize Phoenix**           | ✔ Hosted SaaS             | ✔ Deployable via Docker, terminal, Colab, SageMaker, etc. | Easy local start-up, then flexible production deployment.    |
-| **Confident AI / DeepEval** | ✔ Confident AI SaaS*      | ✖ Not self-hostable                                       | *SaaS covers most needs except multimodal; DeepEval library alone adds offline custom eval but lacks tracing, UI, and management features. ADP access to Confident AI docs is currently blocked. |
+| Framework                   | Cloud (Managed)           | Self-Hosted                                             | Notes                                                                                                                                              |
+|----------------------------|---------------------------|----------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Langfuse**                | ✔ Fully managed, scalable | ✔ Full control over data/security                        | Evaluating self-hosted option to mirror production.                                                                                                |
+| **Arize Phoenix**           | ✔ Hosted SaaS             | ✔ Deployable via Docker, terminal, Colab, SageMaker, etc.| Easy local start-up with flexible production deployment options.                                                                                   |
+| **Confident AI / DeepEval** | ✔ Confident AI SaaS*      | ✖ Not self-hostable                                      | *SaaS meets most needs except multimodal. DeepEval library enables offline eval but lacks tracing, prompt/dataset management, and dashboards. ADP access to documentation is currently blocked. |
 
 Both Langfuse and Phoenix provide dual deployment paths—managed cloud for quick scalability and turnkey maintenance, or self-hosted installs for teams that need granular control over infrastructure and data governance. Confident AI / DeepEval, by contrast, centers on a SaaS offering (plus an open-source library) with no self-hosted alternative, leaving gaps in tracing, prompt management, and dashboarding if you opt for library-only use.
 
