@@ -29,13 +29,6 @@ Error reproducibility: Helps pinpoint and replay failures for debugging and iter
 
 OpenTelemetry-compatible: Supports export to observability stacks like Jaeger, Zipkin, and Datadog.
 
-⚠️ Limitations:
-Runtime overhead: Adds slight latency—relevant in high-throughput or latency-sensitive applications.
-
-Live server dependency: Tracing is tied to the dashboard, reducing usability in offline or headless environments.
-
-Data volume: Detailed traces from complex or long-running agents can result in high data output, requiring effective filtering.
-1 Comprehensive Tracing for Confident AI
 Feature	Confident AI: Rationale & Source
 ✅ LLM & non-LLM calls	Confident AI’s SaaS platform (not just DeepEval OSS) supports end-to-end “inference pipelines” tracing. They explicitly state you can monitor LLM calls with inputs/outputs and attach metadata. However, non-LLM spans (e.g., DB queries, vectorstore retrievals) are not first-class citizens yet — unlike Arize and Langfuse.
 ✅ Multi-turn context	They describe “session-level” monitoring to track context over a conversation.
@@ -45,6 +38,13 @@ Feature	Confident AI: Rationale & Source
 
 https://documentation.confident-ai.com/docs/llm-tracing/integrations/typescript#code--video-demo
 🚫 Multimodal	No mention of image/audio tracing in Confident AI docs as of today.
+Arize Phoenix & Langfuse:
+Both are designed for ML observability and LLMops. Both already trace arbitrary spans, multimodal (to some extent), with mature OpenTelemetry-inspired designs. That’s why they score slightly better on non-LLM calls & multimodal today.
+Confident AI Tracing:
+ 
+Running an LLM application in ADP environment and tracing it to the dashboard is feasible. DeepEval.ts is potentially useful if we want to trace our Typescript services.  
+
+
 Arize Phoenix & Langfuse:
 Both are designed for ML observability and LLMops. Both already trace arbitrary spans, multimodal (to some extent), with mature OpenTelemetry-inspired designs. That’s why they score slightly better on non-LLM calls & multimodal today.
 Confident AI Tracing:
