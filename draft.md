@@ -266,17 +266,23 @@ While powerful, the prebuilt functionalities and data workflows might restrict t
 Langfuse Analytics and Reporting
 Langfuse offers a powerful, flexible Analytics & Reporting suite for LLM applications—featuring a feature-rich Metrics API, alerting, and comprehensive evaluation tools. It equips teams to monitor cost, latency, and quality, detect regressions, and make continuous improvements. However, maximizing its potential depends on thoughtful configuration and sufficient data volume.
 
-- Build custom reports and dashboards with our flexible Metrics API. Query traces, observations, and scores with custom dimensions, metrics, and time granularity.
-- Performance alerting to detect and respond to quality or latency degradation in production.
-- Supports A/B regression testing to compare application or prompt versions systematically. Effective A/B testing requires enough traffic and data to draw reliable conclusions.
-- Enables data-driven decision-making for continuous improvement.
+Pocs:
+Custom report & dashboard generation – With the robust Metrics API, craft tailored reports and dashboards by querying traces, observations, and scores. Customize your insights using selectable dimensions (e.g., model, user, prompt version), metrics (e.g., count, latency p95), filters, and time granularity (hour/day/week/month) voltagent.dev+15Langfuse+15Langfuse+15.
+
+Performance alerting – Automatically detect regressions in quality or latency by configuring metrics-based alerts, enabling faster operational response.
+
+Built-in A/B and regression testing – Compare model versions, prompts, or pipeline variants systematically. Just ensure sufficient traffic and data to derive statistically significant conclusions voltagent.dev.
+
+Advanced analytics for NLP pipelines – Go beyond basic metrics with precision, recall, error rates, and latency analysis. This is especially valuable for high-stakes applications like medical diagnosis or loan approvals Medium.
+
+Data-driven continuous optimization – Leverage dashboards and evaluation tools (LLM-as-a-judge, user feedback, manual or custom scoring) for iterative model refinement 
+
+
 Cons:
-- Requires thoughtful dashboard design to avoid information overload. Advanced Analytics for NLP Pipelines: Here’s something that might surprise you: Langfuse doesn’t just monitor your models, it offers advanced analytics. You can dive deep into metrics like precision, recall, latency, and error rates, giving you an edge in optimizing your model’s performance over time. These analytics are crucial when fine-tuning models that handle critical applications like medical diagnoses or loan approvals.
-- Setting meaningful performance alerts may need tuning to reduce noise or false positives.
-- Cons:
-  - Requires thoughtful dashboard design to avoid information overload.
-  - Setting meaningful performance alerts may need tuning to reduce noise or false positives.
-  - Effective A/B testing requires enough traffic and data to draw reliable conclusions.
+- Dashboard design needs care – Powerful as it is, the Metrics API demands thoughtful construction of views to avoid clutter. A strategic selection of dimensions, metrics, filters, and visuals is essential 
+- Alert tuning to reduce noise – Default thresholds may result in false positives; fine-tuning is required to balance sensitivity with relevance.
+- Statistical validity in A/B Tests – Effective regression testing assumes sufficient data volume; without it, tests could be misleading.
+- Initial customization overhead – Setting up meaningful alerts and dashboards requires effort and domain knowledge—but pays off with actionable insights.
 
 ---
 
