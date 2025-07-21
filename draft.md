@@ -261,6 +261,24 @@ The platform may experience usability challenges or performance degradation when
 Limited Customization in Data Processing:
 While powerful, the prebuilt functionalities and data workflows might restrict teams needing extensive data preprocessing, custom transformations, or more sophisticated versioning logic.
 
+Langfuse Analytics and Reporting
+Pros:
+-	Custom dashboards and metrics to visualize key performance indicators (lyric quality, cost, latency).
+-	Performance alerting to detect and respond to quality or latency degradation in production.
+-	Supports A/B regression testing to compare application or prompt versions systematically.
+-	Enables data-driven decision-making for continuous improvement.
+Cons:
+-	Requires thoughtful dashboard design to avoid information overload.
+-	Setting meaningful performance alerts may need tuning to reduce noise or false positives.
+-	Effective A/B testing requires enough traffic and data to draw reliable conclusions.
+
+Feature	Confident AI: Rationale & Source
+✅ Dashboards	Built-in dashboards to monitor KPIs: quality, latency, cost, drift.
+✅ Alerts	Performance alerts are configurable.
+✅ A/B testing	Experiments dashboard supports regression & A/B tests.
+Arize & Langfuse:
+Similar features, but Arize has slightly more mature alerting & visualization given its ML observability roots.
+Confident AI Reporting UI: To be tested. 
 
 
 
