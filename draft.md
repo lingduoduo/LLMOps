@@ -475,4 +475,26 @@ This project will deliver a proof-of-concept implementation using Langfuse to ev
 
 Overall Takeaway
 The Langfuse platform offers an impressively holistic set of capabilities for evaluating, monitoring, and improving LLM-powered lyric generation. Its strengths lie in unifying tracing, evaluation, prompt management, datasets, and analytics into a single workflow. The key considerations will be managing complexity, ensuring robust data practices, and balancing automated evaluations with human insight, especially given the creative, subjective nature of lyric content.
-<img width="468" height="646" alt="image" src="https://github.com/user-attachments/assets/91bebd27-4963-4811-a320-8f0b0ef50906" />
+
+
+n behalf of our entire ADP team, I thank you for attending the AWS NYC Summit last week. It was great to see so many of you and hear your excitement for our latest announcements.
+ 
+We had significant announcements for Amazon Bedrock, Strands Agents, Amazon Nova, AI Agents Marketplace, Amazon SageMaker, Developer Tools, and Amazon EKS. Among the highlights are:
+ 
+Amazon Bedrock AgentCore: provides infrastructure, tools, and capabilities purpose-built for running AI agents at scale
+Amazon S3 Vectors: a new S3 bucket type built specifically to store and query vector embeddings
+Strands Agents: an SDK that takes a model-driven approach to building AI agents in just a few lines of code
+NovaAct SDK: a developer toolkit for building production-ready AI browser agents powered by the Nova Act model
+Amazon Nova Customization in Amazon SageMaker AI
+SageMaker HyperPod Open Weight Model Deployment: allows you to train, fine-tune, and deploy models on the same HyperPod compute resources, maximizing resource utilization across the entire model lifecycle
+SageMaker HyperPodOpen Observability: allows you to monitor their AI model development more effectively with SageMaker HyperPod's new observability features
+Kiro: an agentic integrated development environment (IDE) built from the ground up to help developers do their best work
+Amazon EKS: launched support for up to 100K node clusters to enable ultra scale AI/ML training and inference workloads in a single cluster
+Claude for Enterprise (C4E): Anthropic's first SaaS solution available outside direct purchase with Anthropic exclusively through AWS Marketplace
+AWS Knowledge MCP Server: a powerful new way to interact with AWS documentation through AI
+AWS API MCP: an open-source model context protocol (MCP) server that helps application developers, agents, and agent builders make valid, syntactically correct calls to AWS APIs
+ 
+We recommend you read Swami’s blog post on delivering production-ready AI agents at scale: https://aws.amazon.com/blogs/machine-learning/enabling-customers-to-deliver-production-ready-ai-agents-at-scale/ and the Summary of Top Announcements: https://aws.amazon.com/blogs/aws/top-announcements-of-the-aws-summit-in-new-york-2025/
+ 
+
+
