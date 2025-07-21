@@ -59,13 +59,52 @@ SaaS-Only Model: Full tracing functionality requires using Confident AI’s host
 
 Access Restrictions: In enterprise environments like ADP, access to Confident AI documentation or services may be blocked, limiting usability.
 
-
-
 Arize Phoenix & Langfuse:
 Both are designed for ML observability and LLMops. Both already trace arbitrary spans, multimodal (to some extent), with mature OpenTelemetry-inspired designs. That’s why they score slightly better on non-LLM calls & multimodal today.
 Confident AI Tracing:
  
 Running an LLM application in ADP environment and tracing it to the dashboard is feasible. DeepEval.ts is potentially useful if we want to trace our Typescript services.  
+
+
+Evaluation
+Phoenix integrates both automated and manual evaluation workflows. It supports built-in and custom metrics (e.g., BLEU, ROUGE, semantic similarity) as well as human-in-the-loop review. The framework links evaluation results directly to experiments and traces, helping users systematically assess model improvements and understand performance dynamics.
+Here are the main ways you can use Evaluation in Phoenix:
+Automatic/Programmatic Evaluation
+•	Use built-in or custom Evaluator classes to assess your outputs programmatically.
+•	Evaluation can be called as part of your code when testing a prompt, RAG chain, or agent.
+•	You write rules/metrics (e.g., accuracy, toxicity, hallucination etc.), and run these automatically over batches of inputs/outputs.
+•	Useful for rapid, repeatable evaluation without human effort (like daily test runs).
+Human (Manual) Evaluation
+•	Phoenix supports adding Human feedback by letting you create evaluation tasks for annotators.
+•	Human evaluators can score outputs (e.g., on correctness, helpfulness, etc.) and this can be visualized alongside metric-based scores.
+•	Some use a UI, others upload CSVs with human ratings.
+Multi-metric and Holistic Evaluation
+•	You can combine multiple evaluators (automated and human) in one run.
+•	Score the model on quality, factuality, toxicity, instructional following, etc., all at once.
+•	Analyze tradeoffs across metrics directly in the dashboard.
+Continuous or Regression Evaluation
+•	Automate evaluation on every new code/model release to monitor performance changes.
+•	Run evaluations as part of CI/CD for quality gates.
+Visual and Interactive Evaluation
+•	Use the Phoenix dashboard to explore evaluation results, filter problems, analyze failure cases, and compare models side-by-side.
+•	See distributions, top errors, and drill down to actual input/output pairs.
+Custom/Advanced Evaluation
+•	Write your own scoring/evaluation functions using LLMs, rubric grading, regex, or more complex pipelines.
+•	Evaluate not just final answers, but intermediate steps (in agents or chains) using custom hooks.
+Strengths
+1.	Continuous Monitoring: Can be hooked into automated tests/CI for ongoing regression detection.
+2.	Facilitates Error Analysis: Makes it fast to spot edge cases and systematically improve your app’s weak spots.
+3.	Integrated Dashboard: Unified place to compare, analyze, and drill down into evaluation results visually.
+4.	Multi-metric Reporting: Evaluate on many axes (accuracy, relevance, harmlessness, etc.) simultaneously.
+5.	Flexible & Rich Evaluations: Supports both automated metrics and human-in-the-loop feedback; extensible to custom use-cases.
+6.	Plug-and-Play: Works with LLMs, chains, agents, and integrates well with many existing workflows.
+Weaknesses
+1.	Data and Scaling: Large batch evaluations (especially with human or LLM-in-the-loop metrics) can be costly and slow, particularly with big datasets.
+2.	Limited Out-of-the-Box Metrics: Some evaluation needs (domain-specific, specialized behaviors) require custom implementation.
+<img width="468" height="633" alt="image" src="https://github.com/user-attachments/assets/292e5935-24c7-490b-a6e5-f06a54fe0bbb" />
+
+
+
 
 
 Arize Phoenix & Langfuse:
