@@ -205,24 +205,61 @@ UI-Centric, Less Developer-Friendly: The prompt management workflow is focused o
 Limited Visibility into Prompt-Call Tracing: Compared to Langfuse, Confident AI provides less direct integration between prompt versions and LLM trace data, which could limit debugging and fine-grained analysis.
 Prompt Studio Maturity Still Unclear: Although promising, the Prompt Studio feature is relatively new and hasn’t been widely validated in production-grade workflows yet.
 
-Dataset Managements
-Pros:
--	Continuous improvement: Create datasets from production edge cases to improve your application
--	Pre-deployment testing: Benchmark new releases before deploying to production
--	Structured testing: Run experiments on collections of inputs and expected outputs
--	Flexible evaluation: Add custom evaluation metrics or use llm-as-a-judge
--	Integrates well: Works with popular frameworks like LangChain and LlamaIndex
-Cons:
--	Requires thoughtful dashboard design to avoid information overload.
+Dataset Management with Langfuse
+✅ Pros
+Continuous Improvement: Easily generate datasets from real-world production edge cases, enabling targeted improvements to your application.
+
+Pre-deployment Testing: Benchmark new models or prompt changes against curated datasets before deploying them to production, reducing risk of regressions.
+
+Structured Testing: Conduct systematic experiments by defining collections of inputs and expected outputs, facilitating repeatable and reliable evaluation processes.
+
+Flexible Evaluation: Incorporate custom evaluation metrics or leverage automated LLM-as-a-judge methods to assess performance flexibly.
+
+Strong Framework Integration: Integrates seamlessly with popular frameworks such as LangChain and LlamaIndex, allowing streamlined dataset management within existing workflows.
+
+⚠️ Cons
+Dashboard Input/Output Truncation:
+Trace inputs and outputs may be truncated in the Langfuse UI (approximately 10k characters or 1 MB per request), complicating inspection of large or complex data.
+
+Limited Manual Dataset Upload via UI:
+Currently, datasets must be imported via API or SDK, as there’s no built-in UI support for manual file uploads (e.g., CSV or JSON), potentially slowing workflows for non-technical users.
+
+No Built-in Throttling or Run Limiting:
+The platform lacks UI-based controls to throttle dataset processing or limit batch sizes, requiring users to implement custom logic programmatically.
+
+Lack of Failure Summaries:
+There is no consolidated view of failed or poorly performing dataset items, forcing users to manually filter and inspect individual records.
+
+API Rate Limits for High-Volume Ingestion:
+Cloud-hosted deployments impose dataset API rate limits (e.g., 100 requests/minute on Hobby plans, up to 1,000 requests/minute on Enterprise plans), which can hinder workflows requiring high-frequency data operations. Self-hosted setups bypass this limitation but depend heavily on the user’s infrastructure capacity.
 
 
-Feature	Confident AI: Rationale & Source
-✅ Creation & storage	SaaS provides dataset creation, goldens, and versioning.
-✅ Import/export	CSV, JSON, and API-driven import/export is documented.
-Arize & Langfuse:
-Both provide similar capabilities for dataset management.
-Confident AI provides topic modeling beyond typical dataset management. However, using built-in functions to load data into ADP environment is a blocker. 
+Dataset Management with Confident AI / DeepEval
+✅ Pros
+Easy Creation and Versioning:
+The SaaS platform enables straightforward dataset creation, version control, and management of gold-standard ("golden") examples, streamlining evaluation workflows.
 
+Flexible Import/Export Options:
+Supports importing and exporting datasets through CSV, JSON, or API-driven methods, offering compatibility with common workflows and tools.
+
+Advanced Capabilities (Topic Modeling):
+Confident AI extends beyond traditional dataset management by offering built-in topic modeling features, enhancing data analysis and insight generation.
+
+Integration with Evaluation:
+Seamlessly integrates datasets with robust evaluation processes, providing built-in tools for batch and real-time evaluations.
+
+⚠️ Cons
+Compatibility Constraints:
+There are current blockers when using Confident AI’s built-in dataset loading functions within certain enterprise environments, such as ADP, potentially limiting operational flexibility.
+
+SaaS-Dependent:
+Dataset management features heavily rely on the SaaS offering. There is no self-hosted or offline option, which may not be suitable for teams with strict security or data privacy requirements.
+
+Limited UI Flexibility for Large Datasets:
+The platform may experience usability challenges or performance degradation when handling very large datasets entirely via the UI, without API-driven processes.
+
+Limited Customization in Data Processing:
+While powerful, the prebuilt functionalities and data workflows might restrict teams needing extensive data preprocessing, custom transformations, or more sophisticated versioning logic.
 
 
 
@@ -255,9 +292,7 @@ Arize Phoenix & Langfuse:
 Both are designed for ML observability and LLMops. Both already trace arbitrary spans, multimodal (to some extent), with mature OpenTelemetry-inspired designs. That’s why they score slightly better on non-LLM calls & multimodal today.
 Confident AI Tracing:
  
-Running an LLM application in ADP environment and tracing it to the dashboard is feasible. DeepEval.ts is potentially useful if we want to trace our Typescript services.  
-
-Langfuse is a great choice for most production use cases, particularly when comprehensive tracing, prompt management, deep evaluation capabilities, and robust usage monitoring are critical. Its ability to provide detailed insights into both LLM and non-LLM activities, along with support for asynchronous logging and various framework integrations, makes it ideal for complex applications requiring thorough observability. How Langfuse provides detailed tracing and quality monitoring through developer-friendly APIs. While it supports multi-step workflows effectively, it lacks support for the OpenTelemetry protocol and can be difficult to customize for non-standard use cases.
+Langfuse offers a comprehensive observability platform for LLM apps, providing deep insights into model performance, cost, and user interactions. Langfuse is a great choice for most production use cases, particularly when comprehensive tracing, prompt management, deep evaluation capabilities, and robust usage monitoring are critical. Its ability to provide detailed insights into both LLM and non-LLM activities, along with support for asynchronous logging and various framework integrations, makes it ideal for complex applications requiring thorough observability. How Langfuse provides detailed tracing and quality monitoring through developer-friendly APIs. While it supports multi-step workflows effectively, it lacks support for the OpenTelemetry protocol and can be difficult to customize for non-standard use cases.
 
 Arize Phoenix is a strong option if your company already uses Arize AI’s enterprise platform and is focused on the experimental and development stages of LLM applications. It offers tools for evaluation and troubleshooting . However, its lack of prompt management and comprehensive LLM usage monitoring features may limit its effectiveness in production environments, making it less suitable for teams requiring these capabilities. Where Phoenix fits into the process by combining experimentation and debugging capabilities with evaluation pipelines. Its strength lies in development-focused observability, but it has limitations in handling real-time tracing once systems are in production.
 
