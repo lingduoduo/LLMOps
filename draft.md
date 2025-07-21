@@ -205,6 +205,24 @@ UI-Centric, Less Developer-Friendly: The prompt management workflow is focused o
 Limited Visibility into Prompt-Call Tracing: Compared to Langfuse, Confident AI provides less direct integration between prompt versions and LLM trace data, which could limit debugging and fine-grained analysis.
 Prompt Studio Maturity Still Unclear: Although promising, the Prompt Studio feature is relatively new and hasn’t been widely validated in production-grade workflows yet.
 
+Dataset Managements
+Pros:
+-	Continuous improvement: Create datasets from production edge cases to improve your application
+-	Pre-deployment testing: Benchmark new releases before deploying to production
+-	Structured testing: Run experiments on collections of inputs and expected outputs
+-	Flexible evaluation: Add custom evaluation metrics or use llm-as-a-judge
+-	Integrates well: Works with popular frameworks like LangChain and LlamaIndex
+Cons:
+-	Requires thoughtful dashboard design to avoid information overload.
+
+
+Feature	Confident AI: Rationale & Source
+✅ Creation & storage	SaaS provides dataset creation, goldens, and versioning.
+✅ Import/export	CSV, JSON, and API-driven import/export is documented.
+Arize & Langfuse:
+Both provide similar capabilities for dataset management.
+Confident AI provides topic modeling beyond typical dataset management. However, using built-in functions to load data into ADP environment is a blocker. 
+
 
 
 
