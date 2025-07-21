@@ -318,6 +318,7 @@ Pros
 - Setup and Integration Requirements
  Requires developer effort to embed DeepEval tracing and design meaningful evaluation pipelines and alerts before generating actionable insights Confident AI.
 
+---
 
 
 
@@ -343,25 +344,18 @@ Pros
 
 
 
+Arize Phoenix shines in early-phase experimentation with minimal setup and strong tracing. It is a powerful open-source tool built with OpenTelemetry that excels during the early stages of development and experimentation. It auto-instruments LLM workflows—capturing spans from frameworks like LangChain and LlamaIndex—allowing easy visualization, dataset creation, and prompt experimentation. It's ideal for prototyping and debugging, especially within teams that already use Arize’s broader platform. However, Phoenix is more geared toward development environments and lacks the prompt management and full production telemetry features needed for scale.
+
+---
+
+Langfuse offers end-to-end, production-ready observability with full OpenTelemetry support and A/B evaluation pipelines.Langfuse delivers robust, production-grade observability across both LLM and non-LLM components. It supports OTLP ingestion, nested spans, cost tracking, multimodal workflows, prompt versioning, user feedback, A/B testing, and built-in alerting. With polished dashboards and deep integration into developer tools, Langfuse is ideal for complex applications requiring full lifecycle visibility—though it may require some setup and configuration to self-host and tailor for edge cases.
+
+---
+
+Confident AI / Deep Eval excels in evaluation-heavy workflows with deep quality testing in SaaS but isn’t included in your free-tier testing scope.Confident AI (DeepEval)** focuses on SaaS-based, test-driven LLM evaluation. Its open-source DeepEval engine lets developers write unit-like tests for model outputs using metrics like G‑Eval, RAGAS, and hallucination detection. The SaaS platform adds tracing, dashboards, regression tests, and CI/CD integration. It’s excellent for ensuring LLM quality before deployment but isn’t part of your free-tier evaluation and lacks real-time, high-volume observability; it’s more suitable for scheduled or targeted evaluations.
 
 
-
-
-
-
-
-Arize Phoenix & Langfuse:
-Both are designed for ML observability and LLMops. Both already trace arbitrary spans, multimodal (to some extent), with mature OpenTelemetry-inspired designs. That’s why they score slightly better on non-LLM calls & multimodal today.
-Confident AI Tracing:
- 
-Langfuse offers a comprehensive observability platform for LLM apps, providing deep insights into model performance, cost, and user interactions. Langfuse is a great choice for most production use cases, particularly when comprehensive tracing, prompt management, deep evaluation capabilities, and robust usage monitoring are critical. Its ability to provide detailed insights into both LLM and non-LLM activities, along with support for asynchronous logging and various framework integrations, makes it ideal for complex applications requiring thorough observability. How Langfuse provides detailed tracing and quality monitoring through developer-friendly APIs. While it supports multi-step workflows effectively, it lacks support for the OpenTelemetry protocol and can be difficult to customize for non-standard use cases.
-
-Arize Phoenix is a strong option if your company already uses Arize AI’s enterprise platform and is focused on the experimental and development stages of LLM applications. It offers tools for evaluation and troubleshooting . However, its lack of prompt management and comprehensive LLM usage monitoring features may limit its effectiveness in production environments, making it less suitable for teams requiring these capabilities. Where Phoenix fits into the process by combining experimentation and debugging capabilities with evaluation pipelines. Its strength lies in development-focused observability, but it has limitations in handling real-time tracing once systems are in production.
-
-Langfuse has a polished UI and solid community momentum, but imposes friction around hosting and feature access. Arize Phoenix offers a more open, developer-friendly experience—especially for those who want a single-container solution with built-in instrumentation and evaluation tools.
-
-
-
+----
 
 By leveraging Langfuse, we aim to demonstrate how it can effectively support the evaluation and improvement of lyric applications.
 Langfuse supports two deployment models to fit different operational needs:
