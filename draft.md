@@ -38,6 +38,29 @@ Feature	Confident AI: Rationale & Source
 
 https://documentation.confident-ai.com/docs/llm-tracing/integrations/typescript#code--video-demo
 🚫 Multimodal	No mention of image/audio tracing in Confident AI docs as of today.
+
+Pros
+LLM Call Tracing: Confident AI’s SaaS platform supports end-to-end tracing of LLM inference pipelines. It captures inputs, outputs, and metadata associated with each LLM call.
+
+Multi-turn Context Support: The platform offers session-level monitoring, enabling developers to trace conversations across multiple turns—useful for chat-based applications.
+
+Custom Metadata: Traces can include custom span-level attributes, giving teams flexibility to tag and organize trace data for deeper analysis.
+
+Latency and Cost Tracking: Built-in dashboards display API latency, throughput, and estimated cost metrics, helping teams monitor both performance and budget.
+
+SDK Integration: Offers Python SDK and DeepEval.ts for JavaScript/TypeScript, making it easy to integrate tracing in both backend and frontend applications.
+
+⚠️ Cons
+Limited Non-LLM Tracing: While LLM spans are supported, other components like database queries or vector store lookups aren’t first-class citizens—unlike what Langfuse and Phoenix offer.
+
+No Multimodal Support: Currently, Confident AI does not provide tracing for image, audio, or other non-text modalities.
+
+SaaS-Only Model: Full tracing functionality requires using Confident AI’s hosted SaaS platform. There is no self-hosted version available.
+
+Access Restrictions: In enterprise environments like ADP, access to Confident AI documentation or services may be blocked, limiting usability.
+
+
+
 Arize Phoenix & Langfuse:
 Both are designed for ML observability and LLMops. Both already trace arbitrary spans, multimodal (to some extent), with mature OpenTelemetry-inspired designs. That’s why they score slightly better on non-LLM calls & multimodal today.
 Confident AI Tracing:
