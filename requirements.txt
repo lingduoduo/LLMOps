@@ -33,5 +33,6 @@ langfuse==2.60.9
 openinference-instrumentation-openai
 opentelemetry-sdk
 opentelemetry-exporter-otlp
+openinference-instrumentation-langchain==0.1.49
 
 

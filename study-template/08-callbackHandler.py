@@ -1,4 +1,5 @@
 import json
+import time
 import warnings
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
@@ -8,7 +9,7 @@ from langchain_core.callbacks import StdOutCallbackHandler
 from langchain_core.callbacks.base import BaseCallbackHandler
 from langchain_core.messages.base import BaseMessage
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.outputs import GenerationChunk, ChatGenerationChunk
+from langchain_core.outputs import GenerationChunk, ChatGenerationChunk, LLMResult
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_openai import ChatOpenAI
@@ -18,7 +19,7 @@ warnings.filterwarnings("ignore")
 
 # --- Custom Callback Handler ---
 class LLMOpsCallbackHandler(BaseCallbackHandler):
-    """自定义LLMOps回调处理器"""
+    start_at: float = 0
 
     def on_chat_model_start(
             self,
@@ -34,6 +35,7 @@ class LLMOpsCallbackHandler(BaseCallbackHandler):
         print("LLM Model started")
         print("serialized:", json.dumps(serialized, indent=3))
         print("messages:", messages)
+        self.start_at = time.time()
 
     def on_llm_new_token(
             self,
@@ -46,6 +48,19 @@ class LLMOpsCallbackHandler(BaseCallbackHandler):
     ) -> Any:
         print("LLM New Token started")
         print("token:", token)
+
+    def on_llm_end(
+            self,
+            response: LLMResult,
+            *,
+            run_id: UUID,
+            parent_run_id: Optional[UUID] = None,
+            **kwargs: Any,
+    ) -> Any:
+        print("LLM Model ended")
+        print("response:", response)
+        end_at = time.time()
+        print("LLM Model ended in", end_at - self.start_at, "seconds")
 
 
 class SafeStdOutCallbackHandler(StdOutCallbackHandler):
