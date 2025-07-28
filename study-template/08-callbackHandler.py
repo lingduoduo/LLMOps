@@ -1,33 +1,67 @@
+import json
+import warnings
+from typing import Any, Dict, List, Optional
+from uuid import UUID
+
 import dotenv
 from langchain_core.callbacks import StdOutCallbackHandler
+from langchain_core.callbacks.base import BaseCallbackHandler
+from langchain_core.messages.base import BaseMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_openai import ChatOpenAI
 
-# Load environment variables
+warnings.filterwarnings("ignore")
+
+
+# --- Custom Callback Handler ---
+class LLMOpsCallbackHandler(BaseCallbackHandler):
+    """自定义LLMOps回调处理器"""
+
+    def on_chat_model_start(
+            self,
+            serialized: Dict[str, Any],
+            messages: List[List[BaseMessage]],
+            *,
+            run_id: UUID,
+            parent_run_id: Optional[UUID] = None,
+            tags: Optional[List[str]] = None,
+            metadata: Optional[Dict[str, Any]] = None,
+            **kwargs: Any,
+    ) -> Any:
+        print("LLM Model started")
+        print("serialized:", json.dumps(serialized, indent=3))
+        print("messages:", messages)
+
+
+class SafeStdOutCallbackHandler(StdOutCallbackHandler):
+    def on_chain_start(self, serialized, inputs, **kwargs):
+        metadata = kwargs.get("metadata") or {}
+        name = metadata.get("name", "UnnamedChain")
+        print(f"\n> Entering chain: {name}")
+
+
+# --- Load env ---
 dotenv.load_dotenv()
 
-# Step 1: Define the prompt template
+# --- Define the prompt ---
 prompt = ChatPromptTemplate.from_template("{query}")
 
-# Step 2: Initialize the LLM model
+# --- Create LLM ---
 llm = ChatOpenAI(model="gpt-3.5-turbo-16k")
 
-# Step 3: Build the processing chain
+# --- Build the chain ---
 chain = (
-        {"query": RunnablePassthrough()}  # Pass query as input
-        | prompt  # Apply the prompt template
-        | llm  # Send query to OpenAI LLM
-        | StrOutputParser()  # Parse the output into a string
+        {"query": RunnablePassthrough()}
+        | prompt
+        | llm
+        | StrOutputParser()
 )
 
-# Step 4: Execute the chain with an example query
-content = chain.stream(
-    "Hello",  # Example input: "Hello, who are you?"
-    config={"callbacks": [StdOutCallbackHandler()]}
+# --- Run the chain with custom handler ---
+output = chain.invoke(
+    "hello",
+    config={"callbacks": [SafeStdOutCallbackHandler(), LLMOpsCallbackHandler()]}
 )
-
-# Step 5: Process and display the output
-for chunk in content:
-    print(chunk)
+print(output)

@@ -1,3 +1,4 @@
+import os
 from operator import itemgetter
 
 from dotenv import load_dotenv
@@ -5,6 +6,8 @@ from langchain_community.vectorstores import FAISS
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 # Load environment variables
 load_dotenv()
