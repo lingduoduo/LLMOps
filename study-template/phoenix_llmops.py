@@ -147,6 +147,8 @@
 # print("Phoenix UI (Post-Evaluation):", px.active_session().url)
 
 
+import os
+
 import dotenv
 # import os
 # import uuid
