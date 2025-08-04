@@ -34,5 +34,6 @@ openinference-instrumentation-openai
 opentelemetry-sdk
 opentelemetry-exporter-otlp
 openinference-instrumentation-langchain==0.1.49
+openai-agents==0.2.4
 
 
