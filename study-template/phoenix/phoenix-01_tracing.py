@@ -133,26 +133,30 @@ def fetch_fusion(query: str) -> Dict[str, Any]:
     return {"output": results}
 fetch_fusion("Bob")
 
+
+
+
+import numpy as np
 from openinference.semconv.trace import SpanAttributes, MessageAttributes
 from opentelemetry.trace import get_tracer
 
 tracer = get_tracer(__name__)
-
-# Create user query embedding
 embedding = Azurellm().azure_embeddings()
 user_query = "Who is under my medical?"
 vector = embedding.embed_query(user_query)
+
+# Filter expression for Redis Hybrid Search
 t = Tag("clientId_ss") == "74203693-75b5-4433-8da3-b988f0fd94b0"
 
-# Hybrid Search with Filters
+# ---- HYBRID SEARCH ----
 with tracer.start_as_current_span("hybrid_search") as span:
-    # --- Input span attributes ---
-    span.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, "CHAIN")
-    span.set_attribute(SpanAttributes.TAG_TAGS, str("['RedisVL','HybridQuery']"))
+    span.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, "retriever")
+    span.set_attribute(SpanAttributes.TAG_TAGS, "['RedisVL','HybridQuery']")
     span.set_attribute(SpanAttributes.INPUT_VALUE, user_query)
     span.set_attribute(SpanAttributes.INPUT_MIME_TYPE, "text/plain")
     span.set_attribute(f"{SpanAttributes.LLM_INPUT_MESSAGES}.0.{MessageAttributes.MESSAGE_ROLE}", "user")
     span.set_attribute(f"{SpanAttributes.LLM_INPUT_MESSAGES}.0.{MessageAttributes.MESSAGE_CONTENT}", user_query)
+
     h = HybridQuery(
         text=user_query,
         text_field_name="description_t",
@@ -160,46 +164,43 @@ with tracer.start_as_current_span("hybrid_search") as span:
         vector=np.array(vector).astype(np.float32).tobytes(),
         vector_field_name="embedding",
         return_fields=['qna_id', 'description_t', 'metadata_s', 'clientId_ss'],
-        alpha=0.7, # weight the vector score lower
+        alpha=0.7,
         num_results=10,
         filter_expression=t
     )
 
-    # Run query
     results = index.query(h)
 
-    # --- Output span attributes ---
-    output_texts = []
     for i, hit in enumerate(results):
-        output_text = f"[{i}] qna_id={hit.get('qna_id')} desc={hit.get('description_t')}"
-        output_texts.append(output_text)
+        content = f"[{i}] qna_id={hit.get('qna_id')} desc={hit.get('description_t')}"
         span.set_attribute(f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.{i}.{MessageAttributes.MESSAGE_ROLE}", "retrieval")
-        span.set_attribute(f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.{i}.{MessageAttributes.MESSAGE_CONTENT}", output_text)
+        span.set_attribute(f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.{i}.{MessageAttributes.MESSAGE_CONTENT}", content)
 
+    span.set_attribute(SpanAttributes.OUTPUT_VALUE, f"{len(results)} documents retrieved.")
 
-# Reranking using Bedrock Nova Model
+# ---- RERANKING ----
 with tracer.start_as_current_span("reranking") as span:
     rerank_model = "nova_pro"
-    rerank_prompt = rerank_prompt_nova  # your custom reranking prompt format
-
-    # Perform reranking (assumes rerank_results returns top item or reranked list)
+    rerank_prompt = rerank_prompt_nova  # your custom prompt
     best_result = rerank_results(user_query, results, rerank_model, rerank_prompt)
+
     doc_texts = [f"[{i}] qna_id={doc.get('qna_id')} desc={doc.get('description_t')}" for i, doc in enumerate(results)]
     input_summary = f"Query: {user_query}\nDocs:\n" + "\n".join(doc_texts)
+
     span.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, "reranker")
     span.set_attribute(SpanAttributes.INPUT_VALUE, input_summary)
+    span.set_attribute(SpanAttributes.INPUT_MIME_TYPE, "text/plain")
 
-    # Log structured LLM input messages (optional)
+    # Structured input messages
     span.set_attribute(f"{SpanAttributes.LLM_INPUT_MESSAGES}.0.{MessageAttributes.MESSAGE_ROLE}", "user")
     span.set_attribute(f"{SpanAttributes.LLM_INPUT_MESSAGES}.0.{MessageAttributes.MESSAGE_CONTENT}", user_query)
-    for i, doc in enumerate(results):
-        span.set_attribute(f"{SpanAttributes.LLM_INPUT_MESSAGES}.{i}.{MessageAttributes.MESSAGE_ROLE}", "retrieval")
-        span.set_attribute(f"{SpanAttributes.LLM_INPUT_MESSAGES}.{i}.{MessageAttributes.MESSAGE_CONTENT}", doc_texts[i])
 
-    # Set OUTPUT_VALUE: top reranked result
+    for i, doc_text in enumerate(doc_texts):
+        span.set_attribute(f"{SpanAttributes.LLM_INPUT_MESSAGES}.{i+1}.{MessageAttributes.MESSAGE_ROLE}", "retrieval")
+        span.set_attribute(f"{SpanAttributes.LLM_INPUT_MESSAGES}.{i+1}.{MessageAttributes.MESSAGE_CONTENT}", doc_text)
+
+    # Output message
     span.set_attribute(SpanAttributes.OUTPUT_VALUE, str(best_result))
     span.set_attribute(f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.0.{MessageAttributes.MESSAGE_ROLE}", "reranker")
     span.set_attribute(f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.0.{MessageAttributes.MESSAGE_CONTENT}", str(best_result))
-
-
 
