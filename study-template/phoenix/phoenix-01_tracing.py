@@ -111,3 +111,25 @@ def hybrid_search_with_tracing(user_query: str, embedding, index, tracer) -> lis
         span.set_attribute(SpanAttributes.OUTPUT_VALUE, "\n".join(output_texts))
 
     return results
+
+
+@tracer.chain
+def fetch_fusion(query: str) -> Dict[str, Any]:
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-Trace-ID": "ling-jupyter-test",
+        "X-OHCM-User-Language": "en-US",
+        "x-api-key": "37f22c2f-a2e7-4a6f-a508-f63928d351a5",
+    }
+    url = (
+        "https://search.fusion.lyric.app.fit2.us.caas.oneadp.com/api/apps/" 
+        "lyric/query/people_4f76ca21-8350-41e8-8bc8-5f677362d9cf_query"
+    )
+
+    payload = (
+        f"q={query}"
+    )
+    response = requests.post(url, headers=headers, data=payload, verify=False)
+    results = response.json().get("response", {}).get("docs", [])
+    return {"output": results}
+fetch_fusion("Bob")
