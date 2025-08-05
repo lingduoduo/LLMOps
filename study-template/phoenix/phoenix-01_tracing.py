@@ -133,19 +133,39 @@ def fetch_fusion(query: str) -> Dict[str, Any]:
     return {"output": results}
 fetch_fusion("Bob")
 
+from openinference.semconv.trace import SpanAttributes, MessageAttributes
+from opentelemetry.trace import get_tracer
 
-# Reranking using Bedrock Nova Model
+tracer = get_tracer(__name__)
+
+# --- Reranking using Bedrock Nova ---
 with tracer.start_as_current_span("reranking") as span:
-    # Reranked hybrid results using Nova_pro
-    rerank_model = 'nova_pro'
-    rerank_prompt = rerank_prompt_nova
+    rerank_model = "nova_pro"
+    rerank_prompt = rerank_prompt_nova  # your custom reranking prompt format
+
+    # Perform reranking (assumes rerank_results returns top item or reranked list)
     best_result = rerank_results(user_query, results, rerank_model, rerank_prompt)
-    best_results = []
-    for i, hit in enumerate(results):
-        output_text = f"[{i}] qna_id={hit.get('qna_id')} desc={hit.get('description_t')}"
-        output_texts.append(output_text)
-        span.set_attribute(f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.{i}.{MessageAttributes.MESSAGE_ROLE}", "retrieval")
-        span.set_attribute(f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.{i}.{MessageAttributes.MESSAGE_CONTENT}", output_text)
-        span.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, "Reranker")
-        span.set_attribute(SpanAttributes.INPUT_VALUE, user_query) # List of documents as input to the reranker
-        span.set_attribute(SpanAttributes.RETRIEVAL_DOCUMENTS, output_text) # List of documents as outputs of the reranker
+
+    # Set INPUT_VALUE: query + input documents
+    doc_texts = [f"[{i}] qna_id={doc.get('qna_id')} desc={doc.get('description_t')}" for i, doc in enumerate(results)]
+    input_summary = f"Query: {user_query}\nDocs:\n" + "\n".join(doc_texts)
+    span.set_attribute(SpanAttributes.INPUT_VALUE, input_summary)
+
+    # Log structured LLM input messages (optional)
+    span.set_attribute(f"{SpanAttributes.LLM_INPUT_MESSAGES}.0.{MessageAttributes.MESSAGE_ROLE}", "user")
+    span.set_attribute(f"{SpanAttributes.LLM_INPUT_MESSAGES}.0.{MessageAttributes.MESSAGE_CONTENT}", user_query)
+
+    for i, doc in enumerate(results):
+        span.set_attribute(f"{SpanAttributes.LLM_INPUT_MESSAGES}.{i+1}.{MessageAttributes.MESSAGE_ROLE}", "retrieval")
+        span.set_attribute(f"{SpanAttributes.LLM_INPUT_MESSAGES}.{i+1}.{MessageAttributes.MESSAGE_CONTENT}", doc_texts[i])
+
+    # Set OUTPUT_VALUE: top reranked result
+    span.set_attribute(SpanAttributes.OUTPUT_VALUE, str(best_result))
+
+    # Log structured LLM output message (optional)
+    span.set_attribute(f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.0.{MessageAttributes.MESSAGE_ROLE}", "reranker")
+    span.set_attribute(f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.0.{MessageAttributes.MESSAGE_CONTENT}", str(best_result))
+
+    # Optional: mark span kind as reranker
+    span.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, "reranker")
+
