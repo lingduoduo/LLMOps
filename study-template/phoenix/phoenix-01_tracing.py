@@ -119,7 +119,6 @@ def fetch_fusion(query: str) -> Dict[str, Any]:
         "Content-Type": "application/x-www-form-urlencoded",
         "X-Trace-ID": "ling-jupyter-test",
         "X-OHCM-User-Language": "en-US",
-        "x-api-key": "37f22c2f-a2e7-4a6f-a508-f63928d351a5",
     }
     url = (
         "https://search.fusion.lyric.app.fit2.us.caas.oneadp.com/api/apps/" 
