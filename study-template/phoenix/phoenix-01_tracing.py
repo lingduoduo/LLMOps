@@ -132,3 +132,20 @@ def fetch_fusion(query: str) -> Dict[str, Any]:
     results = response.json().get("response", {}).get("docs", [])
     return {"output": results}
 fetch_fusion("Bob")
+
+
+# Reranking using Bedrock Nova Model
+with tracer.start_as_current_span("reranking") as span:
+    # Reranked hybrid results using Nova_pro
+    rerank_model = 'nova_pro'
+    rerank_prompt = rerank_prompt_nova
+    best_result = rerank_results(user_query, results, rerank_model, rerank_prompt)
+    best_results = []
+    for i, hit in enumerate(results):
+        output_text = f"[{i}] qna_id={hit.get('qna_id')} desc={hit.get('description_t')}"
+        output_texts.append(output_text)
+        span.set_attribute(f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.{i}.{MessageAttributes.MESSAGE_ROLE}", "retrieval")
+        span.set_attribute(f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.{i}.{MessageAttributes.MESSAGE_CONTENT}", output_text)
+        span.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, "Reranker")
+        span.set_attribute(SpanAttributes.INPUT_VALUE, user_query) # List of documents as input to the reranker
+        span.set_attribute(SpanAttributes.RETRIEVAL_DOCUMENTS, output_text) # List of documents as outputs of the reranker
