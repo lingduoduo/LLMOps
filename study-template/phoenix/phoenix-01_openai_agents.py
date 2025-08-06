@@ -250,12 +250,3 @@ dataset_row = {"question": "What is 15 + 28?"}
 
 result = asyncio.run(solve_math_problem(dataset_row))
 print(result)
-
-# from phoenix.experiments import run_experiment
-#
-# initial_experiment = run_experiment(
-#     dataset,
-#     task=solve_math_problem,
-#     experiment_description="Solve Math Problems",
-#     experiment_name=f"solve-math-questions-{str(uuid.uuid4())[:5]}",
-# )

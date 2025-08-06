@@ -35,6 +35,38 @@ The techniques you'll use are:
 Let's get started!
 
 ### Setup Dependencies & Keys
+
+
+
+Prompts in a self-hosted Phoenix instance with a Postgres DB are stored as JSON in dedicated tables: the Prompt table holds prompt metadata (name, description, metadata, timestamps), and the PromptVersion table stores each version's details (template, model provider, model name, parameters, tools, response format, and metadata).
+What would be the use case edit the storage?
+
+
+
+4:04
+More details on the prompt table structure:
+  1. prompts - Main prompt metadata table
+    - id: Primary key
+    - name: Unique identifier string
+    - description: Optional description
+    - metadata: JSON field for additional metadata
+    - source_prompt_id: Optional foreign key for prompt inheritance
+    - created_at/updated_at: Timestamps
+  2. prompt_versions - Individual versions of prompts
+    - id: Primary key
+    - prompt_id: Foreign key to prompts table
+    - template: JSON field containing the actual prompt content
+    - template_type: Either 'CHAT' or 'STR' (string)
+    - template_format: Format type ('F_STRING', 'MUSTACHE', 'NONE')
+    - invocation_parameters: JSON field with model parameters (temperature, max_tokens, etc.)
+    - model_provider: String (e.g., 'OPENAI', 'ANTHROPIC', 'GOOGLE')
+    - model_name: String model identifier
+    - tools: Optional JSON field for function calling tools
+    - response_format: Optional JSON field for structured outputs
+    - user_id: Optional foreign key to users table
+    - metadata: JSON field for version-specific metadata
+  3. prompt_version_tags - Named tags for prompt versions
+    - Links specific versions to human-readable tags like "production", "staging"
 """
 
 !pip install -q "arize-phoenix>=8.0.0" datasets
@@ -70,7 +102,7 @@ from phoenix.client import Client as PhoenixClient
 unique_id = uuid.uuid4()
 
 # Upload the dataset to Phoenix
-dataset = px.Client().upload_dataset(
+dataset = px.Client(http://localhost:6006).upload_dataset(
     dataframe=ds,
     input_keys=["prompt"],
     output_keys=["type"],
