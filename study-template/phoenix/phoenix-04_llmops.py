@@ -69,25 +69,12 @@ for query in queries:
     answer = output.get("result", output)
     qa_pairs.append({"question": query, "ground_truth": "", "answer": answer})
 
-from phoenix.client import Client
-import uuid
-from opentelemetry import trace
+import phoenix as px
 
-client = Client(api_key=os.getenv("PHOENIX_API_KEY"))
-session_id = str(uuid.uuid4())
+spans_df = px.Client(endpoint="http://127.0.0.1:6006").get_spans_dataframe()
+print(spans_df)
 
-tracer = trace.get_tracer(__name__)
-@tracer.start_as_current_span(name="agent", attributes={SpanAttributes.OPENINFERENCE_SPAN_KIND: "agent"})
-def assistant(
-  messages: list[dict],
-  session_id: str = str,
-):
-    
-# # replace "accuracy" if you chose to annotate on different criteria
-# query = spans.SpanQuery().where("annotations['accuracy']")
-# spans_df = client.spans.get_spans_dataframe(
-#     query=query, project_identifier="intent-classification"
-# )
+queries_df = get_qa_with_reference(px.active_session())
 # spans_df = px.Client().get_spans_dataframe()
 # spans_df[["name", "span_kind", "attributes.input.value", "attributes.retrieval.documents"]].head()
 # print(f"\nQuery: {query}\nResponse: {answer}")
