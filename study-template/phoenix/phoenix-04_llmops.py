@@ -12,8 +12,9 @@ dotenv.load_dotenv()
 os.environ.setdefault("PHOENIX_COLLECTOR_ENDPOINT", "http://localhost:6006/v1/traces")
 os.environ.setdefault("PHOENIX_PROJECT_NAME", "llmops")
 
-# --- Phoenix Tracing ---
+# # --- Phoenix Tracing ---
 from phoenix.otel import register
+
 from openinference.instrumentation.langchain import LangChainInstrumentor
 # --- LangChain & OpenAI ---
 from langchain_core.documents import Document
@@ -71,99 +72,105 @@ for query in queries:
 
 import phoenix as px
 
-spans_df = px.Client(endpoint="http://127.0.0.1:6006").get_spans_dataframe()
-print(spans_df)
+from phoenix.session.evaluation import get_qa_with_reference, get_retrieved_documents
 
-queries_df = get_qa_with_reference(px.active_session())
-# spans_df = px.Client().get_spans_dataframe()
-# spans_df[["name", "span_kind", "attributes.input.value", "attributes.retrieval.documents"]].head()
-# print(f"\nQuery: {query}\nResponse: {answer}")
-# for i, src in enumerate(output.get("source_documents", []), 1):
-#     print(f"  Source {i}: {src.page_content[:120]}...")
+client = px.Client(endpoint="http://127.0.0.1:6006", api_key=os.getenv("PHOENIX_API_KEY"))
+retrieved_documents_df = get_retrieved_documents(client, project_name="llmops")
+queries_df = get_qa_with_reference(client, project_name="llmops")
 
-# # --- Evaluation ---
-# queries_df = pd.DataFrame(qa_pairs)
-# print(queries_df)
-#
-# model = OpenAIModel(model="gpt-4", temperature=0.0, )
-# print(model("Hello world, this is a test if you are working?"))
-#
-# rails = list(HALLUCINATION_PROMPT_RAILS_MAP.values())
-# hallucination_classifications = llm_classify(
-#     dataframe=queries_df,
-#     template=HALLUCINATION_PROMPT_TEMPLATE,
-#     model=model,
-#     rails=rails,
-#     concurrency=20
-# )
-# print(hallucination_classifications["label"].tolist())
-#
-#
-# import phoenix as px
-# from phoenix.client import Client
-# from phoenix.client.types import spans
-#
-# client = Client(api_key=os.getenv("PHOENIX_API_KEY"))
-# # replace "accuracy" if you chose to annotate on different criteria
-# query = spans.SpanQuery().where("annotations['accuracy']")
-# spans_df = client.spans.get_spans_dataframe(
-#     query=query, project_identifier="intent-classification"
-# )
-# annotations_df = client.spans.get_span_annotations_dataframe(
-#     spans_dataframe=spans_df, project_identifier="intent-classification"
-# )
-# full_df = annotations_df.join(spans_df, how="inner")
-#
-# dataset = px.Client().upload_dataset(
-#     dataframe=full_df,
-#     dataset_name="annotated-receipts",
-#     input_keys=["attributes.input.value"],
-#     output_keys=["attributes.llm.output_messages"],
-#     metadata_keys=["result.label", "result.score", "result.explanation"],
-# )
+retrieved_documents_df.to_csv("retrieved_documents_df.csv", index=False)
+queries_df.to_csv("queries_df.csv", index=False)
 
-# # replace "accuracy" if you chose to annotate on different criteria
-# query = spans.SpanQuery().where("annotations['accuracy']")
-# spans_df = client.spans.get_spans_dataframe(
-#     query=query, project_identifier="receipt-classification"
-# )
-# annotations_df = client.spans.get_span_annotations_dataframe(
-#     spans_dataframe=spans_df, project_identifier="receipt-classification"
-# )
-# full_df = annotations_df.join(spans_df, how="inner")
-#
-# dataset = px.Client().upload_dataset(
-#     dataframe=full_df,
-#     dataset_name="annotated-receipts",
-#     input_keys=["attributes.input.value"],
-#     output_keys=["attributes.llm.output_messages"],
-#     metadata_keys=["result.label", "result.score", "result.explanation"],
-# )
+import pandas as pd
+import uuid
 
-# # Hallucination Eval
-# hallucination_eval = llm_classify(
-#     data=queries_df,
-#     model=OpenAIModel(model="gpt-4o", temperature=0.0),
-#     template=HALLUCINATION_PROMPT_TEMPLATE,
-#     rails=list(HALLUCINATION_PROMPT_RAILS_MAP.values()),
-#     provide_explanation=True,
-# )
-# hallucination_eval["score"] = (hallucination_eval.label == "factual").astype(int)
+retrieved_documents_df = pd.read_csv("retrieved_documents_df.csv")
+queries_df = pd.read_csv("queries_df.csv")
 
-# # QA Correctness Eval
-# qa_eval = llm_classify(
-#     data=queries_df,
-#     model=OpenAIModel(model="gpt-4o", temperature=0.0),
-#     template=QA_PROMPT_TEMPLATE,
-#     rails=list(QA_PROMPT_RAILS_MAP.values()),
-#     provide_explanation=True,
-#     concurrency=4,
-# )
-# qa_eval["score"] = (qa_eval.label == "correct").astype(int)
-#
-# # --- Summary ---
-# print("\n=== Hallucination Evaluation ===")
-# print(hallucination_eval[["question", "label", "explanation", "score"]])
-#
-# print("\n=== QA Correctness Evaluation ===")
-# print(qa_eval[["question", "label", "explanation", "score"]])
+# One span per query (reuse this for ALL evals so they correlate)
+span_map = {q: str(uuid.uuid4()) for q in queries_df["input"].unique()}
+
+# Build the doc-level eval frame from the retrieved docs
+retrieved_documents_df["context.span_id"] = retrieved_documents_df["context.trace_id"].map(span_map)
+queries_df["context.span_id"] = queries_df["input"].map(span_map)
+
+import nest_asyncio
+
+from phoenix.evals import (
+    HALLUCINATION_PROMPT_RAILS_MAP,
+    HALLUCINATION_PROMPT_TEMPLATE,
+    QA_PROMPT_RAILS_MAP,
+    QA_PROMPT_TEMPLATE,
+    OpenAIModel,
+    llm_classify,
+)
+
+nest_asyncio.apply()  # Speeds up OpenAI API calls
+
+# Check if the application has any indications of hallucinations
+hallucination_eval = llm_classify(
+    data=queries_df,
+    model=OpenAIModel(model="gpt-4o", temperature=0.0),
+    template=HALLUCINATION_PROMPT_TEMPLATE,
+    rails=list(HALLUCINATION_PROMPT_RAILS_MAP.values()),
+    provide_explanation=True,  # Makes the LLM explain its reasoning
+)
+hallucination_eval["context.span_id"] = queries_df["context.span_id"]
+hallucination_eval["score"] = (
+        hallucination_eval.label[~hallucination_eval.label.isna()] == "factual"
+).astype(int)
+hallucination_eval = hallucination_eval.set_index("context.span_id")
+hallucination_eval.index.name = "context.span_id"
+print(hallucination_eval.iloc[0])
+
+# Check if the application is answering questions correctly
+qa_correctness_eval = llm_classify(
+    data=queries_df,
+    model=OpenAIModel(model="gpt-4o", temperature=0.0),
+    template=QA_PROMPT_TEMPLATE,
+    rails=list(QA_PROMPT_RAILS_MAP.values()),
+    provide_explanation=True,  # Makes the LLM explain its reasoning
+    concurrency=4,
+)
+qa_correctness_eval["context.span_id"] = queries_df["context.span_id"]
+qa_correctness_eval["score"] = (
+        qa_correctness_eval.label[~qa_correctness_eval.label.isna()] == "correct"
+).astype(int)
+qa_correctness_eval = qa_correctness_eval.set_index("context.span_id")
+qa_correctness_eval.index.name = "context.span_id"
+print(qa_correctness_eval.iloc[0])
+
+from phoenix.trace import SpanEvaluations
+
+# Log to Phoenix
+client.log_evaluations(
+    SpanEvaluations(eval_name="Hallucination", dataframe=hallucination_eval),
+    SpanEvaluations(eval_name="QA Correctness", dataframe=qa_correctness_eval),
+)
+
+from phoenix.evals import (
+    RAG_RELEVANCY_PROMPT_RAILS_MAP,
+    RAG_RELEVANCY_PROMPT_TEMPLATE,
+    OpenAIModel,
+    llm_classify,
+)
+
+retrieved_documents_eval = llm_classify(
+    data=retrieved_documents_df,
+    model=OpenAIModel(model="gpt-4o", temperature=0.0),
+    template=RAG_RELEVANCY_PROMPT_TEMPLATE,
+    rails=list(RAG_RELEVANCY_PROMPT_RAILS_MAP.values()),
+    provide_explanation=True,
+)
+
+retrieved_documents_eval["score"] = (
+        retrieved_documents_eval.label[~retrieved_documents_eval.label.isna()] == "relevant"
+).astype(int)
+
+retrieved_documents_eval.head()
+
+from phoenix.trace import DocumentEvaluations
+
+client.log_evaluations(
+    DocumentEvaluations(eval_name="Relevance", dataframe=retrieved_documents_eval)
+)
