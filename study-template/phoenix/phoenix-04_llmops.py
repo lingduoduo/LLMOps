@@ -211,7 +211,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, Optional
 from phoenix.evals.models.openai import OpenAIModel as PhoenixOpenAIModel
 from openai import OpenAI, AzureOpenAI
->>>>>>> 8b4388cbe2b4aaf310d383eaf0e5f661b5f2c58b
+
 
 from phoenix.evals import (
     HALLUCINATION_PROMPT_RAILS_MAP,
@@ -222,7 +222,7 @@ from phoenix.evals import (
     llm_classify,
 )
 
-<<<<<<< HEAD
+
 nest_asyncio.apply()  # Speeds up OpenAI API calls
 
 # Check if the application has any indications of hallucinations
@@ -292,7 +292,10 @@ from phoenix.trace import DocumentEvaluations
 client.log_evaluations(
     DocumentEvaluations(eval_name="Relevance", dataframe=retrieved_documents_eval)
 )
-=======
+
+
+
+
 @dataclass(eq=False)
 class OpenAIModel(PhoenixOpenAIModel):
     http_client: Optional[Any] = field(default=None, repr=False, kw_only=True)
