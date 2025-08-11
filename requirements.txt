@@ -35,5 +35,5 @@ opentelemetry-sdk
 opentelemetry-exporter-otlp
 openinference-instrumentation-langchain==0.1.49
 openai-agents==0.2.4
-
+pydantic-evals==0.6.2
 
