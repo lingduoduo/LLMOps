@@ -67,7 +67,7 @@ from phoenix.session.evaluation import get_qa_with_reference, get_retrieved_docu
 import phoenix as px
 from phoenix.evals import (
     HallucinationEvaluator,
-    # OpenAIModel,
+    OpenAIModel,
     QAEvaluator,
     RelevanceEvaluator,
     run_evals,
@@ -78,9 +78,30 @@ client = px.Client(endpoint="http://127.0.0.1:6006", api_key=os.getenv("PHOENIX_
 retrieved_documents_df = get_retrieved_documents(client, project_name="llmops")
 queries_df = get_qa_with_reference(client, project_name="llmops")
 
-# eval_model = OpenAIModel(
-#     model="gpt-4.1",
-# )
+eval_model = OpenAIModel(
+    model="gpt-4.1",
+)
+
+# Usage in your eval pipeline
+hallucination_evaluator = HallucinationEvaluator(eval_model)
+qa_correctness_evaluator = QAEvaluator(eval_model)
+relevance_evaluator = RelevanceEvaluator(eval_model)
+hallucination_eval_df, qa_correctness_eval_df = run_evals(
+    dataframe=queries_df,
+    evaluators=[hallucination_evaluator, qa_correctness_evaluator],
+    provide_explanation=True,
+)
+relevance_eval_df = run_evals(
+    dataframe=retrieved_documents_df,
+    evaluators=[relevance_evaluator],
+    provide_explanation=True,
+)[0]
+
+client.log_evaluations(
+    SpanEvaluations(eval_name="Hallucination", dataframe=hallucination_eval_df),
+    SpanEvaluations(eval_name="QA Correctness", dataframe=qa_correctness_eval_df),
+    DocumentEvaluations(eval_name="Relevance", dataframe=relevance_eval_df),
+)
 
 # eval_model = OpenAIModel(
 #     model="gpt-4o",
@@ -590,25 +611,25 @@ def _get_token_param_str(is_azure: bool, model: str) -> str:
         return "max_tokens"
     return "max_completion_tokens"
 
-
-# Usage in your eval pipeline:
-eval_model = OpenAIWrapper(model_name="gpt-4.1", initial_rate_limit=10)
-hallucination_evaluator = HallucinationEvaluator(eval_model)
-qa_correctness_evaluator = QAEvaluator(eval_model)
-relevance_evaluator = RelevanceEvaluator(eval_model)
-hallucination_eval_df, qa_correctness_eval_df = run_evals(
-    dataframe=queries_df,
-    evaluators=[hallucination_evaluator, qa_correctness_evaluator],
-    provide_explanation=True,
-)
-relevance_eval_df = run_evals(
-    dataframe=retrieved_documents_df,
-    evaluators=[relevance_evaluator],
-    provide_explanation=True,
-)[0]
-
-client.log_evaluations(
-    SpanEvaluations(eval_name="Hallucination", dataframe=hallucination_eval_df),
-    SpanEvaluations(eval_name="QA Correctness", dataframe=qa_correctness_eval_df),
-    DocumentEvaluations(eval_name="Relevance", dataframe=relevance_eval_df),
-)
+#
+# # Usage in your eval pipeline:
+# eval_model = OpenAIWrapper(model_name="gpt-4.1", initial_rate_limit=10)
+# hallucination_evaluator = HallucinationEvaluator(eval_model)
+# qa_correctness_evaluator = QAEvaluator(eval_model)
+# relevance_evaluator = RelevanceEvaluator(eval_model)
+# hallucination_eval_df, qa_correctness_eval_df = run_evals(
+#     dataframe=queries_df,
+#     evaluators=[hallucination_evaluator, qa_correctness_evaluator],
+#     provide_explanation=True,
+# )
+# relevance_eval_df = run_evals(
+#     dataframe=retrieved_documents_df,
+#     evaluators=[relevance_evaluator],
+#     provide_explanation=True,
+# )[0]
+#
+# client.log_evaluations(
+#     SpanEvaluations(eval_name="Hallucination", dataframe=hallucination_eval_df),
+#     SpanEvaluations(eval_name="QA Correctness", dataframe=qa_correctness_eval_df),
+#     DocumentEvaluations(eval_name="Relevance", dataframe=relevance_eval_df),
+# )
