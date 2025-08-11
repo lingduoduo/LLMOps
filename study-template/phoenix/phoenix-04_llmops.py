@@ -75,10 +75,10 @@ import phoenix as px
 from phoenix.session.evaluation import get_qa_with_reference, get_retrieved_documents
 
 client = px.Client(endpoint="http://127.0.0.1:6006", api_key=os.getenv("PHOENIX_API_KEY"))
+
 retrieved_documents_df = get_retrieved_documents(client, project_name="llmops")
 queries_df = get_qa_with_reference(client, project_name="llmops")
 
-<<<<<<< HEAD
 retrieved_documents_df.to_csv("retrieved_documents_df.csv", index=False)
 queries_df.to_csv("queries_df.csv", index=False)
 
@@ -96,7 +96,6 @@ retrieved_documents_df["context.span_id"] = retrieved_documents_df["context.trac
 queries_df["context.span_id"] = queries_df["input"].map(span_map)
 
 import nest_asyncio
-=======
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Minimal LLM Ops: tracing, evaluation, and analysis with Phoenix + LangChain
