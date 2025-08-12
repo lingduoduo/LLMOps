@@ -1,0 +1,597 @@
+input,output,reference
+How do I use the SDK to upload a ranking model?,I don't have the specific information on how to use the SDK to upload a ranking model. I recommend referring to the documentation or tutorials provided by the SDK you are using for uploading ranking models.,"
+**Check out our** **How to Monitor Ranking Model's** **blog and follow along with our various** **Colab** **examples here.**&#x20;
+
+
+
+
+**Use the 'arize-demo-hotel-ranking' model, available in all free accounts, to follow along.**&#x20;
+
+
+
+
+Ranking models are used by search engines to display query results ranked in the order of the highest relevance. These predictions seek to maximize user actions that are then used to evaluate model performance.&#x20;
+
+The complexity within a ranking model makes failures challenging to pinpoint as a model’s dimensions expand per recommendation. Notable challenges within ranking models include upstream data quality issues, poor-performing segments, the cold start problem, and more. &#x20;
+
+
+
+
+
+
+If you upload multiple of the same ranks for the same prediction group id, you may run into problems visualizing your data within the platform. Revise your data to represent unique ranks for a given prediction group and re-upload your data. &#x20;
+
+"
+What drift metrics are supported in Arize?,"Arize supports drift metrics such as Population Stability Index, KL Divergence, and Wasserstein Distance for measuring distribution drift between the model's production values and a baseline dataset.","
+Arize calculates drift metrics such as Population Stability Index, KL Divergence, and Wasserstein Distance. Arize computes drift by measuring distribution changes between the model’s production values and a baseline (reference dataset). Users can configure a baseline to be any time window of a:
+
+1. Pre-production dataset (training, test, validation) or
+2. Fixed or moving time period from production (e.g. last 30 days, last 60 days).&#x20;
+
+Baselines are saved in Arize so that users can compare several versions and/or environments against each other across moving or fixed time windows. For more details on baselines, visit here.
+
+
+
+
+Drift monitors measure distribution drift, which is the difference between two statistical distributions.&#x20;
+
+Arize offers various distributional drift metrics to choose from when setting up a monitor. Each metric is tailored to a specific use case; refer to this guide to help choose the appropriate metric for various ML use cases.
+
+
+
+
+Arize supports feature quality metrics including feature drift, data quality (ex: cardinality, percent empty, type mismatch, out of range, etc.) and feature importance metrics. Additionally, users can compute performance metrics for their model filtered by feature/value combinations (slices). &#x20;
+
+
+
+
+Arize supports a comprehensive list of model performance metrics for both numeric and categorical model types. These metrics are available on dashboards as well as monitors.&#x20;
+
+In addition to the out-of-the-gate metrics listed below, Arize also supports model data metrics, custom evaluation metrics, and user defined business impact metrics. Learn more about statistical widgets here and user-defined business impact formulas here.
+
+AccuracyMAEPrecisionSensitivityAUCMAPER-SquaredSpecificityF1MSERecallTP/TN/FP/FNLog LossPR-AUCRMSECustom Metrics
+
+In addition to performance metrics, we also support data metrics that allow you to count, average, view percentiles, or calculate percent/count for all features, actuals, and/or predictions. All metrics can be calculated in aggregate, as well as on particular cohorts using applied filters.
+
+"
+Does Arize support batch models?,I don't have enough information to provide an answer to that question.,"
+Arize supports many model types - check out our various Model Types to learn more.&#x20;
+
+
+
+
+Arize natively supports binary classification, multi-class classification, regression, ranking, NLP, and CV model types. Your model type informs the **data ingestion format** and **the performance metrics** that can be utilized in the platform.&#x20;
+
+
+
+
+Arize integrates with your ML stack, no matter where your data is hosted
+
+
+
+
+
+
+Arize is an open platform that works with your machine learning infrastructure, and can be deployed as SaaS or on-premise.
+
+!Open Platform designed to work across platforms and model frameworks
+
+"
+Does Arize support training data?,"Arize does not support training data. It is a machine learning observability platform for monitoring, troubleshooting, and explaining models, rather than a platform for training models.","
+Arize natively supports binary classification, multi-class classification, regression, ranking, NLP, and CV model types. Your model type informs the **data ingestion format** and **the performance metrics** that can be utilized in the platform.&#x20;
+
+
+
+
+Arize natively supports tabular/structured data types (strings, floats, booleans, etc), as well as embedding support for NLP, Image, and other unstructured data types.
+
+
+
+
+Arize is the machine learning observability platform for ML practitioners to monitor, troubleshoot, and explain models. Data Science and ML Engineering teams of all sizes (from individuals to enterprises) use Arize to:
+
+* Monitor real-time model performance, with support for delayed ground truth/feedback
+* Root cause model failures/performance degradation using tracing and explainability
+* Conduct multi-model performance comparisons
+* Surface drift, data quality, and model fairness/bias metrics&#x20;
+
+
+
+
+Arize integrates with your ML stack, no matter where your data is hosted
+
+
+
+"
+How do I configure a threshold if my data has seasonality trends?,"If your data has seasonality trends, you can configure a threshold by utilizing the automatic threshold feature provided by Arize. The automatic threshold is generated based on statistical analysis of your data over a period of at least 14 days. This method takes into account the average (mean) and standard deviation of the data points collected each day. By allowing Arize to set the threshold dynamically based on your data, you can adapt to the seasonality trends present in your dataset. Additionally, you can adjust the sensitivity of the auto threshold by modifying the standard deviation number in the 'Monitor Settings' card. This way, you can ensure that the threshold is responsive to the specific patterns and fluctuations in your seasonal data.","
+Automatic thresholds set a dynamic threshold value for each data point. Arize generates an auto threshold when there are at least 14 days of production data to determine a trend. You can edit your auto threshold sensitivity by changing the standard deviation number in the 'Monitor Settings' card.&#x20;
+
+Learn more here about how an auto threshold value is calculated.&#x20;
+
+Auto Threshold
+
+Toggle automatic thresholds on or off from the “Edit monitor” configuration.
+
+
+
+
+Autothresholds are calculated based on a statistical analysis of data over 14 days. Each day, a data point is collected, and after 14 days, the average (mean) and standard deviation of these data points are computed. The thresholds is then set by adding or subtracting the standard deviation from the average.
+
+
+
+
+Your baseline can help indicate why your model has drifted. &#x20;
+
+To detect drift over time, set your baseline using **training data** to identify how your model changes between your features, predictions, and actuals. To detect short-term drift, set your baseline using **historical production data** (i.e. 2 weeks).
+
+
+
+
+This section allows to set a specific threshold or allow Arize to automatically adjust the threshold to your data. More details here.
+
+"
+How are clusters in the UMAP calculated? When are the clusters refreshed?,I don't know the exact details of how clusters are calculated in UMAP within the Arize platform or when they are refreshed. It would be best to refer to the specific documentation provided by Arize or reach out to their support team for more detailed information on this topic.,"
+1.  **Select your data and Generate UMAP**
+
+    * Select a point on the drift visualization at the top of the page and generate UMAP to visualize the point in time selected
+
+    
+
+
+2.  **Investigate your worst drifted clusters**
+
+    * Clusters are groups of related points in the point cloud. The closer points or clusters are to each other, the more similar they are. Clusters allow you to easily visualize data that differs from your baseline but also allows you to visualize the global and local structure of your data.
+
+    You can select a specific cluster to further investigate and view the data associated with the cluster
+3.  **Investigate the data points that belong in that cluster**&#x20;
+
+
+
+    When you select a cluster, Arize surfaces the data associated (shown on the right) and you can further investigate any data point by clicking ""View Details""
+4.  **Colorize/Filter your data**&#x20;
+
+    UMAP enables users to identify patterns or the structure in the data to explain where model can be improved by applying colorizations and filters
+
+
+
+
+The UMAP visualization requires each datapoint's prediction ID to be unique. If there are are multiple predictions sent with the same prediction ID, the UMAP visualization cannot fetch all of the columns (features, tags, etc) of that datapoint. Since certain fields of this datapoint cannot be fetched, some color by options will be restricted.&#x20;
+
+
+
+
+Embedding Projectors are a great tool in visualizing and interpreting embeddings. In order to do so, we have to apply an algorithm to reduce the dimensionality of the embeddings to 2D/3D. UMAP (Uniform Manifold Approximation and Projection) is a dimensionality reduction technique that belongs to the neighbor graph category. Arize uses it to create a lower dimensional representation (2D or 3D) of your dataset, represented by embedding vectors.&#x20;
+
+Learn more about UMAP in comparison to other neighbor graph algorithms here.&#x20;
+
+
+
+
+After choosing your desired cluster metric (e.g. euclidean distance, accuracy, custom metric, etc.), Arize automatically surfaces the clusters you should focus on for model improvement / troubleshooting so you can quickly find the root cause.&#x20;
+
+Arize automatically surfaces clusters of bad responses to focus on improvement
+
+You can select the metric you want to use, and how you want the clusters to be sorted.&#x20;
+
+Select how to sort the clusters by evaluation score and dataset
+
+"
+How does Arize calculate AUC?,I don't have information on how Arize calculates AUC.,"
+Arize calculates drift metrics such as Population Stability Index, KL Divergence, and Wasserstein Distance. Arize computes drift by measuring distribution changes between the model’s production values and a baseline (reference dataset). Users can configure a baseline to be any time window of a:
+
+1. Pre-production dataset (training, test, validation) or
+2. Fixed or moving time period from production (e.g. last 30 days, last 60 days).&#x20;
+
+Baselines are saved in Arize so that users can compare several versions and/or environments against each other across moving or fixed time windows. For more details on baselines, visit here.
+
+
+
+
+Arize can surface outlier/anomalous data through:
+
+
+
+
+Arize drift detection can show the % of values outside of the baseline range. Arize uses the quantiles of the data to calculate the bins of the distribution. If the baseline range has a larger range than the production/serving environment, the user can see the % of volume where the baseline distribution was outside of the production/serving distribution. If the production/serving distribution was outside the range of the baseline distribution, similarly Arize surfaces the % of volume for values outside the baseline range.
+
+
+
+
+Arize calculates the bins within the drift tab using quantiles and fixed bins from the baseline distribution.
+
+The range between two quantile values in the baseline distribution are utilized to calculate a fixed width for binning. That fixed width value will be used to calculate a finite set of bins (currently 8) of a fixed width from the Median value, in both directions (4 in each direction). Lastly, it adds bins to the ""bookends"", one from min value to lowest bin's edge and another from largest bin's edge to maximum value amongst both distributions.
+
+This strategy optimizes for reasonable sized bins by calculating a fixed width based on quantile values.
+
+"
+Can I send truth labels to Arize separtely? ,"Yes, you can send truth labels separately to Arize.","
+Arize integrates with your ML stack, no matter where your data is hosted
+
+
+
+
+
+
+Arize can surface outlier/anomalous data through:
+
+
+
+
+Arize supports sending in historical data with prediction timestamps up to 2 years before the current timestamp. The data sent to Arize will be retained and visible in Arize for up to 2 years. Reach out to support@arize.com to extend this window.
+
+
+
+
+Arize supports full role based access control. Using organizations and spaces, users can be restricted to only have access to data they are permitted. Your Arize account can consist of multiple organizations and spaces.&#x20;
+
+"
+How do I send embeddings to Arize?,"To send embeddings to Arize, you can either bring your own embeddings or have Arize generate them for you. If you choose to have Arize generate the embeddings, you can use the Python SDK provided. Arize will use large, pre-trained models to extract information from your inputs and encode it into embedding vectors. These embeddings will be returned to you to include in your pandas DataFrame, which can then be sent to Arize. The process is seamless with Auto-Embeddings, where you just need to pass your input and the embedding will be generated for you.","
+Check out our tutorials on how to send embeddings to Arize for different use cases.&#x20;
+
+Getting Started: Quick GuidesCategoryCodeMulti-Class Sentiment Classification NLPColab LinkNamed Entity RecognitionNLPColab LinkImage Classification CVColab Link
+
+Learn more about embeddings and troubleshooting with Arize:
+
+* Blog: Monitor Unstructured Data with Arize
+* Blog: Getting Started With Embeddings is Easier Than You Think
+* Talk: Embedding Usage and Visualization In Modern ML Systems
+
+{% hint style=""info"" %}
+Questions? Email us at support@arize.com or Slack us in the #arize-support channel
+{% endhint %}
+
+
+
+
+Arize supports 2 approaches - bring your own embeddings or have Arize generate them for you.&#x20;
+
+Bring/Generate Your Own Embeddinghow-to-generate-your-own-embedding.mdLet Arize Generate Your Embeddingslet-arize-generate-your-embeddings
+
+
+
+
+There are many ways to extract embeddings depending on your use-case and your model. You can either generate your own embeddings or let Arize generate them for you.&#x20;
+
+
+
+
+Generating embeddings is likely another problem to solve, on top of ensuring your model is performing properly. With our Python SDK, you can offload that task to Arize and we will generate the embeddings for you. We use large, pre-trained models that will capture information from your inputs and encode it into embedding vectors.&#x20;
+
+We extract the embeddings in the appropriate way depending on your use case, and we return it to you to include in your pandas DataFrame, which you then send to Arize.
+
+Auto-Embeddings works end-to-end, you don't have to worry about formatting your inputs for the correct model. By simply passing your input, an embedding will come out as a result. We take care of everything in between.
+
+"
+Can I copy a dashboard,"Yes, you can copy a dashboard by creating a duplicate of it. This can be useful if you want to make changes to the duplicated dashboard without affecting the original one.","
+Templates are designed as starting points for dashboard and model analysis. Once a dashboard is created from a template, it can be edited and customized as desired.
+
+!
+
+
+
+
+To add a widget, simply:
+
+* Click the Edit Dashboard icon in the top right corner.
+* Select or drag and drop the widget onto an area of the dashboard.
+* You can easily change the size of each widget once it's on the dashboard, and you can drag and drop to new areas of the dashboard.&#x20;
+
+!
+
+
+
+
+We get it - ML observability is a lot of fun! Keep an eye on key model health metrics with dashboards for a single pane of glass view of your model. Create a custom dashboard, use a pre-built template, and simply copy and paste the dashboard URL to share with your team!&#x20;
+
+Example dashbaord with key performance metrics
+
+
+
+
+Pre-configured dashboard templates enable teams to quickly view the health of their models, while  customized dashboards allow for ad hoc analysis. Using dashboard visualizations of statistical distributions and performance heatmaps help focus teams on troubleshooting efforts.
+
+"
+How do I use the SDK to upload a ranking model?,"I don't have the specific information on how to use the SDK to upload a ranking model. I recommend checking the documentation or resources provided by the platform you are using for the SDK. If you have any other questions or need further assistance, feel free to ask!","
+**Check out our** **How to Monitor Ranking Model's** **blog and follow along with our various** **Colab** **examples here.**&#x20;
+
+
+
+
+**Use the 'arize-demo-hotel-ranking' model, available in all free accounts, to follow along.**&#x20;
+
+
+
+
+Ranking models are used by search engines to display query results ranked in the order of the highest relevance. These predictions seek to maximize user actions that are then used to evaluate model performance.&#x20;
+
+The complexity within a ranking model makes failures challenging to pinpoint as a model’s dimensions expand per recommendation. Notable challenges within ranking models include upstream data quality issues, poor-performing segments, the cold start problem, and more. &#x20;
+
+
+
+
+
+
+If you upload multiple of the same ranks for the same prediction group id, you may run into problems visualizing your data within the platform. Revise your data to represent unique ranks for a given prediction group and re-upload your data. &#x20;
+
+"
+What drift metrics are supported in Arize?,"Arize supports drift metrics such as Population Stability Index, KL Divergence, and Wasserstein Distance for measuring distribution drift between the model's production values and a baseline dataset.","
+Arize calculates drift metrics such as Population Stability Index, KL Divergence, and Wasserstein Distance. Arize computes drift by measuring distribution changes between the model’s production values and a baseline (reference dataset). Users can configure a baseline to be any time window of a:
+
+1. Pre-production dataset (training, test, validation) or
+2. Fixed or moving time period from production (e.g. last 30 days, last 60 days).&#x20;
+
+Baselines are saved in Arize so that users can compare several versions and/or environments against each other across moving or fixed time windows. For more details on baselines, visit here.
+
+
+
+
+Drift monitors measure distribution drift, which is the difference between two statistical distributions.&#x20;
+
+Arize offers various distributional drift metrics to choose from when setting up a monitor. Each metric is tailored to a specific use case; refer to this guide to help choose the appropriate metric for various ML use cases.
+
+
+
+
+Arize supports feature quality metrics including feature drift, data quality (ex: cardinality, percent empty, type mismatch, out of range, etc.) and feature importance metrics. Additionally, users can compute performance metrics for their model filtered by feature/value combinations (slices). &#x20;
+
+
+
+
+Arize supports a comprehensive list of model performance metrics for both numeric and categorical model types. These metrics are available on dashboards as well as monitors.&#x20;
+
+In addition to the out-of-the-gate metrics listed below, Arize also supports model data metrics, custom evaluation metrics, and user defined business impact metrics. Learn more about statistical widgets here and user-defined business impact formulas here.
+
+AccuracyMAEPrecisionSensitivityAUCMAPER-SquaredSpecificityF1MSERecallTP/TN/FP/FNLog LossPR-AUCRMSECustom Metrics
+
+In addition to performance metrics, we also support data metrics that allow you to count, average, view percentiles, or calculate percent/count for all features, actuals, and/or predictions. All metrics can be calculated in aggregate, as well as on particular cohorts using applied filters.
+
+"
+Does Arize support batch models?,"Yes, Arize supports batch models.","
+Arize supports many model types - check out our various Model Types to learn more.&#x20;
+
+
+
+
+Arize natively supports binary classification, multi-class classification, regression, ranking, NLP, and CV model types. Your model type informs the **data ingestion format** and **the performance metrics** that can be utilized in the platform.&#x20;
+
+
+
+
+Arize integrates with your ML stack, no matter where your data is hosted
+
+
+
+
+
+
+Arize is an open platform that works with your machine learning infrastructure, and can be deployed as SaaS or on-premise.
+
+!Open Platform designed to work across platforms and model frameworks
+
+"
+Does Arize support training data?,"Arize does not support training data. It is a platform for monitoring, troubleshooting, and explaining models during deployment, rather than during the training phase.","
+Arize natively supports binary classification, multi-class classification, regression, ranking, NLP, and CV model types. Your model type informs the **data ingestion format** and **the performance metrics** that can be utilized in the platform.&#x20;
+
+
+
+
+Arize natively supports tabular/structured data types (strings, floats, booleans, etc), as well as embedding support for NLP, Image, and other unstructured data types.
+
+
+
+
+Arize is the machine learning observability platform for ML practitioners to monitor, troubleshoot, and explain models. Data Science and ML Engineering teams of all sizes (from individuals to enterprises) use Arize to:
+
+* Monitor real-time model performance, with support for delayed ground truth/feedback
+* Root cause model failures/performance degradation using tracing and explainability
+* Conduct multi-model performance comparisons
+* Surface drift, data quality, and model fairness/bias metrics&#x20;
+
+
+
+
+Arize integrates with your ML stack, no matter where your data is hosted
+
+
+
+"
+How do I configure a threshold if my data has seasonality trends?,"If your data has seasonality trends, you can configure a threshold by setting an automatic threshold in Arize. The automatic threshold takes into account the statistical analysis of data over a period of 14 days to determine a trend. By adjusting the standard deviation number in the 'Monitor Settings' card, you can edit the auto threshold sensitivity to better capture the seasonality trends in your data. Additionally, you can set your baseline using historical production data to detect short-term drift and monitor how your model changes over time.","
+Automatic thresholds set a dynamic threshold value for each data point. Arize generates an auto threshold when there are at least 14 days of production data to determine a trend. You can edit your auto threshold sensitivity by changing the standard deviation number in the 'Monitor Settings' card.&#x20;
+
+Learn more here about how an auto threshold value is calculated.&#x20;
+
+Auto Threshold
+
+Toggle automatic thresholds on or off from the “Edit monitor” configuration.
+
+
+
+
+Autothresholds are calculated based on a statistical analysis of data over 14 days. Each day, a data point is collected, and after 14 days, the average (mean) and standard deviation of these data points are computed. The thresholds is then set by adding or subtracting the standard deviation from the average.
+
+
+
+
+Your baseline can help indicate why your model has drifted. &#x20;
+
+To detect drift over time, set your baseline using **training data** to identify how your model changes between your features, predictions, and actuals. To detect short-term drift, set your baseline using **historical production data** (i.e. 2 weeks).
+
+
+
+
+This section allows to set a specific threshold or allow Arize to automatically adjust the threshold to your data. More details here.
+
+"
+How are clusters in the UMAP calculated? When are the clusters refreshed?,"Clusters in UMAP are calculated based on the similarity of data points in the lower-dimensional space created by the UMAP algorithm. The algorithm groups together data points that are close to each other in this reduced space, forming clusters based on their similarity.
+
+The clusters are typically refreshed or updated when you interact with the visualization, such as selecting a specific cluster to investigate further, changing the colorization or filtering options, or selecting a different point in time on the drift visualization. This interaction triggers a recalculation of the clusters to reflect any changes or selections made by the user.","
+1.  **Select your data and Generate UMAP**
+
+    * Select a point on the drift visualization at the top of the page and generate UMAP to visualize the point in time selected
+
+    
+
+
+2.  **Investigate your worst drifted clusters**
+
+    * Clusters are groups of related points in the point cloud. The closer points or clusters are to each other, the more similar they are. Clusters allow you to easily visualize data that differs from your baseline but also allows you to visualize the global and local structure of your data.
+
+    You can select a specific cluster to further investigate and view the data associated with the cluster
+3.  **Investigate the data points that belong in that cluster**&#x20;
+
+
+
+    When you select a cluster, Arize surfaces the data associated (shown on the right) and you can further investigate any data point by clicking ""View Details""
+4.  **Colorize/Filter your data**&#x20;
+
+    UMAP enables users to identify patterns or the structure in the data to explain where model can be improved by applying colorizations and filters
+
+
+
+
+The UMAP visualization requires each datapoint's prediction ID to be unique. If there are are multiple predictions sent with the same prediction ID, the UMAP visualization cannot fetch all of the columns (features, tags, etc) of that datapoint. Since certain fields of this datapoint cannot be fetched, some color by options will be restricted.&#x20;
+
+
+
+
+Embedding Projectors are a great tool in visualizing and interpreting embeddings. In order to do so, we have to apply an algorithm to reduce the dimensionality of the embeddings to 2D/3D. UMAP (Uniform Manifold Approximation and Projection) is a dimensionality reduction technique that belongs to the neighbor graph category. Arize uses it to create a lower dimensional representation (2D or 3D) of your dataset, represented by embedding vectors.&#x20;
+
+Learn more about UMAP in comparison to other neighbor graph algorithms here.&#x20;
+
+
+
+
+After choosing your desired cluster metric (e.g. euclidean distance, accuracy, custom metric, etc.), Arize automatically surfaces the clusters you should focus on for model improvement / troubleshooting so you can quickly find the root cause.&#x20;
+
+Arize automatically surfaces clusters of bad responses to focus on improvement
+
+You can select the metric you want to use, and how you want the clusters to be sorted.&#x20;
+
+Select how to sort the clusters by evaluation score and dataset
+
+"
+How does Arize calculate AUC?,I don't have information on how Arize calculates AUC.,"
+Arize calculates drift metrics such as Population Stability Index, KL Divergence, and Wasserstein Distance. Arize computes drift by measuring distribution changes between the model’s production values and a baseline (reference dataset). Users can configure a baseline to be any time window of a:
+
+1. Pre-production dataset (training, test, validation) or
+2. Fixed or moving time period from production (e.g. last 30 days, last 60 days).&#x20;
+
+Baselines are saved in Arize so that users can compare several versions and/or environments against each other across moving or fixed time windows. For more details on baselines, visit here.
+
+
+
+
+Arize can surface outlier/anomalous data through:
+
+
+
+
+Arize drift detection can show the % of values outside of the baseline range. Arize uses the quantiles of the data to calculate the bins of the distribution. If the baseline range has a larger range than the production/serving environment, the user can see the % of volume where the baseline distribution was outside of the production/serving distribution. If the production/serving distribution was outside the range of the baseline distribution, similarly Arize surfaces the % of volume for values outside the baseline range.
+
+
+
+
+Arize calculates the bins within the drift tab using quantiles and fixed bins from the baseline distribution.
+
+The range between two quantile values in the baseline distribution are utilized to calculate a fixed width for binning. That fixed width value will be used to calculate a finite set of bins (currently 8) of a fixed width from the Median value, in both directions (4 in each direction). Lastly, it adds bins to the ""bookends"", one from min value to lowest bin's edge and another from largest bin's edge to maximum value amongst both distributions.
+
+This strategy optimizes for reasonable sized bins by calculating a fixed width based on quantile values.
+
+"
+Can I send truth labels to Arize separtely? ,"Yes, you can send truth labels to Arize separately.","
+Arize integrates with your ML stack, no matter where your data is hosted
+
+
+
+
+
+
+Arize can surface outlier/anomalous data through:
+
+
+
+
+Arize supports sending in historical data with prediction timestamps up to 2 years before the current timestamp. The data sent to Arize will be retained and visible in Arize for up to 2 years. Reach out to support@arize.com to extend this window.
+
+
+
+
+Arize supports full role based access control. Using organizations and spaces, users can be restricted to only have access to data they are permitted. Your Arize account can consist of multiple organizations and spaces.&#x20;
+
+"
+How do I send embeddings to Arize?,"You can send embeddings to Arize by either bringing your own embeddings or letting Arize generate them for you. If you choose to let Arize generate the embeddings for you, you can use the Python SDK to offload the task to Arize. Arize will use large, pre-trained models to extract embeddings from your inputs and encode them into embedding vectors. These embedding vectors can then be included in your pandas DataFrame, which you can send to Arize. This process is handled seamlessly by Arize's Auto-Embeddings feature, so you don't have to worry about formatting your inputs for the correct model.","
+Check out our tutorials on how to send embeddings to Arize for different use cases.&#x20;
+
+Getting Started: Quick GuidesCategoryCodeMulti-Class Sentiment Classification NLPColab LinkNamed Entity RecognitionNLPColab LinkImage Classification CVColab Link
+
+Learn more about embeddings and troubleshooting with Arize:
+
+* Blog: Monitor Unstructured Data with Arize
+* Blog: Getting Started With Embeddings is Easier Than You Think
+* Talk: Embedding Usage and Visualization In Modern ML Systems
+
+{% hint style=""info"" %}
+Questions? Email us at support@arize.com or Slack us in the #arize-support channel
+{% endhint %}
+
+
+
+
+Arize supports 2 approaches - bring your own embeddings or have Arize generate them for you.&#x20;
+
+Bring/Generate Your Own Embeddinghow-to-generate-your-own-embedding.mdLet Arize Generate Your Embeddingslet-arize-generate-your-embeddings
+
+
+
+
+There are many ways to extract embeddings depending on your use-case and your model. You can either generate your own embeddings or let Arize generate them for you.&#x20;
+
+
+
+
+Generating embeddings is likely another problem to solve, on top of ensuring your model is performing properly. With our Python SDK, you can offload that task to Arize and we will generate the embeddings for you. We use large, pre-trained models that will capture information from your inputs and encode it into embedding vectors.&#x20;
+
+We extract the embeddings in the appropriate way depending on your use case, and we return it to you to include in your pandas DataFrame, which you then send to Arize.
+
+Auto-Embeddings works end-to-end, you don't have to worry about formatting your inputs for the correct model. By simply passing your input, an embedding will come out as a result. We take care of everything in between.
+
+"
+Can I copy a dashboard,"Yes, you can copy a dashboard by creating a duplicate of it. This can be useful if you want to make changes to the copy without affecting the original dashboard. ","
+Templates are designed as starting points for dashboard and model analysis. Once a dashboard is created from a template, it can be edited and customized as desired.
+
+!
+
+
+
+
+To add a widget, simply:
+
+* Click the Edit Dashboard icon in the top right corner.
+* Select or drag and drop the widget onto an area of the dashboard.
+* You can easily change the size of each widget once it's on the dashboard, and you can drag and drop to new areas of the dashboard.&#x20;
+
+!
+
+
+
+
+We get it - ML observability is a lot of fun! Keep an eye on key model health metrics with dashboards for a single pane of glass view of your model. Create a custom dashboard, use a pre-built template, and simply copy and paste the dashboard URL to share with your team!&#x20;
+
+Example dashbaord with key performance metrics
+
+
+
+
+Pre-configured dashboard templates enable teams to quickly view the health of their models, while  customized dashboards allow for ad hoc analysis. Using dashboard visualizations of statistical distributions and performance heatmaps help focus teams on troubleshooting efforts.
+
+"
+How can I query for a monitor's status using GraphQL?,"{""result"": ""You can query for a monitor's status using the GraphQL API at the endpoint `/v1/graphql/monitor`."", ""source_documents"": [""page_content='You can query monitor status using the GraphQL API at /v1/graphql/monitor'"", ""page_content='Delete a model using the `deleteModel` mutation in the GraphQL API'"", ""page_content='Log a prediction using the Python SDK with `log_prediction(model_id=..., features=...)`'""]}","You can query monitor status using the GraphQL API at /v1/graphql/monitor
+
+Delete a model using the `deleteModel` mutation in the GraphQL API
+
+Log a prediction using the Python SDK with `log_prediction(model_id=..., features=...)`"
+How do I delete a model?,"{""result"": ""You can delete a model using the `deleteModel` mutation in the GraphQL API."", ""source_documents"": [""page_content='Delete a model using the `deleteModel` mutation in the GraphQL API'"", ""page_content='Log a prediction using the Python SDK with `log_prediction(model_id=..., features=...)`'"", ""page_content='You can query monitor status using the GraphQL API at /v1/graphql/monitor'""]}","Delete a model using the `deleteModel` mutation in the GraphQL API
+
+Log a prediction using the Python SDK with `log_prediction(model_id=..., features=...)`
+
+You can query monitor status using the GraphQL API at /v1/graphql/monitor"
