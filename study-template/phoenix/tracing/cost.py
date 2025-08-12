@@ -140,16 +140,61 @@ def traced_llm_call(user_prompt: str, user_payload_json: str, tracer: trace_api.
         span.set_status(Status(StatusCode.OK))
         return json.dumps(user_payload_dict)
 
-# ------------------------------------------------------------------------------
-# (Optional) Simulated session function from your sample — left here but DISABLED
-# It referenced undefined variables (prompt, user_id), so keep it as a template.
-# ------------------------------------------------------------------------------
-# def run_llm_calls(row_json: str, customer_intent_prompt: str, tracer: trace_api.Tracer) -> dict:
-#     start = time.time()
-#     with tracer.start_as_current_span("User Session") as span:
-#         ...
-#     latency_ms = (time.time() - start) * 1000.0
-#     return {"output": completion, "latency_ms": latency_ms, "cost_usd": cost_usd}
+def run_llm_calls(row_json: str, user_prompt: str, tracer: trace_api.Tracer) -> dict:
+    start = time.time()
+    with tracer.start_as_current_span("User Session") as span:
+        # ---- Inputs ----
+        span.set_attribute(SpanAttributes.INPUT_VALUE, user_prompt)
+        span.set_attribute(SpanAttributes.INPUT_MIME_TYPE, "text/plain")
+
+        # ---- Model/user metadata ----
+        span.set_attribute(SpanAttributes.LLM_PROVIDER, provider)
+        span.set_attribute(SpanAttributes.LLM_MODEL_NAME, model)
+        span.set_attribute("user.id", user)
+
+        # ---- Extract user input from payload ----
+        try:
+            row = json.loads(row_json) if isinstance(row_json, str) else (row_json or {})
+        except Exception:
+            row = {}
+        user_input = row.get("User Input", "")
+
+        # ---- Real LLM call ----
+        response_dict = call_openai_api(user_prompt, user_input)
+
+        # ---- Build completion string ----
+        completion = json.dumps({**row, **response_dict})
+
+        # ---- Token usage ----
+        prompt_tokens = int(row.get("prompt_tokens", 0))
+        completion_tokens = int(response_dict.get("completion_tokens", 0))
+        total_tokens = prompt_tokens + completion_tokens
+
+        # ---- Output + token usage ----
+        span.set_attribute(SpanAttributes.OUTPUT_VALUE, completion)
+        span.set_attribute(SpanAttributes.OUTPUT_MIME_TYPE, "application/json")
+        span.set_attribute("llm.prompt_tokens", prompt_tokens)
+        span.set_attribute("llm.completion_tokens", completion_tokens)
+        span.set_attribute("llm.total_tokens", total_tokens)
+
+        # ---- Cost ----
+        cost_usd = compute_cost(provider, model, prompt_tokens, completion_tokens)
+        span.set_attribute("llm.cost_usd", cost_usd)
+
+        # ---- Custom metrics ----
+        span.set_attribute("metric.pipeline", "faq-bot")
+        span.set_attribute("metric.environment", "dev")
+
+        # ---- Child span ----
+        with tracer.start_as_current_span("rerank") as child:
+            child.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, "TOOL")
+            child.set_attribute("rerank.k", 5)
+
+        span.set_status(Status(StatusCode.OK))
+
+    latency_ms = (time.time() - start) * 1000.0
+    return {"output": completion, "latency_ms": latency_ms, "cost_usd": cost_usd}
+
 
 # ------------------------------------------------------------------------------
 # Phoenix reporting
