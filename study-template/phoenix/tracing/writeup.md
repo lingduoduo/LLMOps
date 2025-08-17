@@ -1,62 +1,52 @@
-Observing Applications Using Traces for LLM Systems
-Introduction
+# Observing Applications Using Traces for LLM Systems
 
-Large Language Models (LLMs) are increasingly embedded into complex applications, interacting with retrieval engines, external APIs, and orchestration agents. Understanding the behavior of such systems requires visibility into their internal operations without direct inspection of every component. LLM Traces and Observability provide a solution: they allow developers to ask questions like “Why is this happening?” or “What sequence of operations led here?” by collecting telemetry data from execution steps.
+## Introduction
 
-Purpose of LLM Traces
+Modern LLM-powered applications orchestrate a complex interplay of model calls, data retrieval, and auxiliary tools across multiple components. To gain visibility into how these distributed systems operate, observability, or understanding what’s happening under the hood, relies on distributed tracing. Each incoming request is captured as a *trace*, which is composed of ordered *spans*. Each span records crucial metadata: timing, inputs and outputs, and contextual tags.
 
-LLM Traces are a category of telemetry data designed to capture the execution of LLMs and the surrounding application context. They serve several purposes:
+**Phoenix**, an open-source AI observability platform by Arize AI, extends this architecture with first-class, vendor-agnostic tracing capabilities backed by OTel. It supports automatic instrumentation for frameworks such as LangChain, LlamaIndex, and SDKs including OpenAI, AWS Bedrock, with language support across Python, JavaScript, and etc.
 
-Troubleshooting: Quickly diagnose and resolve unexpected issues, including “unknown unknowns.”
 
-Understanding: Reveal the inner workings of how requests are processed step by step.
 
-Performance Monitoring: Provide visibility into system-level performance and efficiency.
+------
 
-Context Awareness: Track dependencies such as retrieval from vector stores or API calls.
+## What Traces and Spans Capture
 
-Traces are composed of spans, where each span represents a single unit of work (e.g., a request to an API, a call to an LLM, or a document re-ranking step). Collectively, spans create a timeline of operations, painting a complete picture of application behavior.
+Phoenix’s tracing capabilities give you detailed insights into every stage of your LLM workflow:
 
-Structure of Traces
+- **Application Latency**: Locate slowdowns in model calls, retrieval steps, or embedding generation to improve responsiveness. [Amazon Web Services, Inc.+7Arize AI+7Medium+7](https://arize.com/docs/phoenix/tracing/llm-traces?utm_source=chatgpt.com)
+- **Token Usage**: Analyze token consumption per request, enabling cost management and efficiency tuning. [llmmodels.org+8Arize AI+8Medium+8](https://arize.com/docs/phoenix/tracing/llm-traces?utm_source=chatgpt.com)
+- **Runtime Exceptions**: Detect and investigate errors—or even rate-limiting events—ensuring robust error handling. [LinkedIn+4Arize AI+4Medium+4](https://arize.com/docs/phoenix/tracing/llm-traces?utm_source=chatgpt.com)
+- **Retrieved Documents**: Examine documents returned during retrieval steps, including ranking and scoring, to troubleshoot relevance and retrieval behavior. [Arize AI+9Arize AI+9Medium+9](https://arize.com/docs/phoenix/tracing/llm-traces?utm_source=chatgpt.com)
+- **Embeddings**: Inspect the embedding text and model used, helping you validate and refine embedding strategies. [Arize AI+1](https://arize.com/docs/phoenix/tracing/llm-traces?utm_source=chatgpt.com)
+- **LLM Parameters**: Track invocation settings like temperature and system prompts for better debugging and configuration. [Arize AI+5Arize AI+5Amazon Web Services, Inc.+5](https://arize.com/docs/phoenix/tracing/llm-traces?utm_source=chatgpt.com)
+- **Prompt Templates**: Discover the prompt templates and variable values applied during generation—essential for fine-tuning prompts. [llmmodels.org+5Arize AI+5Amazon Web Services, Inc.+5](https://arize.com/docs/phoenix/tracing/llm-traces?utm_source=chatgpt.com)
+- **Tool Descriptions**: View metadata, descriptions, and function signatures of tools accessible to your LLM, improving observability over agent capabilities. [YouTube+11Arize AI+11Amazon Web Services, Inc.+11](https://arize.com/docs/phoenix/tracing/llm-traces?utm_source=chatgpt.com)
+- **LLM Function Calls**: For LLMs that support function calling (like OpenAI), trace function selection and input messages to debug complex interactions. [Arize AI+1](https://arize.com/docs/phoenix/tracing/llm-traces?utm_source=chatgpt.com)
 
-A span corresponds to a specific operation during the lifecycle of a request. Spans are sequentially linked to form a trace, making it possible to:
+------
 
-Follow the execution flow of a request.
+## Customize Tracing
 
-Track dependencies between components.
+Tracing can be customized by defining spans around specific application logic and enriching them with **metadata**, such as custom attributes, user IDs, session IDs, or prompt templates. In addition, **tags** can be applied to classify runs or group related traces, making it easier to analyze performance, compare experiments, and track behavior across sessions.
 
-Measure the duration and performance of each step.
+After connecting your application to Phoenix, tracing can be enabled in three main ways:
 
-By analyzing traces, developers can identify where delays, failures, or inefficiencies occur.
+1. **Phoenix Decorators**: wrap functions or components for selective tracing.
+2. **OpenInference Auto-Instrumentors** : automatically capture spans for supported libraries.
+3. **Base OpenTelemetry APIs**: create fully customized spans when finer control is required.
 
-Span Kinds Supported in LLM Tracing
+Phoenix OpenAIInstrumentor provides auto-instrumentation that emits fully OTel-compatible LLM spans, including prompt inputs and model outputs. It works with OpenAI and Azure OpenAI and can export to any OTEL backend (e.g., Phoenix, LangChain, Elastic).
 
-LLM tracing systems typically support several specialized span kinds tailored for AI workflows:
+Phoenix OpenTelemetry provides an open, vendor-neutral foundation for generating and exporting these telemetry signals. On top of this, LLM-specific observability frameworks like those following the OpenInference conventions, introduces a structured taxonomy of span kinds tailored to AI workflows, allowing observability systems to capture the unique execution patterns of LLM applications. Beyond generic spans, common categories such as **Agent, Chain, Tool, LLM, Retriever, Reranker, and Embedding** align naturally with how modern AI systems route requests, call external services, retrieve data, and generate responses. For instance, an **LLM span** captures the full lifecycle of a model call, inputs, parameters, and outputs, while a **Chain span** represents a sequence of steps or the connective logic between them. A **Tool span** records the execution of external APIs or functions invoked by the LLM, whereas an **Agent span** serves as the orchestration root, encapsulating the entire run of an agent-driven workflow. Together, these span kinds nest hierarchically to reflect the real execution structure of an LLM-powered application, making complex AI pipelines more transparent, debuggable, and measurable.
 
-LLM – Captures calls to a language model (completion or chat).
+### Tracking custom spans
 
-Chain – Represents links between different application steps, showing orchestration logic.
+As an example, consider tracing a **hybrid search pipeline** where embeddings are generated using an OpenAI model, documents are retrieved from a Redis Vector Store, and results are reranked with an AWS Bedrock model. In such workflows, spans can be designed to capture each critical stage: a **sparse retrieval span** for BM25 or keyword lookups, a **dense embedding span** recording model IDs and vector dimensions, a **vector search span** for dense retrieval results, a **hybrid aggregation span** to log weighting strategies (e.g., hybrid alpha), and a **reranker span** for final scoring and ranking. Hybrid search—fusing sparse and dense methods—is essential for robust LLM-powered retrieval, and by instrumenting each step with Phoenix and OpenTelemetry, teams gain fine-grained visibility into performance bottlenecks, retrieval quality, parameter sensitivities, and potential failures, benefiting both research and operations.
 
-Tool – Logs API or function invocations made on behalf of an LLM.
+###  Tracking user sessions
 
-Agent – Denotes the root of a set of LLM and tool invocations, representing orchestration entities.
+  In addition to tracing individual responses, Phoenix supports **sessions**, which represent a sequence of related traces tied together under a single interaction, such as a multi-turn conversation or user thread. Each model response is still captured as its own trace, but by assigning them to the same session, the system provides visibility into the flow of the entire exchange.
 
-Embedding – Records encoding of unstructured data into vector representations.
+Sessions allow practitioners to connect multiple traces into a coherent dialogue or workflow, navigate conversation history through the **Sessions** tab with recent activity and analytics, and search interactions by message content to locate specific exchanges or investigate user behaviors. This session-level perspective moves beyond isolated traces, enabling richer evaluation of user experience, continuity of context, and overall conversational performance in LLM applicationsespecially valuable when analyzing **function calls**, where accurate parameter extraction across turns is critical for reliable execution.
 
-Retriever – Tracks queries for contextual information from a datastore.
-
-Reranker – Captures the relevance-based reordering of retrieved documents.
-
-Benefits of Observability with LLM Traces
-
-Debugging: Identify failing tools, bottlenecks in retrieval, or LLM misbehavior.
-
-Optimization: Improve system design by measuring execution times of each step.
-
-Explainability: Provide end-to-end transparency of how a final response was generated.
-
-Resilience: Quickly adapt to novel issues through visibility into system dependencies.
-
-Conclusion
-
-LLM Traces and Observability transform opaque AI-driven systems into transparent, diagnosable workflows. By capturing spans across LLM calls, retrievals, embeddings, and orchestration logic, they enable both operational excellence and developer productivity. As applications built with LLMs grow in complexity, tracing will become indispensable for ensuring reliability, accountability, and trust.
