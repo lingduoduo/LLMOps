@@ -50,3 +50,10 @@ As an example, consider tracing a **hybrid search pipeline** where embeddings ar
 
 Sessions allow practitioners to connect multiple traces into a coherent dialogue or workflow, navigate conversation history through the **Sessions** tab with recent activity and analytics, and search interactions by message content to locate specific exchanges or investigate user behaviors. This session-level perspective moves beyond isolated traces, enabling richer evaluation of user experience, continuity of context, and overall conversational performance in LLM applicationsespecially valuable when analyzing **function calls**, where accurate parameter extraction across turns is critical for reliable execution.
 
+### Integration with LangChain
+
+LangChain is a robust high-level API that lets developers build LLM-powered apps with minimal code. But the "magic" often hides what's happening beneath making debugging, performance tuning, and cost tracing challenging. Arize Phoenix adds observability by visualizing every step (or *span*) of your application, from retrieval to LLM responses. You can surface and inspect spans based on latency, token usage, retrieval metrics, and more, enabling us to pinpoint bottlenecks, inefficiencies, or hallucinations.
+
+This example instruments a LangChain‑based retrieval‑augmented generation (RAG) pipeline with Phoenix: you’ll build a simple Q&A application that answers questions using the Arize documentation, then capture trace data in the OpenInference format via Phoenix and OpenTelemetry, after which you’ll inspect the trace structure and its spans in Phoenix to pinpoint latency bottlenecks, token hotspots, and cost drivers, then export the trace data as a pandas DataFrame and run LLM‑guided evaluations to assess your RAG chain’s performance.
+
+
