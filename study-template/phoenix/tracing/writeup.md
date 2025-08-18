@@ -58,4 +58,10 @@ In this example, you will instrument a LangChain-based retrieval-augmented gener
 
 Evaluation serves as the foundation for assessing the accuracy and reliability of the application once it has been instrumented with Phoenix. While inspecting individual queries can provide some insight, this approach quickly becomes unsustainable as the number of edge cases grows. Phoenix enables a more systematic and scalable solution by supporting a wide range of automated evaluation metrics—covering retrieval effectiveness (such as precision@k, nDCG, and hit rate) as well as response quality (such as QA correctness, hallucination detection, and toxicity analysis). Because these evaluations are tied directly to trace data and powered by reusable LLM-based evaluators, they highlight problematic spans for deeper analysis while also allowing results to be exported for dataframe-based or LLM-assisted evaluation workflows. In doing so, Phoenix turns observability into actionable insight, giving you the ability to continuously measure, diagnose, and improve the performance of your RAG system.
 
+"AWS OTEL Distro:  OTEL compatible distribution from AWS.  You can instrument your Gen AI application - LLM Calls, RAG based Applcations and Agents using AWS OTEL Distro.  OTEL Distro supports out of the tracing of LLM Calls, latency, tokens etc.  IN addition you can build your own custom traces and Spans. All Telemetry can be viewed in ""Gen AI Observability"" tab in Cloud Watch.  These can be exported to any OTEL supported 3rd party applications. With Agent Core, Observability is built in with all the Agents that run on Agent Core Runtime"
+
+https://catalog.workshops.aws/observability/en-US
+https://catalog.workshops.aws/observability/en-US/aws-managed-oss
+https://opentelemetry.io/docs/languages/python/getting-started/
+
 
