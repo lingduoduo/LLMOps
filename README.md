@@ -118,8 +118,14 @@ flask --app app.http.app db init
 flask --app app.http.app db migrate -m "init db migration"
 ```
 
-
+### BedRock
+In AWS CloudShell
 ```
+python3 -m venv ~/.venv
+source ~/.venv/bin/activate
+pip install ipython
+```
+
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:6006/v1/traces"  # or wherever Phoenix is hosted
 export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 export OTEL_TRACES_EXPORTER=otlp
