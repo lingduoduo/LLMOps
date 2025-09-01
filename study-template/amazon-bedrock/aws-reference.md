@@ -160,3 +160,26 @@ You can repurpose any of these agent examples into an evaluation notebook by add
 
 
 
+**Findings**: 
+
+- Bedrock automatic evaluation offers two modes - model eval and RAG eval, each of which provides pre-built metrics and the capability of customizing metrics. The human-centered evaluation was not explored due to the expectation of having an automatic eval tool for different use cases. 
+
+- The pre-built metrics have their own prompts built-in. The evaluation will be off-chart if the use case does not fit exactly the template provided. 
+
+- Our intent detection use case requires calculating recall, which can be achieved via QA model eval, not the retrieval-only RAG eval. 
+
+- Bedrock evaluation only offers GenAI related metrics using LLM as a judge. Traditional ML metrics for retrieval are not readily available. However, we can reproduce simple metrics (recall@1, recall@3, and recall@5) using prompt. The ability to calculate more advanced metrics (NDCG) using prompt is yet to be explored and the correctness cannot be guaranteed. 
+
+- Given a typical traced dataset without any ground truth, traditional ML metrics for retrieval do not apply. However, we can use LLM as a judge to evaluate the query-document relevancy, and the result highly depends on which LLM/RLM being used. One observation is o4-mini achieved 100% relevancy while sonnet-3.7 achieved 68%, and o4-mini aligns better with human judgement. 
+
+- Customized metrics can be downloaded and is supposed to be reused, should the same metrics apply in the next eval job. However, eval job cannot be created when importing customized metrics. 
+
+- Currently we can list eval jobs via AWS SDK. Creating eval job is still blocked for AWS-Lyrics-PowerUsers. All above-mentioned experiments were executed via AWS console with a new manually created IAM role, which is not assumable from ADP SSO. Once unblocked, SDK and Console should have the same functionality if code is required. 
+
+- The eval results can be examined one by one from the console. 
+
+- Human annotation seems not possible in Bedrock. 
+
+- One advantage of running eval jobs in AWS console is ease of use and dedicated support. One minor disadvantage is it is not as flexible as one would expect in real production use cases. 
+
+
