@@ -1,6 +1,3 @@
-Here are several **hands-on workshop and evaluation notebook examples** that showcase how to create, evaluate, and iterate on Amazon Bedrock Agents. These can serve as excellent references for building your own evaluation notebooks:
-
-------
 ### Setup AWS CLI
 ```
 curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
@@ -9,6 +6,10 @@ sudo installer -pkg AWSCLIV2.pkg -target /
 aws configure
 aws configure list
 ```
+
+Here are several **hands-on workshop and evaluation notebook examples** that showcase how to create, evaluate, and iterate on Amazon Bedrock Agents. These can serve as excellent references for building your own evaluation notebooks:
+
+------
 AWS CLI settings can come from multiple places, listed here in descending priority:
 
 - Command-line flags (e.g., --profile, --region)
