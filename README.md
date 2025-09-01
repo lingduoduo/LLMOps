@@ -102,20 +102,6 @@ brew services restart postgresql@16
 brew services stop postgresql@16
 ```
 
-### Flask-Migrate
-
-```
-pip install flask-migrate
-
-flask db init
-
-flask --app app.http.app routes
-
-flask --app app.http.app db init
-
-flask --app app.http.app db migrate -m "init db migration"
-```
-
 ### Phoenix
 
 ```
@@ -133,3 +119,19 @@ python3 -m venv ~/.venv
 source ~/.venv/bin/activate
 pip install ipython
 ```
+
+### Flask-Migrate
+
+```
+pip install flask-migrate
+
+flask db init
+
+flask --app app.http.app routes
+
+flask --app app.http.app db init
+
+flask --app app.http.app db migrate -m "init db migration"
+```
+
+
