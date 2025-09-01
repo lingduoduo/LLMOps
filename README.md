@@ -145,3 +145,9 @@ import boto3
 bedrock_client = boto3.client(service_name="bedrock")
 bedrock_client.list_foundation_models()
 ```
+
+```
+ssh-keygen -t rsa
+cat .ssh/id_rsa.pub
+git clone git@github.com:aws-samples/amazon-bedrock-workshop.git
+```
