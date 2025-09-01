@@ -102,6 +102,24 @@ brew services restart postgresql@16
 brew services stop postgresql@16
 ```
 
+### Flask-Migrate
+
+```
+pip install flask-migrate
+
+flask db init
+
+flask --app app.http.app routes
+
+flask --app app.http.app db init
+
+flask --app app.http.app db migrate -m "init db migration"
+```
+
+
+
+
+
 ### Phoenix
 
 ```
@@ -118,20 +136,12 @@ In AWS CloudShell
 python3 -m venv ~/.venv
 source ~/.venv/bin/activate
 pip install ipython
+
+aws bedrock list-foundation-models
 ```
 
-### Flask-Migrate
-
 ```
-pip install flask-migrate
-
-flask db init
-
-flask --app app.http.app routes
-
-flask --app app.http.app db init
-
-flask --app app.http.app db migrate -m "init db migration"
+import boto3
+bedrock_client = boto3.client(service_name="bedrock")
+bedrock_client.list_foundation_models()
 ```
-
-
