@@ -157,3 +157,34 @@ You can repurpose any of these agent examples into an evaluation notebook by add
 ## 7. Cleanup
 - Delete agents, knowledge bases, policies, and other resources
 ```
+
+| **Dataset Management**  | A PostGreSQL database is used as storage for dataset. A dataset can be built from traces (logs). The evaluation can be run either from Phoenix dashboard or from custom code using Phoenix SDK APIs. | AWS S3 is used as storage for dataset. If the evaluation is to be run with Bedrock dashboard, then the dataset must contains fields as per specifications. If the evaluation is to be run with custom code, then the dataset can contain any free structure. |
+| ----------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| **Prompt Optimisation** | Prompt optimisation is an external task in Phoenix. Phoenix helps with process of evaluating the performance of different versions of a prompt; but it does not provide the optimised prompt itself. User should use tools like DSPy or techniques like gradient optimisation to improve prompt, and then use Phoenix to evaluate and compare the new prompt with earlier versions. | Bedrock uses AI to optimise prompts. On click of a button, it reads existing prompt, and uses AI to analyse and generate a new prompt. The new prompt can then be tested on some pre-defined dataset and it’s performance can be compared to earlier versions. |
+| **Prompt Evaluation**   | Dashboard lists experiment runs for a particular dataset. In each experiment run, details of each record run are shown like input, expected output, actual output along with trace info for that run. Results can be filtered by contents like a particular text, score or failures. The navigation through evaluation results is very easy. | Evaluation results are output as .jsonl files. There is no dashboard to view result details. We have to analyse the output file using JSON tools. To filter results by text, error, failure, we have to use custom JSON code. |
+
+
+
+**Findings**: 
+
+- Bedrock automatic evaluation offers two modes - model eval and RAG eval, each of which provides pre-built metrics and the capability of customizing metrics. The human-centered evaluation was not explored due to the expectation of having an automatic eval tool for different use cases. 
+
+- The pre-built metrics have their own prompts built-in. The evaluation will be off-chart if the use case does not fit exactly the template provided. 
+
+- Our intent detection use case requires calculating recall, which can be achieved via QA model eval, not the retrieval-only RAG eval. 
+
+- Bedrock evaluation only offers GenAI related metrics using LLM as a judge. Traditional ML metrics for retrieval are not readily available. However, we can reproduce simple metrics (recall@1, recall@3, and recall@5) using prompt. The ability to calculate more advanced metrics (NDCG) using prompt is yet to be explored and the correctness cannot be guaranteed. 
+
+- Given a typical traced dataset without any ground truth, traditional ML metrics for retrieval do not apply. However, we can use LLM as a judge to evaluate the query-document relevancy, and the result highly depends on which LLM/RLM being used. One observation is o4-mini achieved 100% relevancy while sonnet-3.7 achieved 68%, and o4-mini aligns better with human judgement. 
+
+- Customized metrics can be downloaded and is supposed to be reused, should the same metrics apply in the next eval job. However, eval job cannot be created when importing customized metrics. 
+
+- Currently we can list eval jobs via AWS SDK. Creating eval job is still blocked for AWS-Lyrics-PowerUsers. All above-mentioned experiments were executed via AWS console with a new manually created IAM role, which is not assumable from ADP SSO. Once unblocked, SDK and Console should have the same functionality if code is required. 
+
+- The eval results can be examined one by one from the console. 
+
+- Human annotation seems not possible in Bedrock. 
+
+- One advantage of running eval jobs in AWS console is ease of use and dedicated support. One minor disadvantage is it is not as flexible as one would expect in real production use cases. 
+
+
