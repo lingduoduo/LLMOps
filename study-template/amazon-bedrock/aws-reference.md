@@ -152,3 +152,11 @@ You can repurpose any of these agent examples into an evaluation notebook by add
 ## 7. Cleanup
 - Delete agents, knowledge bases, policies, and other resources
 ```
+
+| **Dataset Management**  | A PostGreSQL database is used as storage for dataset. A dataset can be built from traces (logs). The evaluation can be run either from Phoenix dashboard or from custom code using Phoenix SDK APIs. | AWS S3 is used as storage for dataset. If the evaluation is to be run with Bedrock dashboard, then the dataset must contains fields as per specifications. If the evaluation is to be run with custom code, then the dataset can contain any free structure. |
+| ----------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| **Prompt Optimisation** | Prompt optimisation is an external task in Phoenix. Phoenix helps with process of evaluating the performance of different versions of a prompt; but it does not provide the optimised prompt itself. User should use tools like DSPy or techniques like gradient optimisation to improve prompt, and then use Phoenix to evaluate and compare the new prompt with earlier versions. | Bedrock uses AI to optimise prompts. On click of a button, it reads existing prompt, and uses AI to analyse and generate a new prompt. The new prompt can then be tested on some pre-defined dataset and it’s performance can be compared to earlier versions. |
+| **Prompt Evaluation**   | Dashboard lists experiment runs for a particular dataset. In each experiment run, details of each record run are shown like input, expected output, actual output along with trace info for that run. Results can be filtered by contents like a particular text, score or failures. The navigation through evaluation results is very easy. | Evaluation results are output as .jsonl files. There is no dashboard to view result details. We have to analyse the output file using JSON tools. To filter results by text, error, failure, we have to use custom JSON code. |
+
+
+
