@@ -104,11 +104,9 @@ brew services stop postgresql@16
 
 ### Flask-Migrate
 
-````
+```
 pip install flask-migrate
-```
 
-```
 flask db init
 
 flask --app app.http.app routes
@@ -118,16 +116,20 @@ flask --app app.http.app db init
 flask --app app.http.app db migrate -m "init db migration"
 ```
 
+### Phoenix
+
+```
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:6006/v1/traces"  # or wherever Phoenix is hosted
+export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+export OTEL_TRACES_EXPORTER=otlp
+export OTEL_SERVICE_NAME=openai-test
+```
+
 ### BedRock
+
 In AWS CloudShell
 ```
 python3 -m venv ~/.venv
 source ~/.venv/bin/activate
 pip install ipython
-```
-
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:6006/v1/traces"  # or wherever Phoenix is hosted
-export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
-export OTEL_TRACES_EXPORTER=otlp
-export OTEL_SERVICE_NAME=openai-test
 ```
