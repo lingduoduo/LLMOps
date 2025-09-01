@@ -151,3 +151,21 @@ ssh-keygen -t rsa
 cat .ssh/id_rsa.pub
 git clone git@github.com:aws-samples/amazon-bedrock-workshop.git
 ```
+
+```
+# 1) Create a key (press Enter for defaults)
+ssh-keygen -t ed25519 -C "linghypshen@gmail.com"
+
+# 2) Start agent & add key
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
+
+# 3) Add the public key to GitHub (copies it to clipboard)
+pbcopy < ~/.ssh/id_ed25519.pub
+# GitHub → Settings → SSH and GPG keys → New SSH key → paste
+
+# 4) Point your repo at the SSH URL and push
+git remote set-url origin git@github.com:lingduoduo/LLMOps.git
+ssh -T git@github.com    # should say "Hi <your-username>!"
+git push
+```
