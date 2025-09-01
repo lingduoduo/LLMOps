@@ -41,6 +41,11 @@ You’ll find guided steps and code snippets to get agents up and running — gr
 
 ------
 
+## Build Real world End-to-End AI-Agents using AWS-Bedrock
+
+https://github.com/PacktPublishing/Build-Real-world-End-to-End-AI-Agents-using-AWS-Bedrock
+
+
 ## 2. Open Source Bedrock Agent Evaluation Framework
 
 **Source**: *open-source-bedrock-agent-evaluation* repository
