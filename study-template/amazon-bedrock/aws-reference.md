@@ -188,3 +188,5 @@ You can repurpose any of these agent examples into an evaluation notebook by add
 - One advantage of running eval jobs in AWS console is ease of use and dedicated support. One minor disadvantage is it is not as flexible as one would expect in real production use cases. 
 
 
+https://github.com/strands-agents/samples/tree/main
+https://aws.amazon.com/blogs/machine-learning/observing-and-evaluating-ai-agentic-workflows-with-strands-agents-sdk-and-arize-ax/
