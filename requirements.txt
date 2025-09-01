@@ -36,4 +36,4 @@ opentelemetry-exporter-otlp
 openinference-instrumentation-langchain==0.1.49
 openai-agents==0.2.4
 pydantic-evals==0.6.2
-
+boto3==1.40.21
