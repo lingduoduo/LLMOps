@@ -280,3 +280,6 @@ You can repurpose any of these agent examples into an evaluation notebook by add
 
 https://github.com/strands-agents/samples/tree/main
 https://aws.amazon.com/blogs/machine-learning/observing-and-evaluating-ai-agentic-workflows-with-strands-agents-sdk-and-arize-ax/
+https://arize.com/docs/phoenix/cookbook/evaluation/openai-agents-sdk-cookbook
+
+
