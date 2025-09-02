@@ -164,7 +164,6 @@ You can repurpose any of these agent examples into an evaluation notebook by add
 | **Prompt Evaluation**   | Dashboard lists experiment runs for a particular dataset. In each experiment run, details of each record run are shown like input, expected output, actual output along with trace info for that run. Results can be filtered by contents like a particular text, score or failures. The navigation through evaluation results is very easy. | Evaluation results are output as .jsonl files. There is no dashboard to view result details. We have to analyse the output file using JSON tools. To filter results by text, error, failure, we have to use custom JSON code. |
 
 
-
 **Findings**: 
 
 - Bedrock automatic evaluation offers two modes - model eval and RAG eval, each of which provides pre-built metrics and the capability of customizing metrics. The human-centered evaluation was not explored due to the expectation of having an automatic eval tool for different use cases. 
@@ -186,6 +185,97 @@ You can repurpose any of these agent examples into an evaluation notebook by add
 - Human annotation seems not possible in Bedrock. 
 
 - One advantage of running eval jobs in AWS console is ease of use and dedicated support. One minor disadvantage is it is not as flexible as one would expect in real production use cases. 
+
+
+# Prompt Engineering: Phoenix vs AWS Bedrock
+
+## **Dataset Management**
+
+- **Phoenix**
+  - Uses **PostgreSQL** for dataset storage.
+  - Datasets can be built from **traces/logs**.
+  - Evaluations can be run via **Phoenix dashboard** or custom code using **Phoenix SDK APIs**.
+- **AWS Bedrock**
+  - Uses **S3** for dataset storage.
+  - If using the **Bedrock dashboard**, datasets must follow **predefined schema/specs**.
+  - If using **custom code**, datasets can be in **any free structure**.
+
+------
+
+## **Prompt Optimisation**
+
+- **Phoenix**
+  - **Does not optimise prompts directly.**
+  - Acts as an **evaluation framework**.
+  - External tools (e.g., **DSPy**, gradient optimisation) must be used to improve prompts.
+  - Phoenix helps compare new prompts against older versions.
+- **AWS Bedrock**
+  - Provides **AI-driven automatic prompt optimisation**.
+  - On button click, Bedrock analyses and generates a **new optimised prompt**.
+  - The new prompt can then be tested against pre-defined datasets and compared to earlier versions.
+
+------
+
+## **Prompt Evaluation**
+
+- **Phoenix**
+  - Has an **interactive dashboard** with experiment runs.
+  - Each run shows: input, expected output, actual output, and trace info.
+  - Results are filterable (by text, score, success/failure).
+  - Very **user-friendly for interactive exploration**.
+- **AWS Bedrock**
+  - Outputs results as **`.jsonl` files** (no dashboard).
+  - Users must process results via **external JSON tools**.
+  - Filtering requires **custom JSON code**.
+  - **Less interactive**, more manual analysis.
+
+------
+
+## **Bedrock Evaluation Findings**
+
+- Offers **two automatic evaluation modes**:
+  - **Model eval**
+  - **RAG eval**
+     Each comes with **pre-built metrics** and allows **custom metric definitions**.
+     (Human-centered evaluation is not available.)
+- **Limitations of pre-built metrics**:
+  - Metrics have **built-in prompts**.
+  - If use cases do not align exactly with templates, results may be **off-chart**.
+- **Use case alignment**:
+  - For **intent detection (recall calculation)**, QA model eval works.
+  - **RAG eval** is retrieval-only and does not cover recall.
+- **Metric availability**:
+  - Provides only **GenAI-related metrics** using **LLM-as-a-judge**.
+  - Lacks **traditional ML retrieval metrics** (recall, precision, NDCG).
+  - Simple metrics (recall@1, recall@3, recall@5) can be reproduced with prompts.
+  - More advanced metrics (e.g., **NDCG**) are not validated for correctness.
+- **LLM dependency in evaluation**:
+  - Without ground truth, ML metrics cannot apply.
+  - Instead, **LLM/RLM judge query-document relevance**.
+  - Results vary depending on model:
+    - **o4-mini**: ~100% relevancy (aligns with human judgement).
+    - **Sonnet-3.7**: ~68% relevancy.
+- **Custom metrics**:
+  - Can be downloaded for reuse.
+  - But **eval jobs cannot be created** when importing custom metrics.
+- **Execution limitations**:
+  - Eval jobs can be listed via **AWS SDK**.
+  - **Creating eval jobs** is currently blocked for AWS-Lyrics-PowerUsers.
+  - Experiments run only via **AWS Console** with a manually created IAM role (not assumable from ADP SSO).
+  - Once unblocked, **SDK and Console parity is expected**.
+- **Result inspection**:
+  - Eval results can be examined **one by one in the console**.
+  - No **human annotation** capability.
+- **Console pros/cons**:
+  - **Advantage**: Ease of use and dedicated support.
+  - **Disadvantage**: Less flexible for real production workflows.
+
+------
+
+✅ **Summary**:
+
+- **Phoenix** → Strong in **evaluation depth and traceability**, flexible for iterative prompt testing.
+- **Bedrock** → Strong in **automatic optimisation & built-in eval modes**, but limited flexibility, traditional ML metrics, and currently constrained by IAM/SDK support.
 
 
 https://github.com/strands-agents/samples/tree/main
