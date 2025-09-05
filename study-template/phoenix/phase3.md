@@ -21,4 +21,14 @@ Cost-Benefit Analysis: Detailed financial implications and ROI.
   b) For example, Uber leverages Arize, which typically builds all technology in-house. It is a complicated effort which encouraged them to see outside support
   c) Even if using Phoenix as a baseline, the services and infrastructure that would have to be built around it for production use cases would take many engineers across many disciplines (ranging from infra, database, front-end etc.)
   d) With Sharon's team's resources they are still opting to buy over build. It might be useful to discuss with her how she is thinking about it. 
- 
+
+
+ Scalability: Phoenix is designed primarily for proof-of-concepts and early development cycles rather than scale, whereas Arize AI AX is built to support enterprise-level scalability for lyric policy generation and evaluation data, RAG systems, and agent calls (see Arize DB blog).
+
+Security & Compliance: Arize AX is purpose-built for the complex compliance requirements enterprises face, including HIPAA, SOC 2 Type II, ISO 27001, and GDPR. In addition to robust RBAC, it supports fine-grained access controls often required in enterprise deployments. Documentation is available, and trust.arize.com provides full details on certifications, penetration tests, and security posture.
+
+Community & Support: Phoenix is limited to community support, while Arize AX provides direct access to AI engineers such as Jeff Peng and Hakan Tekgul on a weekly basis. These engineers assist with best practices, onboarding, training, configuration, and other aspects of enterprise support, ensuring smoother adoption and faster issue resolution.
+
+Deployment Model: Sharon is pursuing a VPC deployment of Arize AX within ADP’s cloud infrastructure, with separate Development, Test, and Production environments. This managed cloud approach reduces maintenance overhead while supporting enterprise compliance and data control requirements, unlike a self-hosted open-source model.
+
+Cost-Benefit Analysis: Building a comparable system in-house would require a rare combination of infrastructure, front-end engineering, database, and AI expertise across many engineers. Arize AI AX, supported by ~130 dedicated engineers, provides a level of scalability and reliability that is difficult to replicate internally. Even companies like Uber, which typically build technology in-house, have opted to leverage Arize due to the complexity. While Phoenix could serve as a baseline, the services and infrastructure required to make it production-ready would be extensive. Sharon’s team, despite strong technical resources, has opted to buy over build—a perspective that could be useful to explore further in discussion.
