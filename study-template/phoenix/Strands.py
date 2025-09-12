@@ -80,4 +80,94 @@ class StrandsAsyncOpenAI:
 
     async def _auth_headers(self) -> Dict[str, str]:
         """
-        Build auth head
+        Build auth headers:
+          - If token_provider is set, call it (await if needed) and format as:
+              { token_header_name: "{token_scheme} {token}" }
+          - Else, return empty (the SDK will use api_key if provided).
+        """
+        if not self.token_provider:
+            return {}
+
+        token_or_coro = self.token_provider()
+        token = await token_or_coro if inspect.isawaitable(token_or_coro) else token_or_coro
+        return {self.token_header_name: f"{self.token_scheme} {token}" if self.token_scheme else token}
+
+    @property
+    def invocation_params(self) -> Dict[str, Any]:
+        """
+        Default invocation params to merge into each model call.
+        You can add defaults here (e.g., temperature) per your policy.
+        """
+        params: Dict[str, Any] = {}
+        if self.request_timeout is not None:
+            params["timeout"] = self.request_timeout
+        # Example: enforce deterministic generation policy
+        # params["temperature"] = 0
+        return params
+
+    async def chat(self, *, model: str, messages: list, **kwargs) -> Any:
+        """
+        Convenience method for chat completions with merged headers/timeouts.
+        Example use inside Strands: await wrapper.chat(model="gpt-4o-mini", messages=[...])
+        """
+        # Merge invocation defaults
+        call_kwargs = dict(self.invocation_params)
+        call_kwargs.update(kwargs or {})
+
+        # Merge headers: default (SDK) + our per-call extra_headers + dynamic auth
+        extra_headers = dict(self.extra_headers or {})
+        extra_headers.update(await self._auth_headers())
+        if extra_headers:
+            call_kwargs["extra_headers"] = extra_headers
+
+        return await self.client.chat.completions.create(
+            model=model,
+            messages=messages,
+            **call_kwargs,
+        )
+
+    async def responses(self, *, model: str, input: Any, **kwargs) -> Any:
+        """
+        Convenience method for the newer Responses API (if you use it).
+        """
+        call_kwargs = dict(self.invocation_params)
+        call_kwargs.update(kwargs or {})
+
+        extra_headers = dict(self.extra_headers or {})
+        extra_headers.update(await self._auth_headers())
+        if extra_headers:
+            call_kwargs["extra_headers"] = extra_headers
+
+        # If you prefer Responses API:
+        return await self.client.responses.create(
+            model=model,
+            input=input,
+            **call_kwargs,
+        )
+
+
+
+# Suppose Strands gives you:
+#   - A proxy base URL (AI Gateway)
+#   - A short-lived bearer token provider
+
+async def get_gateway_token() -> str:
+    # Your logic here (e.g., call STS / OIDC / internal endpoint)
+    return "eyJhbGciOi..."  # example JWT
+
+wrapper = StrandsAsyncOpenAI(
+    base_url="https://your-aigw.example.com/v1",   # or whatever Strands proxy uses
+    token_provider=get_gateway_token,              # rotates per call
+    default_headers={"x-tenant-id": "my-tenant"},
+    extra_headers={"x-trace-id": "abc-123"},
+    request_timeout=45.0,
+)
+
+async def run():
+    resp = await wrapper.chat(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": "Hello from Strands!"}],
+    )
+    print(resp.choices[0].message.content)
+
+asyncio.run(run())
