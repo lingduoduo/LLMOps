@@ -146,7 +146,6 @@ class StrandsAsyncOpenAI:
         )
 
 
-
 # Suppose Strands gives you:
 #   - A proxy base URL (AI Gateway)
 #   - A short-lived bearer token provider
