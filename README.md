@@ -132,7 +132,9 @@ docker exec -it redis-dev redis-cli
 ### Weaviate
 
 ```
-docker run -p 8080:8080 -p 50051:50051 cr.weaviate.io/semitechnologies/weaviate:1.32.8
+docker run --name weaviate-dev -d -p 8080:8080 -p 50051:50051 cr.weaviate.io/semitechnologies/weaviate:1.32.8
+docker stop weaviate-dev
+docker start weaviate-dev
 ```
 
 ### Phoenix
