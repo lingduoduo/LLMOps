@@ -22,3 +22,5 @@ Traceback (most recent call last):
 RuntimeError: Failed to create dataset: name=docs-qa-new-0e848, type=1 for space_id=U3BhY2U6MjY4Mjk6RXl5dQ==
 
 Process finished with exit code 1
+
+/Applications/Python\ 3.x/Install\ Certificates.command 
