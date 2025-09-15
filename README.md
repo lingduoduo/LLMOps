@@ -116,9 +116,24 @@ flask --app app.http.app db init
 flask --app app.http.app db migrate -m "init db migration"
 ```
 
+### Redis
 
+```
+docker pull redis
+docker images
+docker run --name redis-dev -d -p 6379:6379 redis
+docker ps
+docker start redis-dev
+docker stop redis-dev
 
+docker exec -it redis-dev redis-cli
+```
 
+### Weaviate
+
+```
+docker run -p 8080:8080 -p 50051:50051 cr.weaviate.io/semitechnologies/weaviate:1.32.8
+```
 
 ### Phoenix
 
@@ -132,6 +147,7 @@ export OTEL_SERVICE_NAME=openai-test
 ### BedRock
 
 In AWS CloudShell
+
 ```
 python3 -m venv ~/.venv
 source ~/.venv/bin/activate

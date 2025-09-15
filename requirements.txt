@@ -25,6 +25,7 @@ lark==1.2.2
 umap-learn==0.5.7
 marshmallow==3.26.1
 wtforms
+redis==6.4.0
 langfuse==2.60.9
 openinference-instrumentation-openai
 opentelemetry-sdk
@@ -33,5 +34,3 @@ openinference-instrumentation-langchain==0.1.49
 openai-agents==0.2.4
 pydantic-evals==0.6.2
 boto3==1.40.21
-strands-agents==1.5.0
-strands-agents-tools==0.2.4
