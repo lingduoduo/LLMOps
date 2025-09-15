@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@Author  : linghypshen@gmail.com
 @File    : http.py
 """
+import logging
 import os
 
 from flask import Flask
@@ -12,13 +12,14 @@ from flask_migrate import Migrate
 
 from config import Config
 from internal.exception import CustomException
+from internal.extension import logging_extension
 from internal.router import Router
 from pkg.response import json, Response, HttpCode
 from pkg.sqlalchemy import SQLAlchemy
 
 
 class Http(Flask):
-    """HTTP Service Engine"""
+    """HTTP service engine"""
 
     def __init__(
             self,
@@ -29,42 +30,48 @@ class Http(Flask):
             router: Router,
             **kwargs,
     ):
-        # 1. Call the parent class constructor for initialization
+        # 1) Call parent constructor to initialize
         super().__init__(*args, **kwargs)
 
-        # 2. Initialize application configuration
+        # 2) Initialize application config
         self.config.from_object(conf)
 
-        # 3. Register and bind error handlers
+        # 3) Register a global error handler
         self.register_error_handler(Exception, self._register_error_handler)
 
-        # 4. Initialize Flask extensions
+        # 4) Initialize Flask extensions
         db.init_app(self)
         migrate.init_app(self, db, directory="internal/migration")
+        # redis_extension.init_app(self)
+        # celery_extension.init_app(self)
+        logging_extension.init_app(self)
 
-        # 5. Solve CORS
+        # 5) Enable CORS between frontend and backend
         CORS(self, resources={
             r"/*": {
-                "origins": ["*"],
+                "origins": "*",
                 "supports_credentials": True,
-                "methods": ["GET", "POST"],
-                "allow_headers": ["Content-Type"],
+                # "methods": ["GET", "POST"],
+                # "allow_headers": ["Content-Type"],
             }
         })
 
-        # 5. Register application routes
+        # 6) Register application routes
         router.register_router(self)
 
     def _register_error_handler(self, error: Exception):
-        # 1. Check if the exception is a custom exception; if so, extract the message and code
+        # 1) Log the exception details
+        logging.error("An error occurred: %s", error, exc_info=True)
+
+        # 2) If it's our custom exception, return its message/code/data
         if isinstance(error, CustomException):
             return json(Response(
                 code=error.code,
                 message=error.message,
                 data=error.data if error.data is not None else {},
             ))
-        # 2. If it's not a custom exception, it might be an exception thrown by the program or database.
-        #    Extract the information and set the response code to FAIL.
+
+        # 3) Otherwise, it may be a system/DB exception; in dev re-raise, else return FAIL
         if self.debug or os.getenv("FLASK_ENV") == "development":
             raise error
         else:

@@ -6,6 +6,7 @@
 """
 import os
 
+import dotenv
 import weaviate
 from injector import inject
 from langchain_core.documents import Document
@@ -14,6 +15,10 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_weaviate import WeaviateVectorStore
 from weaviate import WeaviateClient
 from weaviate.classes.init import Auth
+
+dotenv.load_dotenv()
+weaviate_url = os.environ["WCD_CLUSTER_URL"]
+weaviate_api_key = os.environ["WCD_API_KEY"]
 
 
 @inject
@@ -26,8 +31,8 @@ class VectorDatabaseService:
         """Constructor that initializes the vector database client and LangChain vector store instance"""
         # 1. Connect to the Weaviate vector database
         self.client = weaviate.connect_to_weaviate_cloud(
-            cluster_url=os.environ.get("WC_CLUSTER_URL"),
-            auth_credentials=Auth.api_key(os.environ["WCD_API_KEY"]),
+            cluster_url=weaviate_url,
+            auth_credentials=Auth.api_key(weaviate_api_key),
         )
         print(self.client.is_ready())
 
