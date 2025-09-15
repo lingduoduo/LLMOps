@@ -7,9 +7,9 @@
 from dataclasses import dataclass
 
 from injector import inject
-from internal.schema.upload_file_schema import UploadFileReq, UploadFileResp, UploadImageReq
 
-from internal.service import CosService
+from internal.schema.upload_file_schema import UploadFileReq, UploadFileResp, UploadImageReq
+from internal.service import S3Service
 from pkg.response import validate_error_json, success_json
 
 
@@ -17,7 +17,7 @@ from pkg.response import validate_error_json, success_json
 @dataclass
 class UploadFileHandler:
     """Upload File Handler"""
-    cos_service: CosService
+    s3_service: S3Service
 
     def upload_file(self):
         """Upload a file/document"""
@@ -27,7 +27,7 @@ class UploadFileHandler:
             return validate_error_json(req.errors)
 
         # 2) Call service to upload the file and get the record
-        upload_file = self.cos_service.upload_file(req.file.data)
+        upload_file = self.s3_service.upload_file(req.file.data)
 
         # 3) Build response and return
         resp = UploadFileResp()
@@ -41,9 +41,9 @@ class UploadFileHandler:
             return validate_error_json(req.errors)
 
         # 2) Call service and upload the file
-        upload_file = self.cos_service.upload_file(req.file.data, True)
+        upload_file = self.s3_service.upload_file(req.file.data, True)
 
         # 3) Get the actual URL of the image
-        image_url = self.cos_service.get_file_url(upload_file.key)
+        image_url = self.s3_service.get_file_url(upload_file.key)
 
         return success_json({"image_url": image_url})

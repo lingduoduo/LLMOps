@@ -13,7 +13,7 @@ from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_openai import OpenAIEmbeddings
 from langchain_weaviate import WeaviateVectorStore
 from weaviate import WeaviateClient
-from weaviate.auth import AuthApiKey
+from weaviate.classes.init import Auth
 
 
 @inject
@@ -25,10 +25,11 @@ class VectorDatabaseService:
     def __init__(self):
         """Constructor that initializes the vector database client and LangChain vector store instance"""
         # 1. Connect to the Weaviate vector database
-        self.client = weaviate.connect_to_wcs(
+        self.client = weaviate.connect_to_weaviate_cloud(
             cluster_url=os.environ.get("WC_CLUSTER_URL"),
-            auth_credentials=AuthApiKey(os.environ["WCD_API_KEY"]),
+            auth_credentials=Auth.api_key(os.environ["WCD_API_KEY"]),
         )
+        print(self.client.is_ready())
 
         # 2. Create the LangChain vector store
         self.vector_store = WeaviateVectorStore(
