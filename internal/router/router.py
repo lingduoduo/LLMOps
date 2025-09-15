@@ -10,7 +10,11 @@ from dataclasses import dataclass
 from flask import Flask, Blueprint
 from injector import inject
 
-from internal.handler import AppHandler, BuiltinToolHandler, ApiToolHandler
+from internal.handler import (AppHandler,
+                              BuiltinToolHandler,
+                              ApiToolHandler,
+                              UploadFileHandler
+                              )
 
 
 @inject
@@ -20,6 +24,7 @@ class Router:
     app_handler: AppHandler
     builtin_tool_handler: BuiltinToolHandler
     api_tool_handler: ApiToolHandler
+    upload_file_handler: UploadFileHandler
 
     def register_router(self, app: Flask):
         """Register all routes with the Flask app"""
@@ -82,6 +87,16 @@ class Router:
             "/api-tools/<uuid:provider_id>/delete",
             methods=["POST"],
             view_func=self.api_tool_handler.delete_api_tool_provider,
+        )
+        bp.add_url_rule(
+            "/upload-file/file",
+            methods=["POST"],
+            view_func=self.upload_file_handler.upload_file,
+        )
+        bp.add_url_rule(
+            "/upload-file/image",
+            methods=["POST"],
+            view_func=self.upload_file_handler.upload_image,
         )
 
         # 5. Register the blueprint with the app

@@ -10,7 +10,7 @@ import dotenv
 import weaviate
 from langchain_openai import OpenAIEmbeddings
 from langchain_weaviate import WeaviateVectorStore
-from weaviate.auth import AuthApiKey
+from weaviate.classes.init import Auth
 from weaviate.classes.query import Filter
 
 dotenv.load_dotenv()
@@ -44,10 +44,16 @@ metadatas = [
 # 2. Create client connection
 # client = weaviate.connect_to_local("192.168.2.120", "8080")
 # Alternatively, connect to Weaviate Cloud Service (WCS)
-client = weaviate.connect_to_wcs(
-    cluster_url=os.environ.get("WC_CLUSTER_URL"),
-    auth_credentials=AuthApiKey(os.environ["WCD_API_KEY"]),
+# Best practice: store your credentials in environment variables
+weaviate_url = os.environ["WCD_CLUSTER_URL"]
+weaviate_api_key = os.environ["WCD_API_KEY"]
+
+# Connect to Weaviate Cloud
+client = weaviate.connect_to_weaviate_cloud(
+    cluster_url=weaviate_url,
+    auth_credentials=Auth.api_key(weaviate_api_key),
 )
+print(client.is_ready())
 
 embedding = OpenAIEmbeddings(model="text-embedding-3-small")
 
