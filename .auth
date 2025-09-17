@@ -17,3 +17,13 @@ https://colab.research.google.com/github/Arize-ai/tutorials/blob/main/python/llm
 SPACE_ID
 API_KEY
 
+- [Arize Documentation](https://docs.arize.com/phoenix/notebooks)
+- [LLM Evaluation: The Definitive Guide](https://arize.com/blog-course/llm-evaluation-the-definitive-guide/)
+- [LLM Evaluation: Assessing Large Language Models Using Their Peers](https://arize.com/blog-course/assessing-large-language-models/)
+- [Navigating LLM Leaderboards for Model Selection: An Overview of Benchmark Evaluations](https://arize.com/blog-course/llm-leaderboards-benchmarks/)
+- [Evals from OpenAI: Simplifying and Streamlining LLM Evaluation](https://arize.com/blog-course/evals-openai-simplifying-llm-evaluation/)
+
+Github Repos:
+
+- [Phoenix evals](https://github.com/Arize-ai/phoenix/tree/main/tutorials/evals)
+- [Resources for Evaluation of LLMs / Generative AI](https://github.com/rajshah4/LLM-Evaluation#resources-for-evaluation-of-llms--generative-ai)
