@@ -47,3 +47,23 @@ import certifi
 os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = “/Users/your-path-here”
 
 
+
+E0918 15:54:49.318727000 8335483072 ssl_transport_security.cc:1501]    Handshake failed with fatal error SSL_ERROR_SSL: error:0A000086:SSL routines::certificate verify failed.
+Traceback (most recent call last):
+  File "/Users/huanglin/miniconda3/envs/poc-llm/lib/python3.11/site-packages/arize/experimental/datasets/core/client.py", line 478, in create_dataset
+    writer, metadata_reader = flight_client.do_put(
+                              ^^^^^^^^^^^^^^^^^^^^^
+  File "pyarrow/_flight.pyx", line 1732, in pyarrow._flight.FlightClient.do_put
+  File "pyarrow/_flight.pyx", line 68, in pyarrow._flight.check_flight_status
+pyarrow._flight.FlightUnavailableError: Flight returned unavailable error, with message: failed to connect to all addresses; last error: UNKNOWN: ipv4:34.117.96.240:443: Ssl handshake failed: SSL_ERROR_SSL: error:0A000086:SSL routines::certificate verify failed. gRPC client debug context: UNKNOWN:failed to connect to all addresses; last error: UNKNOWN: ipv4:34.117.96.240:443: Ssl handshake failed: SSL_ERROR_SSL: error:0A000086:SSL routines::certificate verify failed {grpc_status:14, created_time:"2025-09-18T15:54:49.321443-04:00"}. Additionally, could not finish writing record batches before closing. Client context: IOError: Could not write record batch to stream (server disconnect?). Detail: flight::ServerErrorTagStatusDetail
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/huanglin/Bitbucket/llmops-poc/template-test/arize-ax/experiment.py", line 30, in <module>
+    dataset_id = arize_client.create_dataset(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/huanglin/miniconda3/envs/poc-llm/lib/python3.11/site-packages/arize/experimental/datasets/core/client.py", line 491, in create_dataset
+    raise RuntimeError(
+RuntimeError: Failed to create dataset: name=docs-qa-new-55594, type=1 for space_id=U3BhY2U6MjY4Mjk6RXl5dQ==
+
