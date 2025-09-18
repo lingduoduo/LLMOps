@@ -27,3 +27,23 @@ Github Repos:
 
 - [Phoenix evals](https://github.com/Arize-ai/phoenix/tree/main/tutorials/evals)
 - [Resources for Evaluation of LLMs / Generative AI](https://github.com/rajshah4/LLM-Evaluation#resources-for-evaluation-of-llms--generative-ai)
+
+openssl s_client -connect otlp.arize.com:443 -showcerts </dev/null \
+
+ | awk '/BEGIN CERTIFICATE/{f="y"} f{print} /END CERTIFICATE/{f=""}' \
+
+ \> /Users/XXXXXX
+
+
+
+import certifi
+
+os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = certifi.where()
+
+
+
+import certifi
+
+os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = “/Users/your-path-here”
+
+
