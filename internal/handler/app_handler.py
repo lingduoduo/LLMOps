@@ -24,6 +24,7 @@ from internal.schema.app_schema import CompletionReq
 # from internal.service import ApiToolService
 from internal.service import AppService, VectorDatabaseService
 from internal.service import BuiltinToolService
+from internal.task.demo_task import demo_task
 from pkg.response import success_json, validate_error_json, success_message
 
 
@@ -152,7 +153,9 @@ class AppHandler:
     def ping(self):
         """Health check endpoint"""
         # raise FailException("Data not found")
-        return {"ping": "pong"}
+        # return {"ping": "pong"}
+        demo_task.delay(uuid.uuid4())
+
         # google_serper = self.provider_factory.get_tool("google", "google_serper")()
         # print(google_serper)
         # print(google_serper.invoke("What is the world record for marathon?"))

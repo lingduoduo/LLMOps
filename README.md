@@ -187,3 +187,10 @@ git remote set-url origin git@github.com:lingduoduo/LLMOps.git
 ssh -T git@github.com    # should say "Hi <your-username>!"
 git push
 ```
+
+### Celery
+
+```
+celery -A app.http.app.celery worker --loglevel INFO --logfile storage/log/celery.log
+```
+

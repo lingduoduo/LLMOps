@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@Author  : thezehui@gmail.com
 @File    : upload_file_handler.py
 """
 from dataclasses import dataclass

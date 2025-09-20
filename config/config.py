@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@Time    : 2024/4/1 14:50
 @File    : config.py
 """
 import os
@@ -11,12 +10,12 @@ from .default_config import DEFAULT_CONFIG
 
 
 def _get_env(key: str) -> Any:
-    """Get a config value from environment variables; fall back to the default if not found."""
+    """Get a config value from environment variables; fall back to DEFAULT_CONFIG if not found."""
     return os.getenv(key, DEFAULT_CONFIG.get(key))
 
 
 def _get_bool_env(key: str) -> bool:
-    """Get a boolean config value from environment variables; fall back to the default if not found."""
+    """Get a boolean config value from environment variables; fall back to DEFAULT_CONFIG if not found."""
     value: str = _get_env(key)
     return value.lower() == "true" if value is not None else False
 
@@ -26,7 +25,7 @@ class Config:
         # Disable WTForms CSRF protection
         self.WTF_CSRF_ENABLED = _get_bool_env("WTF_CSRF_ENABLED")
 
-        # SQLAlchemy database configuration
+        # SQLAlchemy configuration
         self.SQLALCHEMY_DATABASE_URI = _get_env("SQLALCHEMY_DATABASE_URI")
         self.SQLALCHEMY_ENGINE_OPTIONS = {
             "pool_size": int(_get_env("SQLALCHEMY_POOL_SIZE")),

@@ -12,7 +12,7 @@ from flask_migrate import Migrate
 
 from config import Config
 from internal.exception import CustomException
-from internal.extension import logging_extension, redis_extension
+from internal.extension import logging_extension, redis_extension, celery_extension
 from internal.router import Router
 from pkg.response import json, Response, HttpCode
 from pkg.sqlalchemy import SQLAlchemy
@@ -30,23 +30,23 @@ class Http(Flask):
             router: Router,
             **kwargs,
     ):
-        # 1) Call parent constructor to initialize
+        # 1) Call the parent constructor to initialize
         super().__init__(*args, **kwargs)
 
-        # 2) Initialize application config
+        # 2) Load application configuration
         self.config.from_object(conf)
 
-        # 3) Register a global error handler
+        # 3) Register a global exception handler
         self.register_error_handler(Exception, self._register_error_handler)
 
         # 4) Initialize Flask extensions
         db.init_app(self)
         migrate.init_app(self, db, directory="internal/migration")
         redis_extension.init_app(self)
-        # celery_extension.init_app(self)
+        celery_extension.init_app(self)
         logging_extension.init_app(self)
 
-        # 5) Enable CORS between frontend and backend
+        # 5) Enable CORS to resolve cross-origin requests between frontend & backend
         CORS(self, resources={
             r"/*": {
                 "origins": "*",
@@ -63,7 +63,7 @@ class Http(Flask):
         # 1) Log the exception details
         logging.error("An error occurred: %s", error, exc_info=True)
 
-        # 2) If it's our custom exception, return its message/code/data
+        # 2) If this is our CustomException, extract message/code/etc.
         if isinstance(error, CustomException):
             return json(Response(
                 code=error.code,
@@ -71,7 +71,8 @@ class Http(Flask):
                 data=error.data if error.data is not None else {},
             ))
 
-        # 3) Otherwise, it may be a system/DB exception; in dev re-raise, else return FAIL
+        # 3) Otherwise, it may be a program/DB exception; expose details in dev,
+        #    or return a FAIL status code in non-debug environments.
         if self.debug or os.getenv("FLASK_ENV") == "development":
             raise error
         else:
