@@ -1,0 +1,26 @@
+name: dalle3
+label: DALLE-3 Drawing Tool
+description: DALLE-3 is a text-to-image generation tool.
+params:
+  - name: size
+    label: Image Size
+    type: select
+    default: 1024x1024
+    required: true
+    options:
+      - value: 1024x1024
+        label: "(Square) 1024×1024"
+      - value: 1792x1024
+        label: "(Landscape) 1792×1024"
+      - value: 1024x1792
+        label: "(Portrait) 1024×1792"
+  - name: style
+    label: Image Style
+    type: select
+    default: vivid
+    required: true
+    options:
+      - value: vivid
+        label: "Vivid"
+      - value: natural
+        label: "Natural"
