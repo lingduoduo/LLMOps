@@ -1,0 +1,1166 @@
+[2025-11-01 13:38:47,637.637] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 13:38:47,637.637] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:38:47,638.638] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 13:38:47,638.638] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:38:47,638.638] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 13:38:47,638.638] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:38:47,639.639] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 13:38:47,646.646] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 13:38:47,646.646] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00022s] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 13:38:47,648.648] base.py -> _exec_single_context line:1896 [INFO]: DELETE FROM api_tool WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.account_id = %(account_id_1)s::UUID
+[2025-11-01 13:38:47,648.648] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00011s] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 13:38:47,652.652] base.py -> _exec_single_context line:1896 [INFO]: DELETE FROM api_tool_provider WHERE api_tool_provider.id = %(id)s::UUID
+[2025-11-01 13:38:47,652.652] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00035s] {'id': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 13:38:47,654.654] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 13:38:47,654.654] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.008075s ago] {'pk_1': 'ed3d0910-93d9-4cfe-95a0-f29c09c02974'}
+[2025-11-01 13:38:47,655.655] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 13:39:07,208.208] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 13:39:07,208.208] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:39:07,209.209] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 13:39:07,209.209] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:39:07,209.209] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 13:39:07,209.209] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:39:07,210.210] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 13:39:07,217.217] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 13:39:07,217.217] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00015s] {'pk_1': UUID('b1ffd31f-5cbb-4b35-bc8f-4bafabd78817')}
+[2025-11-01 13:39:07,218.218] http.py -> _register_error_handler line:64 [ERROR]: An error occurred: 
+Traceback (most recent call last):
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/linghuang/Git/LLMOps/internal/handler/api_tool_handler.py", line 61, in update_api_tool_provider
+    self.api_tool_service.update_api_tool_provider(provider_id, req)
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 48, in update_api_tool_provider
+    raise ValidateErrorException("Provider does not exist.")
+internal.exception.exception.ValidateErrorException
+[2025-11-01 13:39:07,220.220] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 13:39:07,220.220] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.003644s ago] {'pk_1': 'b1ffd31f-5cbb-4b35-bc8f-4bafabd78817'}
+[2025-11-01 13:39:07,318.318] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 13:39:39,436.436] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 13:39:39,436.436] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:39:39,437.437] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 13:39:39,437.437] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:39:39,437.437] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 13:39:39,437.437] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:39:39,437.437] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 13:39:39,445.445] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 13:39:39,445.445] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00014s] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 13:39:39,447.447] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name = %(name_1)s AND api_tool_provider.id != %(id_1)s::UUID
+[2025-11-01 13:39:39,447.447] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00010s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': 'test_update_api_tool_provider', 'id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 13:39:39,449.449] base.py -> _exec_single_context line:1896 [INFO]: DELETE FROM api_tool WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.account_id = %(account_id_1)s::UUID
+[2025-11-01 13:39:39,449.449] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 13:39:39,450.450] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 13:39:39,450.450] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 13:39:39,451.451] base.py -> _exec_single_context line:1896 [INFO]: UPDATE api_tool_provider SET name=%(name)s, openapi_schema=%(openapi_schema)s WHERE api_tool_provider.id = %(api_tool_provider_id)s::UUID
+[2025-11-01 13:39:39,451.451] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00006s] {'name': 'test_update_api_tool_provider', 'openapi_schema': '{"description":"Query IP location, weather forecast, route planning, etc. via Gaode toolkit","server":"https://gaode.example.com","paths":{"/weather" ... (341 characters truncated) ... p","parameters":[{"name":"ip","in":"request_body","description":"Standard IP address to query, e.g., 201.52.14.23","required":true,"type":"str"}]}}}}', 'api_tool_provider_id': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 13:39:39,452.452] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 13:39:39,452.452] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.001916s ago] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 13:39:39,453.453] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 13:39:39,453.453] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00013s] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'name': 'GetCurrentWeather', 'description': 'Get weather forecast for a specified city, e.g., Guangzhou', 'url': 'https://gaode.example.com/weather', 'method': 'get', 'parameters': '[{"name": "location", "in": "query", "description": "City name to query weather for", "required": true, "type": "str"}]'}
+[2025-11-01 13:39:39,461.461] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 13:39:39,461.461] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.01171s ago] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 13:39:39,462.462] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 13:39:39,462.462] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.009551s ago] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'name': 'GetLocationForIp', 'description': 'Query IP location based on given IP', 'url': 'https://gaode.example.com/ip', 'method': 'post', 'parameters': '[{"name": "ip", "in": "request_body", "description": "Standard IP address to query, e.g., 201.52.14.23", "required": true, "type": "str"}]'}
+[2025-11-01 13:39:39,463.463] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 13:39:39,463.463] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.01845s ago] {'pk_1': 'ed3d0910-93d9-4cfe-95a0-f29c09c02974'}
+[2025-11-01 13:39:39,464.464] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 13:39:51,984.984] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 13:39:51,984.984] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:39:51,985.985] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 13:39:51,985.985] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:39:51,985.985] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 13:39:51,985.985] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:39:51,985.985] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 13:39:51,992.992] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name = %(name_1)s
+[2025-11-01 13:39:51,992.992] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00017s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': 'Imooc Learning Toolkit'}
+[2025-11-01 13:39:51,994.994] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool_provider (account_id, name, icon, description, openapi_schema, headers) VALUES (%(account_id)s::UUID, %(name)s, %(icon)s, %(description)s, %(openapi_schema)s, %(headers)s::JSONB) RETURNING api_tool_provider.id, api_tool_provider.updated_at, api_tool_provider.created_at
+[2025-11-01 13:39:51,994.994] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00012s] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name': 'Imooc Learning Toolkit', 'icon': 'https://cdn.imooc.com/icon.png', 'description': 'Query IP location, weather forecast, route planning, etc. via Gaode toolkit', 'openapi_schema': '{"description":"Query IP location, weather forecast, route planning, etc. via Gaode toolkit","server":"https://gaode.example.com","paths":{"/weather" ... (337 characters truncated) ... p","parameters":[{"name":"ip","in":"request_body","description":"Standard IP address to query, e.g., 201.52.14.23","required":true,"type":"str"}]}}}}', 'headers': '[{"key": "Authorization", "value": "Bearer access_token"}]'}
+[2025-11-01 13:39:51,997.997] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 13:39:51,997.997] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'pk_1': UUID('06b9b76a-0dce-4548-9f93-8c06ba537de4')}
+[2025-11-01 13:39:51,998.998] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 13:39:51,998.998] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('06b9b76a-0dce-4548-9f93-8c06ba537de4'), 'name': 'GetCurrentWeather', 'description': 'Get weather forecast for a specified city, e.g., Guangzhou', 'url': 'https://gaode.example.com/weather', 'method': 'get', 'parameters': '[{"name": "location", "in": "query", "description": "City name to query weather for", "required": true, "type": "str"}]'}
+[2025-11-01 13:39:51,999.999] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 13:39:51,999.999] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.00182s ago] {'pk_1': UUID('06b9b76a-0dce-4548-9f93-8c06ba537de4')}
+[2025-11-01 13:39:51,999.999] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 13:39:52,000.000] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.001333s ago] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('06b9b76a-0dce-4548-9f93-8c06ba537de4'), 'name': 'GetCurrentIp', 'description': 'Query IP location based on given IP', 'url': 'https://gaode.example.com/ip', 'method': 'post', 'parameters': '[{"name": "ip", "in": "request_body", "description": "Standard IP address to query, e.g., 201.52.14.23", "required": true, "type": "str"}]'}
+[2025-11-01 13:39:52,001.001] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.name = %(name_1)s
+[2025-11-01 13:39:52,001.001] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'name_1': 'Imooc Learning Toolkit'}
+[2025-11-01 13:39:52,001.001] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 13:39:58,053.053] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 13:39:58,053.053] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:39:58,054.054] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 13:39:58,054.054] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:39:58,054.054] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 13:39:58,054.054] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:39:58,054.054] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 13:39:58,055.055] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.name = %(name_1)s
+[2025-11-01 13:39:58,056.056] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'provider_id_1': UUID('3944eee4-9d5a-4ca5-91c1-e56654cbc1e4'), 'name_1': 'GetLocationForIp'}
+[2025-11-01 13:39:58,057.057] http.py -> _register_error_handler line:64 [ERROR]: An error occurred: 
+Traceback (most recent call last):
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/linghuang/Git/LLMOps/internal/handler/api_tool_handler.py", line 67, in get_api_tool
+    api_tool = self.api_tool_service.get_api_tool(provider_id, tool_name)
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 125, in get_api_tool
+    raise NotFoundException("Tool does not exist.")
+internal.exception.exception.NotFoundException
+[2025-11-01 13:39:58,059.059] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 13:39:58,156.156] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 13:39:58,157.157] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.name = %(name_1)s
+[2025-11-01 13:39:58,157.157] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.1012s ago] {'provider_id_1': UUID('3944eee4-9d5a-4ca5-91c1-e56654cbc1e4'), 'name_1': 'Imooc'}
+[2025-11-01 13:39:58,157.157] http.py -> _register_error_handler line:64 [ERROR]: An error occurred: 
+Traceback (most recent call last):
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/linghuang/Git/LLMOps/internal/handler/api_tool_handler.py", line 67, in get_api_tool
+    api_tool = self.api_tool_service.get_api_tool(provider_id, tool_name)
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 125, in get_api_tool
+    raise NotFoundException("Tool does not exist.")
+internal.exception.exception.NotFoundException
+[2025-11-01 13:39:58,158.158] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 13:40:35,044.044] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 13:40:35,044.044] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:40:35,044.044] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 13:40:35,045.045] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:40:35,045.045] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 13:40:35,045.045] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:40:35,045.045] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 13:40:35,046.046] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.name = %(name_1)s
+[2025-11-01 13:40:35,046.046] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'name_1': 'GetLocationForIp'}
+[2025-11-01 13:40:35,048.048] http.py -> _register_error_handler line:64 [ERROR]: An error occurred: 
+Traceback (most recent call last):
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/linghuang/Git/LLMOps/internal/handler/api_tool_handler.py", line 67, in get_api_tool
+    api_tool = self.api_tool_service.get_api_tool(provider_id, tool_name)
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 125, in get_api_tool
+    raise NotFoundException("Tool does not exist.")
+internal.exception.exception.NotFoundException
+[2025-11-01 13:40:35,049.049] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 13:40:35,148.148] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 13:40:35,148.148] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.name = %(name_1)s
+[2025-11-01 13:40:35,148.148] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.1017s ago] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'name_1': 'Imooc'}
+[2025-11-01 13:40:35,149.149] http.py -> _register_error_handler line:64 [ERROR]: An error occurred: 
+Traceback (most recent call last):
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/linghuang/Git/LLMOps/internal/handler/api_tool_handler.py", line 67, in get_api_tool
+    api_tool = self.api_tool_service.get_api_tool(provider_id, tool_name)
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 125, in get_api_tool
+    raise NotFoundException("Tool does not exist.")
+internal.exception.exception.NotFoundException
+[2025-11-01 13:40:35,149.149] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 13:41:16,430.430] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 13:41:16,430.430] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:41:16,431.431] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 13:41:16,431.431] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:41:16,431.431] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 13:41:16,431.431] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 13:41:16,431.431] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 13:41:16,433.433] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.name = %(name_1)s
+[2025-11-01 13:41:16,433.433] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb'), 'name_1': 'GetLocationForIp'}
+[2025-11-01 13:41:16,434.434] http.py -> _register_error_handler line:64 [ERROR]: An error occurred: 
+Traceback (most recent call last):
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/linghuang/Git/LLMOps/internal/handler/api_tool_handler.py", line 67, in get_api_tool
+    api_tool = self.api_tool_service.get_api_tool(provider_id, tool_name)
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 125, in get_api_tool
+    raise NotFoundException("Tool does not exist.")
+internal.exception.exception.NotFoundException
+[2025-11-01 13:41:16,436.436] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 13:41:16,534.534] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 13:41:16,534.534] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.name = %(name_1)s
+[2025-11-01 13:41:16,534.534] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.1013s ago] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb'), 'name_1': 'Imooc'}
+[2025-11-01 13:41:16,534.534] http.py -> _register_error_handler line:64 [ERROR]: An error occurred: 
+Traceback (most recent call last):
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/linghuang/Git/LLMOps/internal/handler/api_tool_handler.py", line 67, in get_api_tool
+    api_tool = self.api_tool_service.get_api_tool(provider_id, tool_name)
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 125, in get_api_tool
+    raise NotFoundException("Tool does not exist.")
+internal.exception.exception.NotFoundException
+[2025-11-01 13:41:16,535.535] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 13:42:41,798.798] http.py -> _register_error_handler line:64 [ERROR]: An error occurred: 
+Traceback (most recent call last):
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/linghuang/Git/LLMOps/internal/handler/builtin_tool_handler.py", line 31, in get_provider_tool
+    builtin_tool = self.builtin_tool_service.get_provider_tool(provider_name, tool_name)
+  File "/Users/linghuang/Git/LLMOps/internal/service/builtin_tool_service.py", line 63, in get_provider_tool
+    raise NotFoundException(f"Provider '{provider_name}' not found")
+internal.exception.exception.NotFoundException
+[2025-11-01 16:18:33,444.444] http.py -> _register_error_handler line:64 [ERROR]: An error occurred: 
+Traceback (most recent call last):
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 211, in parse_openapi_schema
+    raise
+RuntimeError: No active exception to reraise
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/linghuang/Git/LLMOps/internal/handler/api_tool_handler.py", line 93, in validate_openapi_schema
+    self.api_tool_service.parse_openapi_schema(req.openapi_schema.data)
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 213, in parse_openapi_schema
+    raise ValidateErrorException("Provided data must be a valid OpenAPI-compliant JSON string.")
+internal.exception.exception.ValidateErrorException
+[2025-11-01 16:18:52,111.111] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 16:18:52,111.111] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:18:52,113.113] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 16:18:52,113.113] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:18:52,114.114] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 16:18:52,114.114] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:18:52,115.115] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:18:52,116.116] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 16:18:52,116.116] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00010s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'param_1': 20, 'param_2': 0}
+[2025-11-01 16:18:52,121.121] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID) AS anon_1
+[2025-11-01 16:18:52,121.121] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 16:18:52,122.122] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:18:52,122.122] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'provider_id_1': UUID('10693d70-c214-4af3-b6ba-a82ebcc80965')}
+[2025-11-01 16:18:52,123.123] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:18:52,123.123] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.001093s ago] {'provider_id_1': UUID('67a6978f-055f-47d4-aa37-16b50d60ee41')}
+[2025-11-01 16:18:52,124.124] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:18:52,124.124] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.001543s ago] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:18:52,124.124] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:18:52,124.124] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.002054s ago] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 16:18:52,125.125] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:18:52,127.127] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:18:52,128.128] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 16:18:52,128.128] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.0116s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'param_1': 20, 'param_2': 20}
+[2025-11-01 16:18:52,128.128] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID) AS anon_1
+[2025-11-01 16:18:52,128.128] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.007527s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 16:18:52,129.129] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:18:52,130.130] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:18:52,130.130] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 16:18:52,131.131] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Gaode%', 'param_1': 20, 'param_2': 0}
+[2025-11-01 16:18:52,132.132] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s) AS anon_1
+[2025-11-01 16:18:52,133.133] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00006s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Gaode%'}
+[2025-11-01 16:18:52,133.133] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:18:52,133.133] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.01092s ago] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:18:52,133.133] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:18:52,133.133] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.01136s ago] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 16:18:52,134.134] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:18:52,231.231] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:18:52,231.231] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 16:18:52,231.231] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.1004s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Ling Toolkit%', 'param_1': 20, 'param_2': 0}
+[2025-11-01 16:18:52,232.232] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s) AS anon_1
+[2025-11-01 16:18:52,232.232] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.09934s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Ling Toolkit%'}
+[2025-11-01 16:18:52,232.232] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:19:04,919.919] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 16:19:04,919.919] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:19:04,920.920] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 16:19:04,920.920] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:19:04,920.920] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 16:19:04,920.920] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:19:04,920.920] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:19:04,921.921] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:19:04,922.922] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00010s] {'pk_1': UUID('fadb32bf-2db0-4469-ae12-183ff077faa6')}
+[2025-11-01 16:19:04,923.923] http.py -> _register_error_handler line:64 [ERROR]: An error occurred: 
+Traceback (most recent call last):
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/linghuang/Git/LLMOps/internal/handler/api_tool_handler.py", line 75, in get_api_tool_provider
+    api_tool_provider = self.api_tool_service.get_api_tool_provider(provider_id)
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 139, in get_api_tool_provider
+    raise NotFoundException("Provider does not exist.")
+internal.exception.exception.NotFoundException
+[2025-11-01 16:19:04,925.925] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:19:04,926.926] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:19:04,927.927] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:19:04,927.927] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.005133s ago] {'pk_1': UUID('fadb32bf-2db0-4469-ae12-183ff077faa6')}
+[2025-11-01 16:19:04,927.927] http.py -> _register_error_handler line:64 [ERROR]: An error occurred: 
+Traceback (most recent call last):
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/linghuang/Git/LLMOps/internal/handler/api_tool_handler.py", line 75, in get_api_tool_provider
+    api_tool_provider = self.api_tool_service.get_api_tool_provider(provider_id)
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 139, in get_api_tool_provider
+    raise NotFoundException("Provider does not exist.")
+internal.exception.exception.NotFoundException
+[2025-11-01 16:19:04,927.927] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:19:46,947.947] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 16:19:46,947.947] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:19:46,948.948] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 16:19:46,948.948] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:19:46,948.948] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 16:19:46,948.948] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:19:46,949.949] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:19:46,950.950] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:19:46,950.950] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'pk_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 16:19:46,952.952] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:19:46,954.954] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:19:46,954.954] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:19:46,954.954] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.004037s ago] {'pk_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 16:19:46,955.955] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:22:39,892.892] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 16:22:39,892.892] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:22:39,893.893] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 16:22:39,893.893] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:22:39,893.893] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 16:22:39,893.893] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:22:39,893.893] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:22:39,900.900] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:22:39,900.900] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00011s] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:22:39,903.903] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name = %(name_1)s AND api_tool_provider.id != %(id_1)s::UUID
+[2025-11-01 16:22:39,903.903] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': 'test_update_api_tool_provider', 'id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:22:39,905.905] base.py -> _exec_single_context line:1896 [INFO]: DELETE FROM api_tool WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.account_id = %(account_id_1)s::UUID
+[2025-11-01 16:22:39,905.905] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 16:22:39,908.908] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:22:39,908.908] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00006s] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:22:39,909.909] base.py -> _exec_single_context line:1896 [INFO]: UPDATE api_tool_provider SET name=%(name)s, openapi_schema=%(openapi_schema)s WHERE api_tool_provider.id = %(api_tool_provider_id)s::UUID
+[2025-11-01 16:22:39,909.909] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'name': 'test_update_api_tool_provider', 'openapi_schema': '{"description":"Query IP location, weather forecast, route planning, etc. via Gaode toolkit","server":"https://gaode.example.com","paths":{"/weather" ... (341 characters truncated) ... p","parameters":[{"name":"ip","in":"request_body","description":"Standard IP address to query, e.g., 201.52.14.23","required":true,"type":"str"}]}}}}', 'api_tool_provider_id': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:22:39,910.910] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:22:39,910.910] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.002246s ago] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:22:39,912.912] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 16:22:39,912.912] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'name': 'GetCurrentWeather', 'description': 'Get weather forecast for a specified city, e.g., Guangzhou', 'url': 'https://gaode.example.com/weather', 'method': 'get', 'parameters': '[{"name": "location", "in": "query", "description": "City name to query weather for", "required": true, "type": "str"}]'}
+[2025-11-01 16:22:39,921.921] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:22:39,921.921] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.01319s ago] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:22:39,922.922] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 16:22:39,922.922] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.01017s ago] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'name': 'GetLocationForIp', 'description': 'Query IP location based on given IP', 'url': 'https://gaode.example.com/ip', 'method': 'post', 'parameters': '[{"name": "ip", "in": "request_body", "description": "Standard IP address to query, e.g., 201.52.14.23", "required": true, "type": "str"}]'}
+[2025-11-01 16:22:39,923.923] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:22:39,923.923] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.02314s ago] {'pk_1': 'ed3d0910-93d9-4cfe-95a0-f29c09c02974'}
+[2025-11-01 16:22:39,924.924] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:22:47,252.252] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 16:22:47,252.252] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:22:47,253.253] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 16:22:47,253.253] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:22:47,254.254] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 16:22:47,254.254] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:22:47,254.254] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:22:47,261.261] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:22:47,261.261] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00012s] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:22:47,263.263] base.py -> _exec_single_context line:1896 [INFO]: DELETE FROM api_tool WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.account_id = %(account_id_1)s::UUID
+[2025-11-01 16:22:47,263.263] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 16:22:47,265.265] base.py -> _exec_single_context line:1896 [INFO]: DELETE FROM api_tool_provider WHERE api_tool_provider.id = %(id)s::UUID
+[2025-11-01 16:22:47,265.265] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'id': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:22:47,265.265] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:22:47,265.265] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.004678s ago] {'pk_1': 'ed3d0910-93d9-4cfe-95a0-f29c09c02974'}
+[2025-11-01 16:22:47,266.266] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:48:32,037.037] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 16:48:32,037.037] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:48:32,040.040] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 16:48:32,040.040] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:48:32,050.050] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 16:48:32,050.050] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:48:32,050.050] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:48:32,052.052] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 16:48:32,052.052] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00011s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'param_1': 20, 'param_2': 0}
+[2025-11-01 16:48:32,055.055] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID) AS anon_1
+[2025-11-01 16:48:32,055.055] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 16:48:32,056.056] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:48:32,056.056] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'provider_id_1': UUID('10693d70-c214-4af3-b6ba-a82ebcc80965')}
+[2025-11-01 16:48:32,057.057] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:48:32,057.057] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.0007137s ago] {'provider_id_1': UUID('67a6978f-055f-47d4-aa37-16b50d60ee41')}
+[2025-11-01 16:48:32,057.057] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:48:32,057.057] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.001186s ago] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:48:32,058.058] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:48:32,058.058] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.001669s ago] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 16:48:32,059.059] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:48:32,061.061] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:48:32,061.061] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 16:48:32,061.061] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.009821s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'param_1': 20, 'param_2': 20}
+[2025-11-01 16:48:32,062.062] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID) AS anon_1
+[2025-11-01 16:48:32,063.063] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.007635s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 16:48:32,064.064] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:48:32,065.065] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:48:32,066.066] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 16:48:32,066.066] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00011s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Gaode%', 'param_1': 20, 'param_2': 0}
+[2025-11-01 16:48:32,068.068] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s) AS anon_1
+[2025-11-01 16:48:32,068.068] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Gaode%'}
+[2025-11-01 16:48:32,069.069] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:48:32,069.069] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.0126s ago] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:48:32,069.069] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:48:32,069.069] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.01314s ago] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 16:48:32,072.072] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:48:32,173.173] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:48:32,173.173] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 16:48:32,173.173] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.1071s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Ling Toolkit%', 'param_1': 20, 'param_2': 0}
+[2025-11-01 16:48:32,189.189] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s) AS anon_1
+[2025-11-01 16:48:32,189.189] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.1213s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Ling Toolkit%'}
+[2025-11-01 16:48:32,190.190] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:50:36,132.132] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 16:50:36,133.133] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:50:36,136.136] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 16:50:36,136.136] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:50:36,136.136] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 16:50:36,136.136] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:50:36,137.137] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:50:36,138.138] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 16:50:36,138.138] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'param_1': 20, 'param_2': 0}
+[2025-11-01 16:50:36,164.164] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID) AS anon_1
+[2025-11-01 16:50:36,164.164] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00016s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 16:50:36,169.169] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:50:36,169.169] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00011s] {'provider_id_1': UUID('10693d70-c214-4af3-b6ba-a82ebcc80965')}
+[2025-11-01 16:50:36,170.170] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:50:36,170.170] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.0009577s ago] {'provider_id_1': UUID('67a6978f-055f-47d4-aa37-16b50d60ee41')}
+[2025-11-01 16:50:36,170.170] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:50:36,170.170] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.001415s ago] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:50:36,171.171] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:50:36,171.171] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.00181s ago] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 16:50:36,172.172] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:50:36,174.174] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:50:36,174.174] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 16:50:36,174.174] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.0364s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'param_1': 20, 'param_2': 20}
+[2025-11-01 16:50:36,175.175] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID) AS anon_1
+[2025-11-01 16:50:36,175.175] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.01106s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 16:50:36,176.176] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:50:36,178.178] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:50:36,178.178] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 16:50:36,178.178] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00010s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Gaode%', 'param_1': 20, 'param_2': 0}
+[2025-11-01 16:50:36,180.180] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s) AS anon_1
+[2025-11-01 16:50:36,181.181] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00011s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Gaode%'}
+[2025-11-01 16:50:36,181.181] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:50:36,181.181] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.0123s ago] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:50:36,188.188] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:50:36,188.188] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.01882s ago] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 16:50:36,189.189] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:50:36,190.190] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:50:36,191.191] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 16:50:36,191.191] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.01232s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Ling Toolkit%', 'param_1': 20, 'param_2': 0}
+[2025-11-01 16:50:36,191.191] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s) AS anon_1
+[2025-11-01 16:50:36,191.191] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.011s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Ling Toolkit%'}
+[2025-11-01 16:50:36,192.192] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:54:30,580.580] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 16:54:30,580.580] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:54:30,589.589] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 16:54:30,589.589] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:54:30,590.590] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 16:54:30,590.590] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:54:30,591.591] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:54:30,592.592] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.name = %(name_1)s
+[2025-11-01 16:54:30,592.592] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00011s] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb'), 'name_1': 'GetCurrentIp'}
+[2025-11-01 16:54:30,595.595] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:54:30,595.595] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00010s] {'pk_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 16:54:30,597.597] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:54:30,599.599] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:54:30,599.599] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.name = %(name_1)s
+[2025-11-01 16:54:30,599.599] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.007438s ago] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb'), 'name_1': 'Imooc'}
+[2025-11-01 16:54:30,600.600] http.py -> _register_error_handler line:64 [ERROR]: An error occurred: 
+Traceback (most recent call last):
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/linghuang/Git/LLMOps/internal/handler/api_tool_handler.py", line 67, in get_api_tool
+    api_tool = self.api_tool_service.get_api_tool(provider_id, tool_name)
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 125, in get_api_tool
+    raise NotFoundException("Tool does not exist.")
+internal.exception.exception.NotFoundException
+[2025-11-01 16:54:30,602.602] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:57:05,782.782] http.py -> _register_error_handler line:64 [ERROR]: An error occurred: 
+Traceback (most recent call last):
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 211, in parse_openapi_schema
+    raise
+RuntimeError: No active exception to reraise
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/linghuang/Git/LLMOps/internal/handler/api_tool_handler.py", line 93, in validate_openapi_schema
+    self.api_tool_service.parse_openapi_schema(req.openapi_schema.data)
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 213, in parse_openapi_schema
+    raise ValidateErrorException("Provided data must be a valid OpenAPI-compliant JSON string.")
+internal.exception.exception.ValidateErrorException
+[2025-11-01 16:57:05,814.814] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 16:57:05,814.814] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:57:05,814.814] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 16:57:05,815.815] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:57:05,815.815] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 16:57:05,815.815] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 16:57:05,815.815] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:57:05,816.816] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 16:57:05,816.816] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'param_1': 20, 'param_2': 0}
+[2025-11-01 16:57:05,819.819] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID) AS anon_1
+[2025-11-01 16:57:05,819.819] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 16:57:05,820.820] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:57:05,820.820] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00006s] {'provider_id_1': UUID('10693d70-c214-4af3-b6ba-a82ebcc80965')}
+[2025-11-01 16:57:05,821.821] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:57:05,821.821] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.0008785s ago] {'provider_id_1': UUID('67a6978f-055f-47d4-aa37-16b50d60ee41')}
+[2025-11-01 16:57:05,821.821] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:57:05,821.821] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.001312s ago] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:57:05,822.822] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:57:05,822.822] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.001784s ago] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 16:57:05,823.823] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:57:05,824.824] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:57:05,825.825] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 16:57:05,825.825] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.008185s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'param_1': 20, 'param_2': 20}
+[2025-11-01 16:57:05,825.825] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID) AS anon_1
+[2025-11-01 16:57:05,825.825] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.006317s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 16:57:05,826.826] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:57:05,827.827] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:57:05,828.828] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 16:57:05,828.828] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Gaode%', 'param_1': 20, 'param_2': 0}
+[2025-11-01 16:57:05,829.829] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s) AS anon_1
+[2025-11-01 16:57:05,829.829] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Gaode%'}
+[2025-11-01 16:57:05,829.829] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:57:05,829.829] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.009269s ago] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:57:05,830.830] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 16:57:05,830.830] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.009762s ago] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 16:57:05,831.831] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:57:05,832.832] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:57:05,832.832] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 16:57:05,833.833] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.004914s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Ling Toolkit%', 'param_1': 20, 'param_2': 0}
+[2025-11-01 16:57:05,833.833] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s) AS anon_1
+[2025-11-01 16:57:05,833.833] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.004561s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Ling Toolkit%'}
+[2025-11-01 16:57:05,834.834] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:57:05,836.836] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:57:05,836.836] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:57:05,836.836] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00011s] {'pk_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 16:57:05,837.837] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:57:05,839.839] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:57:05,839.839] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:57:05,839.839] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.002442s ago] {'pk_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 16:57:05,840.840] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:57:05,841.841] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:57:05,841.841] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.name = %(name_1)s
+[2025-11-01 16:57:05,841.841] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb'), 'name_1': 'GetCurrentIp'}
+[2025-11-01 16:57:05,842.842] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:57:05,843.843] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.006159s ago] {'pk_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 16:57:05,844.844] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:57:05,846.846] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:57:05,846.846] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.name = %(name_1)s
+[2025-11-01 16:57:05,846.846] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.00488s ago] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb'), 'name_1': 'Ling'}
+[2025-11-01 16:57:05,847.847] http.py -> _register_error_handler line:64 [ERROR]: An error occurred: 
+Traceback (most recent call last):
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/linghuang/Git/LLMOps/internal/handler/api_tool_handler.py", line 67, in get_api_tool
+    api_tool = self.api_tool_service.get_api_tool(provider_id, tool_name)
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 125, in get_api_tool
+    raise NotFoundException("Tool does not exist.")
+internal.exception.exception.NotFoundException
+[2025-11-01 16:57:05,847.847] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:57:05,848.848] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:57:05,850.850] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name = %(name_1)s
+[2025-11-01 16:57:05,850.850] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00011s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': 'Ling Learning Toolkit'}
+[2025-11-01 16:57:05,851.851] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool_provider (account_id, name, icon, description, openapi_schema, headers) VALUES (%(account_id)s::UUID, %(name)s, %(icon)s, %(description)s, %(openapi_schema)s, %(headers)s::JSONB) RETURNING api_tool_provider.id, api_tool_provider.updated_at, api_tool_provider.created_at
+[2025-11-01 16:57:05,851.851] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name': 'Ling Learning Toolkit', 'icon': 'https://cdn.imooc.com/icon.png', 'description': 'Query IP location, weather forecast, route planning, etc. via Gaode toolkit', 'openapi_schema': '{"description":"Query IP location, weather forecast, route planning, etc. via Gaode toolkit","server":"https://gaode.example.com","paths":{"/weather" ... (337 characters truncated) ... p","parameters":[{"name":"ip","in":"request_body","description":"Standard IP address to query, e.g., 201.52.14.23","required":true,"type":"str"}]}}}}', 'headers': '[{"key": "Authorization", "value": "Bearer access_token"}]'}
+[2025-11-01 16:57:05,855.855] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:57:05,855.855] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'pk_1': UUID('7dd4c776-a002-4327-b6bf-ae10ec1b9af2')}
+[2025-11-01 16:57:05,856.856] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 16:57:05,856.856] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('7dd4c776-a002-4327-b6bf-ae10ec1b9af2'), 'name': 'GetCurrentWeather', 'description': 'Get weather forecast for a specified city, e.g., Guangzhou', 'url': 'https://gaode.example.com/weather', 'method': 'get', 'parameters': '[{"name": "location", "in": "query", "description": "City name to query weather for", "required": true, "type": "str"}]'}
+[2025-11-01 16:57:05,857.857] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:57:05,857.857] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.001599s ago] {'pk_1': UUID('7dd4c776-a002-4327-b6bf-ae10ec1b9af2')}
+[2025-11-01 16:57:05,857.857] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 16:57:05,857.857] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.001162s ago] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('7dd4c776-a002-4327-b6bf-ae10ec1b9af2'), 'name': 'GetCurrentIp', 'description': 'Query IP location based on given IP', 'url': 'https://gaode.example.com/ip', 'method': 'post', 'parameters': '[{"name": "ip", "in": "request_body", "description": "Standard IP address to query, e.g., 201.52.14.23", "required": true, "type": "str"}]'}
+[2025-11-01 16:57:05,858.858] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.name = %(name_1)s
+[2025-11-01 16:57:05,858.858] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00006s] {'name_1': 'Imooc Learning Toolkit'}
+[2025-11-01 16:57:05,953.953] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:57:05,953.953] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:57:05,954.954] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:57:05,954.954] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.1179s ago] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:57:05,955.955] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name = %(name_1)s AND api_tool_provider.id != %(id_1)s::UUID
+[2025-11-01 16:57:05,955.955] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00011s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': 'test_update_api_tool_provider', 'id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:57:05,956.956] base.py -> _exec_single_context line:1896 [INFO]: DELETE FROM api_tool WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.account_id = %(account_id_1)s::UUID
+[2025-11-01 16:57:05,957.957] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 16:57:05,958.958] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:57:05,958.958] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.1026s ago] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:57:05,959.959] base.py -> _exec_single_context line:1896 [INFO]: UPDATE api_tool_provider SET name=%(name)s, openapi_schema=%(openapi_schema)s WHERE api_tool_provider.id = %(api_tool_provider_id)s::UUID
+[2025-11-01 16:57:05,959.959] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'name': 'test_update_api_tool_provider', 'openapi_schema': '{"description":"Query IP location, weather forecast, route planning, etc. via Gaode toolkit","server":"https://gaode.example.com","paths":{"/weather" ... (341 characters truncated) ... p","parameters":[{"name":"ip","in":"request_body","description":"Standard IP address to query, e.g., 201.52.14.23","required":true,"type":"str"}]}}}}', 'api_tool_provider_id': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:57:05,959.959] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:57:05,959.959] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.1041s ago] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:57:05,960.960] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 16:57:05,960.960] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.1038s ago] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'name': 'GetCurrentWeather', 'description': 'Get weather forecast for a specified city, e.g., Guangzhou', 'url': 'https://gaode.example.com/weather', 'method': 'get', 'parameters': '[{"name": "location", "in": "query", "description": "City name to query weather for", "required": true, "type": "str"}]'}
+[2025-11-01 16:57:05,961.961] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:57:05,961.961] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.1054s ago] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:57:05,961.961] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 16:57:05,961.961] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.1049s ago] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'name': 'GetLocationForIp', 'description': 'Query IP location based on given IP', 'url': 'https://gaode.example.com/ip', 'method': 'post', 'parameters': '[{"name": "ip", "in": "request_body", "description": "Standard IP address to query, e.g., 201.52.14.23", "required": true, "type": "str"}]'}
+[2025-11-01 16:57:05,962.962] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:57:05,962.962] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.1254s ago] {'pk_1': 'ed3d0910-93d9-4cfe-95a0-f29c09c02974'}
+[2025-11-01 16:57:05,962.962] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 16:57:05,963.963] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 16:57:05,964.964] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:57:05,964.964] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.1274s ago] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:57:05,964.964] base.py -> _exec_single_context line:1896 [INFO]: DELETE FROM api_tool WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.account_id = %(account_id_1)s::UUID
+[2025-11-01 16:57:05,964.964] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.007895s ago] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 16:57:05,965.965] base.py -> _exec_single_context line:1896 [INFO]: DELETE FROM api_tool_provider WHERE api_tool_provider.id = %(id)s::UUID
+[2025-11-01 16:57:05,965.965] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'id': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 16:57:05,965.965] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 16:57:05,965.965] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.129s ago] {'pk_1': 'ed3d0910-93d9-4cfe-95a0-f29c09c02974'}
+[2025-11-01 16:57:05,966.966] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 17:01:38,160.160] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 17:01:38,160.160] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:01:38,161.161] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 17:01:38,161.161] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:01:38,162.162] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 17:01:38,162.162] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:01:38,162.162] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 17:01:38,168.168] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name = %(name_1)s
+[2025-11-01 17:01:38,168.168] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': 'Ling Learning Toolkit'}
+[2025-11-01 17:01:38,171.171] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool_provider (account_id, name, icon, description, openapi_schema, headers) VALUES (%(account_id)s::UUID, %(name)s, %(icon)s, %(description)s, %(openapi_schema)s, %(headers)s::JSONB) RETURNING api_tool_provider.id, api_tool_provider.updated_at, api_tool_provider.created_at
+[2025-11-01 17:01:38,171.171] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name': 'Ling Learning Toolkit', 'icon': 'https://cdn.imooc.com/icon.png', 'description': 'Query IP location, weather forecast, route planning, etc. via Gaode toolkit', 'openapi_schema': '{"description":"Query IP location, weather forecast, route planning, etc. via Gaode toolkit","server":"https://gaode.example.com","paths":{"/weather" ... (337 characters truncated) ... p","parameters":[{"name":"ip","in":"request_body","description":"Standard IP address to query, e.g., 201.52.14.23","required":true,"type":"str"}]}}}}', 'headers': '[{"key": "Authorization", "value": "Bearer access_token"}]'}
+[2025-11-01 17:01:38,176.176] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 17:01:38,176.176] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'pk_1': UUID('2081c107-395e-48b2-836e-14f3cac362ac')}
+[2025-11-01 17:01:38,177.177] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 17:01:38,177.177] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('2081c107-395e-48b2-836e-14f3cac362ac'), 'name': 'GetCurrentWeather', 'description': 'Get weather forecast for a specified city, e.g., Guangzhou', 'url': 'https://gaode.example.com/weather', 'method': 'get', 'parameters': '[{"name": "location", "in": "query", "description": "City name to query weather for", "required": true, "type": "str"}]'}
+[2025-11-01 17:01:38,178.178] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 17:01:38,178.178] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.002582s ago] {'pk_1': UUID('2081c107-395e-48b2-836e-14f3cac362ac')}
+[2025-11-01 17:01:38,179.179] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 17:01:38,179.179] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.002021s ago] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('2081c107-395e-48b2-836e-14f3cac362ac'), 'name': 'GetCurrentIp', 'description': 'Query IP location based on given IP', 'url': 'https://gaode.example.com/ip', 'method': 'post', 'parameters': '[{"name": "ip", "in": "request_body", "description": "Standard IP address to query, e.g., 201.52.14.23", "required": true, "type": "str"}]'}
+[2025-11-01 17:01:38,180.180] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.name = %(name_1)s
+[2025-11-01 17:01:38,180.180] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00006s] {'name_1': 'Ling Learning Toolkit'}
+[2025-11-01 17:01:38,277.277] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 17:02:39,390.390] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 17:02:39,390.390] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:02:39,391.391] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 17:02:39,391.391] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:02:39,391.391] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 17:02:39,391.391] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:02:39,392.392] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 17:02:39,398.398] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name = %(name_1)s
+[2025-11-01 17:02:39,398.398] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00010s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': 'Ling Learning Toolkit'}
+[2025-11-01 17:02:39,401.401] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool_provider (account_id, name, icon, description, openapi_schema, headers) VALUES (%(account_id)s::UUID, %(name)s, %(icon)s, %(description)s, %(openapi_schema)s, %(headers)s::JSONB) RETURNING api_tool_provider.id, api_tool_provider.updated_at, api_tool_provider.created_at
+[2025-11-01 17:02:39,401.401] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name': 'Ling Learning Toolkit', 'icon': 'https://cdn.imooc.com/icon.png', 'description': 'Query IP location, weather forecast, route planning, etc. via Gaode toolkit', 'openapi_schema': '{"description":"Query IP location, weather forecast, route planning, etc. via Gaode toolkit","server":"https://gaode.example.com","paths":{"/weather" ... (337 characters truncated) ... p","parameters":[{"name":"ip","in":"request_body","description":"Standard IP address to query, e.g., 201.52.14.23","required":true,"type":"str"}]}}}}', 'headers': '[{"key": "Authorization", "value": "Bearer access_token"}]'}
+[2025-11-01 17:02:39,405.405] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 17:02:39,405.405] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'pk_1': UUID('ecabb2be-54fb-46c2-a88e-717df6f97ef6')}
+[2025-11-01 17:02:39,406.406] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 17:02:39,406.406] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('ecabb2be-54fb-46c2-a88e-717df6f97ef6'), 'name': 'GetCurrentWeather', 'description': 'Get weather forecast for a specified city, e.g., Guangzhou', 'url': 'https://gaode.example.com/weather', 'method': 'get', 'parameters': '[{"name": "location", "in": "query", "description": "City name to query weather for", "required": true, "type": "str"}]'}
+[2025-11-01 17:02:39,406.406] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 17:02:39,406.406] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.001754s ago] {'pk_1': UUID('ecabb2be-54fb-46c2-a88e-717df6f97ef6')}
+[2025-11-01 17:02:39,407.407] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 17:02:39,407.407] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.001361s ago] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('ecabb2be-54fb-46c2-a88e-717df6f97ef6'), 'name': 'GetCurrentIp', 'description': 'Query IP location based on given IP', 'url': 'https://gaode.example.com/ip', 'method': 'post', 'parameters': '[{"name": "ip", "in": "request_body", "description": "Standard IP address to query, e.g., 201.52.14.23", "required": true, "type": "str"}]'}
+[2025-11-01 17:02:39,408.408] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.name = %(name_1)s
+[2025-11-01 17:02:39,408.408] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00006s] {'name_1': 'Ling Learning Toolkit'}
+[2025-11-01 17:02:39,408.408] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 17:02:58,477.477] http.py -> _register_error_handler line:64 [ERROR]: An error occurred: 
+Traceback (most recent call last):
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 211, in parse_openapi_schema
+    raise
+RuntimeError: No active exception to reraise
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/linghuang/Git/LLMOps/internal/handler/api_tool_handler.py", line 93, in validate_openapi_schema
+    self.api_tool_service.parse_openapi_schema(req.openapi_schema.data)
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 213, in parse_openapi_schema
+    raise ValidateErrorException("Provided data must be a valid OpenAPI-compliant JSON string.")
+internal.exception.exception.ValidateErrorException
+[2025-11-01 17:03:15,281.281] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 17:03:15,282.282] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:03:15,282.282] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 17:03:15,282.282] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:03:15,283.283] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 17:03:15,283.283] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:03:15,283.283] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 17:03:15,284.284] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 17:03:15,284.284] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'param_1': 20, 'param_2': 0}
+[2025-11-01 17:03:15,287.287] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID) AS anon_1
+[2025-11-01 17:03:15,287.287] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 17:03:15,288.288] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 17:03:15,288.288] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'provider_id_1': UUID('10693d70-c214-4af3-b6ba-a82ebcc80965')}
+[2025-11-01 17:03:15,289.289] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 17:03:15,289.289] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.0009853s ago] {'provider_id_1': UUID('67a6978f-055f-47d4-aa37-16b50d60ee41')}
+[2025-11-01 17:03:15,290.290] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 17:03:15,290.290] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.00146s ago] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 17:03:15,290.290] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 17:03:15,290.290] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.001918s ago] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 17:03:15,291.291] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 17:03:15,293.293] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 17:03:15,293.293] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 17:03:15,293.293] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.008799s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'param_1': 20, 'param_2': 20}
+[2025-11-01 17:03:15,294.294] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID) AS anon_1
+[2025-11-01 17:03:15,294.294] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.006627s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 17:03:15,294.294] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 17:03:15,295.295] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 17:03:15,296.296] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 17:03:15,296.296] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Gaode%', 'param_1': 20, 'param_2': 0}
+[2025-11-01 17:03:15,297.297] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s) AS anon_1
+[2025-11-01 17:03:15,297.297] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00010s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Gaode%'}
+[2025-11-01 17:03:15,298.298] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 17:03:15,298.298] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.009446s ago] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 17:03:15,298.298] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID
+[2025-11-01 17:03:15,298.298] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.009903s ago] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 17:03:15,299.299] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 17:03:15,300.300] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 17:03:15,300.300] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s ORDER BY api_tool_provider.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s
+[2025-11-01 17:03:15,300.300] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.004545s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Ling Toolkit%', 'param_1': 20, 'param_2': 0}
+[2025-11-01 17:03:15,301.301] base.py -> _exec_single_context line:1896 [INFO]: SELECT count(*) AS count_1 
+FROM (SELECT api_tool_provider.id AS id, api_tool_provider.account_id AS account_id, api_tool_provider.name AS name, api_tool_provider.icon AS icon, api_tool_provider.description AS description, api_tool_provider.openapi_schema AS openapi_schema, api_tool_provider.headers AS headers, api_tool_provider.updated_at AS updated_at, api_tool_provider.created_at AS created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name ILIKE %(name_1)s) AS anon_1
+[2025-11-01 17:03:15,301.301] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.003598s ago] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': '%Ling Toolkit%'}
+[2025-11-01 17:03:15,301.301] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 17:03:41,797.797] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 17:03:41,798.798] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:03:41,798.798] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 17:03:41,798.798] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:03:41,798.798] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 17:03:41,799.799] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:03:41,799.799] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 17:03:41,800.800] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 17:03:41,800.800] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'pk_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 17:03:41,802.802] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 17:03:41,803.803] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 17:03:41,803.803] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 17:03:41,803.803] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.003657s ago] {'pk_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cc')}
+[2025-11-01 17:03:41,804.804] http.py -> _register_error_handler line:64 [ERROR]: An error occurred: 
+Traceback (most recent call last):
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/linghuang/Git/LLMOps/internal/handler/api_tool_handler.py", line 75, in get_api_tool_provider
+    api_tool_provider = self.api_tool_service.get_api_tool_provider(provider_id)
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 139, in get_api_tool_provider
+    raise NotFoundException("Provider does not exist.")
+internal.exception.exception.NotFoundException
+[2025-11-01 17:03:41,805.805] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 17:03:57,010.010] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 17:03:57,011.011] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:03:57,011.011] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 17:03:57,011.011] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:03:57,012.012] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 17:03:57,012.012] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:03:57,012.012] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 17:03:57,013.013] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.name = %(name_1)s
+[2025-11-01 17:03:57,013.013] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb'), 'name_1': 'GetCurrentIp'}
+[2025-11-01 17:03:57,016.016] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 17:03:57,016.016] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'pk_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb')}
+[2025-11-01 17:03:57,017.017] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 17:03:57,019.019] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 17:03:57,019.019] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool.id AS api_tool_id, api_tool.account_id AS api_tool_account_id, api_tool.provider_id AS api_tool_provider_id, api_tool.name AS api_tool_name, api_tool.description AS api_tool_description, api_tool.url AS api_tool_url, api_tool.method AS api_tool_method, api_tool.parameters AS api_tool_parameters, api_tool.updated_at AS api_tool_updated_at, api_tool.created_at AS api_tool_created_at 
+FROM api_tool 
+WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.name = %(name_1)s
+[2025-11-01 17:03:57,019.019] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.006249s ago] {'provider_id_1': UUID('a4b99b28-dcca-452d-b7ae-86f3188ca9cb'), 'name_1': 'Ling'}
+[2025-11-01 17:03:57,020.020] http.py -> _register_error_handler line:64 [ERROR]: An error occurred: 
+Traceback (most recent call last):
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 870, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/linghuang/miniconda3/envs/llmops/lib/python3.10/site-packages/flask/app.py", line 855, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/linghuang/Git/LLMOps/internal/handler/api_tool_handler.py", line 67, in get_api_tool
+    api_tool = self.api_tool_service.get_api_tool(provider_id, tool_name)
+  File "/Users/linghuang/Git/LLMOps/internal/service/api_tool_service.py", line 125, in get_api_tool
+    raise NotFoundException("Tool does not exist.")
+internal.exception.exception.NotFoundException
+[2025-11-01 17:03:57,021.021] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 17:04:06,023.023] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 17:04:06,023.023] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:04:06,024.024] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 17:04:06,024.024] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:04:06,024.024] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 17:04:06,024.024] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:04:06,024.024] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 17:04:06,031.031] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name = %(name_1)s
+[2025-11-01 17:04:06,031.031] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00012s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': 'Ling Learning Toolkit'}
+[2025-11-01 17:04:06,034.034] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool_provider (account_id, name, icon, description, openapi_schema, headers) VALUES (%(account_id)s::UUID, %(name)s, %(icon)s, %(description)s, %(openapi_schema)s, %(headers)s::JSONB) RETURNING api_tool_provider.id, api_tool_provider.updated_at, api_tool_provider.created_at
+[2025-11-01 17:04:06,034.034] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name': 'Ling Learning Toolkit', 'icon': 'https://cdn.imooc.com/icon.png', 'description': 'Query IP location, weather forecast, route planning, etc. via Gaode toolkit', 'openapi_schema': '{"description":"Query IP location, weather forecast, route planning, etc. via Gaode toolkit","server":"https://gaode.example.com","paths":{"/weather" ... (337 characters truncated) ... p","parameters":[{"name":"ip","in":"request_body","description":"Standard IP address to query, e.g., 201.52.14.23","required":true,"type":"str"}]}}}}', 'headers': '[{"key": "Authorization", "value": "Bearer access_token"}]'}
+[2025-11-01 17:04:06,038.038] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 17:04:06,038.038] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'pk_1': UUID('adb57311-4b6f-4b2a-8f16-e4b8536149ef')}
+[2025-11-01 17:04:06,038.038] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 17:04:06,039.039] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('adb57311-4b6f-4b2a-8f16-e4b8536149ef'), 'name': 'GetCurrentWeather', 'description': 'Get weather forecast for a specified city, e.g., Guangzhou', 'url': 'https://gaode.example.com/weather', 'method': 'get', 'parameters': '[{"name": "location", "in": "query", "description": "City name to query weather for", "required": true, "type": "str"}]'}
+[2025-11-01 17:04:06,039.039] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 17:04:06,039.039] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.001836s ago] {'pk_1': UUID('adb57311-4b6f-4b2a-8f16-e4b8536149ef')}
+[2025-11-01 17:04:06,040.040] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 17:04:06,040.040] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.00145s ago] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('adb57311-4b6f-4b2a-8f16-e4b8536149ef'), 'name': 'GetCurrentIp', 'description': 'Query IP location based on given IP', 'url': 'https://gaode.example.com/ip', 'method': 'post', 'parameters': '[{"name": "ip", "in": "request_body", "description": "Standard IP address to query, e.g., 201.52.14.23", "required": true, "type": "str"}]'}
+[2025-11-01 17:04:06,041.041] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.name = %(name_1)s
+[2025-11-01 17:04:06,041.041] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'name_1': 'Ling Learning Toolkit'}
+[2025-11-01 17:04:06,042.042] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 17:04:31,903.903] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 17:04:31,904.904] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:04:31,904.904] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 17:04:31,904.904] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:04:31,905.905] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 17:04:31,905.905] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:04:31,905.905] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 17:04:31,912.912] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 17:04:31,912.912] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00010s] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 17:04:31,914.914] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.account_id = %(account_id_1)s::UUID AND api_tool_provider.name = %(name_1)s AND api_tool_provider.id != %(id_1)s::UUID
+[2025-11-01 17:04:31,914.914] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00009s] {'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'name_1': 'test_update_api_tool_provider', 'id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 17:04:31,916.916] base.py -> _exec_single_context line:1896 [INFO]: DELETE FROM api_tool WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.account_id = %(account_id_1)s::UUID
+[2025-11-01 17:04:31,916.916] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 17:04:31,917.917] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 17:04:31,917.917] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00006s] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 17:04:31,918.918] base.py -> _exec_single_context line:1896 [INFO]: UPDATE api_tool_provider SET name=%(name)s, openapi_schema=%(openapi_schema)s WHERE api_tool_provider.id = %(api_tool_provider_id)s::UUID
+[2025-11-01 17:04:31,918.918] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00006s] {'name': 'test_update_api_tool_provider', 'openapi_schema': '{"description":"Query IP location, weather forecast, route planning, etc. via Gaode toolkit","server":"https://gaode.example.com","paths":{"/weather" ... (341 characters truncated) ... p","parameters":[{"name":"ip","in":"request_body","description":"Standard IP address to query, e.g., 201.52.14.23","required":true,"type":"str"}]}}}}', 'api_tool_provider_id': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 17:04:31,919.919] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 17:04:31,919.919] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.001557s ago] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 17:04:31,920.920] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 17:04:31,920.920] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00008s] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'name': 'GetCurrentWeather', 'description': 'Get weather forecast for a specified city, e.g., Guangzhou', 'url': 'https://gaode.example.com/weather', 'method': 'get', 'parameters': '[{"name": "location", "in": "query", "description": "City name to query weather for", "required": true, "type": "str"}]'}
+[2025-11-01 17:04:31,922.922] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 17:04:31,922.922] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.005314s ago] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 17:04:31,923.923] base.py -> _exec_single_context line:1896 [INFO]: INSERT INTO api_tool (account_id, provider_id, name, description, url, method, parameters) VALUES (%(account_id)s::UUID, %(provider_id)s::UUID, %(name)s, %(description)s, %(url)s, %(method)s, %(parameters)s::JSONB) RETURNING api_tool.id, api_tool.updated_at, api_tool.created_at
+[2025-11-01 17:04:31,923.923] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.00341s ago] {'account_id': '46db30d1-3199-4e79-a0cd-abf12fa6858f', 'provider_id': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'name': 'GetLocationForIp', 'description': 'Query IP location based on given IP', 'url': 'https://gaode.example.com/ip', 'method': 'post', 'parameters': '[{"name": "ip", "in": "request_body", "description": "Standard IP address to query, e.g., 201.52.14.23", "required": true, "type": "str"}]'}
+[2025-11-01 17:04:31,924.924] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 17:04:31,924.924] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.01267s ago] {'pk_1': 'ed3d0910-93d9-4cfe-95a0-f29c09c02974'}
+[2025-11-01 17:04:31,925.925] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK
+[2025-11-01 17:04:38,679.679] base.py -> _exec_single_context line:1896 [INFO]: select pg_catalog.version()
+[2025-11-01 17:04:38,679.679] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:04:38,680.680] base.py -> _exec_single_context line:1896 [INFO]: select current_schema()
+[2025-11-01 17:04:38,680.680] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:04:38,680.680] base.py -> _exec_single_context line:1896 [INFO]: show standard_conforming_strings
+[2025-11-01 17:04:38,680.680] base.py -> _exec_single_context line:1901 [INFO]: [raw sql] {}
+[2025-11-01 17:04:38,681.681] base.py -> _begin_impl line:1097 [INFO]: BEGIN (implicit)
+[2025-11-01 17:04:38,687.687] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 17:04:38,687.687] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00020s] {'pk_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 17:04:38,690.690] base.py -> _exec_single_context line:1896 [INFO]: DELETE FROM api_tool WHERE api_tool.provider_id = %(provider_id_1)s::UUID AND api_tool.account_id = %(account_id_1)s::UUID
+[2025-11-01 17:04:38,690.690] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'provider_id_1': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974'), 'account_id_1': '46db30d1-3199-4e79-a0cd-abf12fa6858f'}
+[2025-11-01 17:04:38,691.691] base.py -> _exec_single_context line:1896 [INFO]: DELETE FROM api_tool_provider WHERE api_tool_provider.id = %(id)s::UUID
+[2025-11-01 17:04:38,691.691] base.py -> _exec_single_context line:1901 [INFO]: [generated in 0.00007s] {'id': UUID('ed3d0910-93d9-4cfe-95a0-f29c09c02974')}
+[2025-11-01 17:04:38,692.692] base.py -> _exec_single_context line:1896 [INFO]: SELECT api_tool_provider.id AS api_tool_provider_id, api_tool_provider.account_id AS api_tool_provider_account_id, api_tool_provider.name AS api_tool_provider_name, api_tool_provider.icon AS api_tool_provider_icon, api_tool_provider.description AS api_tool_provider_description, api_tool_provider.openapi_schema AS api_tool_provider_openapi_schema, api_tool_provider.headers AS api_tool_provider_headers, api_tool_provider.updated_at AS api_tool_provider_updated_at, api_tool_provider.created_at AS api_tool_provider_created_at 
+FROM api_tool_provider 
+WHERE api_tool_provider.id = %(pk_1)s::UUID
+[2025-11-01 17:04:38,692.692] base.py -> _exec_single_context line:1901 [INFO]: [cached since 0.005108s ago] {'pk_1': 'ed3d0910-93d9-4cfe-95a0-f29c09c02974'}
+[2025-11-01 17:04:38,693.693] base.py -> _rollback_impl line:1123 [INFO]: ROLLBACK

@@ -1,0 +1,4 @@
+name: duckduckgo_search
+label: DuckDuckGo Search
+description: A privacy-focused search engine.
+params: [ ]

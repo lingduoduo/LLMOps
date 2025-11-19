@@ -1,0 +1,21 @@
+Single-database configuration for Flask.
+
+```
+psql -h localhost -U postgres -d llmops
+```
+
+```
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+\q
+```
+
+```
+dropdb llmops
+createdb llmops
+flask --app app.http.app db init
+flask --app app.http.app db migrate -m "initial migration"
+flask --app app.http.app db upgrade
+psql -h localhost -U postgres -d llmops
+flask --app app.http.app db upgrade
+```
+

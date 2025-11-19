@@ -1,0 +1,4 @@
+name: wikipedia_search
+label: Wikipedia Search
+description: A tool for performing Wikipedia searches and extracting snippets and pages.
+params: [ ]

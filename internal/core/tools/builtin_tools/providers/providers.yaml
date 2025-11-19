@@ -1,0 +1,47 @@
+- name: google
+  label: Google
+  description: Google service provider, covering Google Search and other tools.
+  icon: icon.png
+  background: "#E5E7EB"
+  category: search
+  created_at: 1722498386
+
+- name: time
+  label: Time
+  description: A tool for obtaining the current time.
+  icon: icon.svg
+  background: "#E5E7EB"
+  category: tool
+  created_at: 1722498386
+
+- name: duckduckgo
+  label: DuckDuckGo
+  description: A privacy-focused search engine.
+  icon: icon.svg
+  background: "#FFFFFF"
+  category: search
+  created_at: 1722498386
+
+- name: dalle
+  label: DALL·E
+  description: DALL·E is a text-to-image generation tool.
+  icon: icon.png
+  background: "#E5E7EB"
+  category: image
+  created_at: 1722498386
+
+- name: gaode
+  label: Gaode Toolkit
+  description: Includes built-in Gaode weather forecasts and IP lookup functionality.
+  icon: icon.png
+  background: "#E5E7EB"
+  category: tool
+  created_at: 1722498386
+
+- name: wikipedia
+  label: Wikipedia
+  description: Wikipedia is a free online encyclopedia created and edited by volunteers around the world.
+  icon: icon.svg
+  background: "#FFFFFF"
+  category: other
+  created_at: 1722498386
