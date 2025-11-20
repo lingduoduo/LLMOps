@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@Time    : 2024/3/29 15:01
-@Author  : thezehui@gmail.com
 @File    : router.py
 """
 from dataclasses import dataclass
@@ -22,13 +20,15 @@ from internal.handler import (
     AccountHandler,
     AuthHandler,
     AIHandler,
+    ApiKeyHandler,
+    OpenAPIHandler,
 )
 
 
 @inject
 @dataclass
 class Router:
-    """Router"""
+    """Application Router"""
     app_handler: AppHandler
     builtin_tool_handler: BuiltinToolHandler
     api_tool_handler: ApiToolHandler
@@ -40,13 +40,16 @@ class Router:
     account_handler: AccountHandler
     auth_handler: AuthHandler
     ai_handler: AIHandler
+    api_key_handler: ApiKeyHandler
+    openapi_handler: OpenAPIHandler
 
     def register_router(self, app: Flask):
         """Register all routes"""
-        # 1. Create a blueprint
+        # 1. Create blueprints
         bp = Blueprint("llmops", __name__, url_prefix="")
+        openapi_bp = Blueprint("openapi", __name__, url_prefix="")
 
-        # 2. Bind URL paths to handler methods
+        # 2. Bind URLs to controller methods
         bp.add_url_rule("/ping", view_func=self.app_handler.ping)
         bp.add_url_rule("/apps", methods=["POST"], view_func=self.app_handler.create_app)
         bp.add_url_rule("/apps/<uuid:app_id>", view_func=self.app_handler.get_app)
@@ -104,7 +107,7 @@ class Router:
             view_func=self.app_handler.get_debug_conversation_messages_with_page,
         )
 
-        # 3. Built-in tool marketplace module
+        # 3. Built-in tool marketplace
         bp.add_url_rule("/builtin-tools", view_func=self.builtin_tool_handler.get_builtin_tools)
         bp.add_url_rule(
             "/builtin-tools/<string:provider_name>/tools/<string:tool_name>",
@@ -153,11 +156,11 @@ class Router:
             view_func=self.api_tool_handler.delete_api_tool_provider,
         )
 
-        # 4. Upload file module
+        # 4. File upload module
         bp.add_url_rule("/upload-files/file", methods=["POST"], view_func=self.upload_file_handler.upload_file)
         bp.add_url_rule("/upload-files/image", methods=["POST"], view_func=self.upload_file_handler.upload_image)
 
-        # 5. Knowledge base module
+        # 5. Dataset / Knowledge Base module
         bp.add_url_rule("/datasets", view_func=self.dataset_handler.get_datasets_with_page)
         bp.add_url_rule("/datasets", methods=["POST"], view_func=self.dataset_handler.create_dataset)
         bp.add_url_rule("/datasets/<uuid:dataset_id>", view_func=self.dataset_handler.get_dataset)
@@ -234,7 +237,7 @@ class Router:
             view_func=self.dataset_handler.hit,
         )
 
-        # 6. OAuth / authentication module
+        # 6. OAuth & Authentication
         bp.add_url_rule(
             "/oauth/<string:provider_name>",
             view_func=self.oauth_handler.provider,
@@ -255,18 +258,48 @@ class Router:
             view_func=self.auth_handler.logout,
         )
 
-        # 7. Account settings module
+        # 7. Account Settings
         bp.add_url_rule("/account", view_func=self.account_handler.get_current_user)
         bp.add_url_rule("/account/password", methods=["POST"], view_func=self.account_handler.update_password)
         bp.add_url_rule("/account/name", methods=["POST"], view_func=self.account_handler.update_name)
         bp.add_url_rule("/account/avatar", methods=["POST"], view_func=self.account_handler.update_avatar)
 
-        # 8. AI assistance module
+        # 8. AI Assistance module
         bp.add_url_rule("/ai/optimize-prompt", methods=["POST"], view_func=self.ai_handler.optimize_prompt)
         bp.add_url_rule(
-            "/ai/suggested-questions", methods=["POST"],
+            "/ai/suggested-questions",
+            methods=["POST"],
             view_func=self.ai_handler.generate_suggested_questions,
         )
 
-        # 9. Register the blueprint with the Flask app
+        # 9. API Key module
+        bp.add_url_rule("/openapi/api-keys", view_func=self.api_key_handler.get_api_keys_with_page)
+        bp.add_url_rule(
+            "/openapi/api-keys",
+            methods=["POST"],
+            view_func=self.api_key_handler.create_api_key,
+        )
+        bp.add_url_rule(
+            "/openapi/api-keys/<uuid:api_key_id>",
+            methods=["POST"],
+            view_func=self.api_key_handler.update_api_key,
+        )
+        bp.add_url_rule(
+            "/openapi/api-keys/<uuid:api_key_id>/is-active",
+            methods=["POST"],
+            view_func=self.api_key_handler.update_api_key_is_active,
+        )
+        bp.add_url_rule(
+            "/openapi/api-keys/<uuid:api_key_id>/delete",
+            methods=["POST"],
+            view_func=self.api_key_handler.delete_api_key,
+        )
+        openapi_bp.add_url_rule(
+            "/openapi/chat",
+            methods=["POST"],
+            view_func=self.openapi_handler.chat,
+        )
+
+        # 10. Register blueprints to the Flask application
         app.register_blueprint(bp)
+        app.register_blueprint(openapi_bp)
