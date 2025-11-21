@@ -218,18 +218,45 @@ class AppHandler:
         #
         # return success_json({"content": content})
 
-        from internal.entity.dataset_entity import RetrievalStrategy, RetrievalSource
-        dataset_retrieval = self.retrieval_service.create_langchain_tool_from_search(
-            dateset_ids=["123e4567-e89b-12d3-a456-426614174000"],
-            account_id=current_user,
-            tool_name=RetrievalStrategy.SEMANTIC,
-            k=10,
-            score=0.5,
-            retrival_source=RetrievalSource.DEBUGGER,
-        )
-        print(dataset_retrieval.name)
-        print(dataset_retrieval.description)
-        print(dataset_retrieval.args)
+        ############# Dataset retrieval tool test #############
+        # from internal.entity.dataset_entity import RetrievalStrategy, RetrievalSource
+        # dataset_retrieval = self.retrieval_service.create_langchain_tool_from_search(
+        #     dateset_ids=["123e4567-e89b-12d3-a456-426614174000"],
+        #     account_id=current_user,
+        #     tool_name=RetrievalStrategy.SEMANTIC,
+        #     k=10,
+        #     score=0.5,
+        #     retrival_source=RetrievalSource.DEBUGGER,
+        # )
+        # print(dataset_retrieval.name)
+        # print(dataset_retrieval.description)
+        # print(dataset_retrieval.args)
+        #
+        # content = dataset_retrieval.invoke("What is LLM agent?")
+        # return success_json({"content": content})
 
-        content = dataset_retrieval.invoke("What is LLM agent?")
-        return success_json({"content": content})
+        from internal.core.agent.agents import FunctionCallAgent
+        from internal.core.agent.entities.agent_entity import AgentConfig
+        from langchain_openai import ChatOpenAI
+        from langchain_core.messages import HumanMessage
+        from internal.core.tools.builtin_tools.providers.google import google_serper
+        import uuid
+
+        # Initialize the FunctionCallAgent with an OpenAI model and configured tools
+        agent = FunctionCallAgent(
+            llm=ChatOpenAI(model="gpt-4o-mini"),
+            agent_config=AgentConfig(
+                user_id=uuid.uuid4(),  # Generate a random user ID for this request
+                tools=[google_serper()],  # Register the Google Serper search tool
+            )
+        )
+
+        # Invoke the agent with a test query
+        agent_result = agent.invoke({
+            "messages": [
+                HumanMessage("Help me search for the top 3 results of the 2024 Beijing Half Marathon.")
+            ]
+        })
+
+        # Return the agent result as JSON
+        return success_json({"agent_result": agent_result.model_dump()})
