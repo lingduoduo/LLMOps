@@ -15,20 +15,20 @@ from langchain_core.runnables import Runnable, RunnableConfig
 from langgraph.graph.state import CompiledStateGraph
 
 from internal.core.agent.entities.agent_entity import AgentConfig, AgentState
-from internal.core.agent.entities.queue_entity import AgentResult, AgentThought
+from internal.core.agent.entities.queue_entity import AgentResult, AgentThought, QueueEvent
 from internal.exception import FailException
 from .agent_queue_manager import AgentQueueManager
 
 
 class BaseAgent(Serializable, Runnable):
-    """Base agent class built on Runnable"""
+    """Base agent class built on top of Runnable."""
     llm: BaseLanguageModel
     agent_config: AgentConfig
     _agent: CompiledStateGraph = PrivateAttr(None)
     _agent_queue_manager: AgentQueueManager = PrivateAttr(None)
 
     class Config:
-        # Allow arbitrary field types without validators
+        # Allow arbitrary types without validation
         arbitrary_types_allowed = True
 
     def __init__(
@@ -38,7 +38,7 @@ class BaseAgent(Serializable, Runnable):
             *args,
             **kwargs,
     ):
-        """Constructor that initializes the agent graph program"""
+        """Constructor: initialize agent graph structure."""
         super().__init__(*args, llm=llm, agent_config=agent_config, **kwargs)
         self._agent = self._build_agent()
         self._agent_queue_manager = AgentQueueManager(
@@ -48,12 +48,66 @@ class BaseAgent(Serializable, Runnable):
 
     @abstractmethod
     def _build_agent(self) -> CompiledStateGraph:
-        """Build the agent graph; must be implemented by subclasses"""
-        raise NotImplementedError("_build_agent() is not implemented")
+        """Build the agent graph — must be implemented by subclass."""
+        raise NotImplementedError("_build_agent() not implemented")
 
     def invoke(self, input: AgentState, config: Optional[RunnableConfig] = None) -> AgentResult:
-        """Block-style response: generate the full content once and return"""
-        pass
+        """Blocking invocation: returns the complete output after processing."""
+        # 1. Call stream() to get event outputs
+        agent_result = AgentResult(query=input["messages"][0].content)
+        agent_thoughts = {}
+
+        for agent_thought in self.stream(input, config):
+            # 2. Convert event id to string
+            event_id = str(agent_thought.id)
+
+            # 3. Record all events except ping
+            if agent_thought.event != QueueEvent.PING:
+
+                # 4. Special handling for agent_message; this event type accumulates output
+                if agent_thought.event == QueueEvent.AGENT_MESSAGE:
+
+                    # 5. If this event id has not been seen, initialize it
+                    if event_id not in agent_thoughts:
+                        agent_thoughts[event_id] = agent_thought
+                    else:
+                        # 7. Accumulate thought and answer content
+                        agent_thoughts[event_id] = agent_thoughts[event_id].model_copy(update={
+                            "thought": agent_thoughts[event_id].thought + agent_thought.thought,
+                            "answer": agent_thoughts[event_id].answer + agent_thought.answer,
+                            "latency": agent_thought.latency,
+                        })
+
+                    # 8. Append answer text to final result
+                    agent_result.answer += agent_thought.answer
+
+                else:
+                    # 9. Other event types override previous values
+                    agent_thoughts[event_id] = agent_thought
+
+                    # 10. If event is STOP/TIMEOUT/ERROR, update status and error
+                    if agent_thought.event in [QueueEvent.STOP, QueueEvent.TIMEOUT, QueueEvent.ERROR]:
+                        agent_result.status = agent_thought.event
+                        agent_result.error = (
+                            agent_thought.observation if agent_thought.event == QueueEvent.ERROR else ""
+                        )
+
+        # 11. Convert thought dictionary to list
+        agent_result.agent_thoughts = [agent_thought for agent_thought in agent_thoughts.values()]
+
+        # 12. Fill in message used to generate the final answer
+        agent_result.message = next(
+            (agent_thought.message for agent_thought in agent_thoughts.values()
+             if agent_thought.event == QueueEvent.AGENT_MESSAGE),
+            []
+        )
+
+        # 13. Calculate total latency
+        agent_result.latency = sum(
+            agent_thought.latency for agent_thought in agent_thoughts.values()
+        )
+
+        return agent_result
 
     def stream(
             self,
@@ -61,30 +115,27 @@ class BaseAgent(Serializable, Runnable):
             config: Optional[RunnableConfig] = None,
             **kwargs: Optional[Any],
     ) -> Iterator[AgentThought]:
-        """
-        Streaming output: returns content whenever a node finishes
-        or whenever the LLM generates tokens.
-        """
-        # 1. Check if the subclass has successfully built the agent; if not, raise an error
+        """Stream output: returns an event whenever a node or LLM generates a token."""
+        # 1. Ensure agent graph is built
         if not self._agent:
-            raise FailException("Agent has not been successfully built, please verify and try again.")
+            raise FailException("Agent graph was not successfully built, please verify and retry.")
 
-        # 2. Build the task_id and initialize data
+        # 2. Initialize task id and input metadata
         input["task_id"] = input.get("task_id", uuid.uuid4())
         input["history"] = input.get("history", [])
         input["iteration_count"] = input.get("iteration_count", 0)
 
-        # 3. Create a worker thread and run the agent
+        # 3. Start agent computation in a background thread
         thread = Thread(
             target=self._agent.invoke,
             args=(input,)
         )
         thread.start()
 
-        # 4. Use the queue manager to listen for data and yield an iterator
+        # 4. Use queue manager to listen and yield streaming events
         yield from self._agent_queue_manager.listen(input["task_id"])
 
     @property
     def agent_queue_manager(self) -> AgentQueueManager:
-        """Read-only property that returns the agent queue manager"""
+        """Read-only property: return the agent queue manager."""
         return self._agent_queue_manager

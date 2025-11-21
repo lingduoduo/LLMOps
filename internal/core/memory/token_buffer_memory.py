@@ -26,23 +26,37 @@ class TokenBufferMemory:
             max_token_limit: int = 2000,
             message_limit: int = 10,
     ) -> list[AnyMessage]:
-        """Retrieve conversation history messages based on token + message count limits"""
-        # 1. Check whether the conversation exists; if not, return empty list
+        """Get historical messages for a conversation according to token limit and message count limit."""
+        # 1. If the conversation does not exist, return an empty list
         if self.conversation is None:
             return []
 
-        # 2. Query messages for this conversation:
-        #    ordered by time DESC, answer not empty,
-        #    not soft deleted, and status is NORMAL or STOP
-        messages = self.db.session.query(Message).filter(
-            Message.conversation_id == self.conversation.id,
-            Message.answer != "",
-            Message.is_deleted == False,
-            Message.status.in_([MessageStatus.NORMAL, MessageStatus.STOP]),
-        ).order_by(desc("created_at")).limit(message_limit).all()
+        # 2. Query message list for the conversation:
+        #    - ordered by creation time (descending)
+        #    - answer not empty
+        #    - not soft deleted
+        #    - message status in NORMAL / STOP / TIMEOUT
+        messages = (
+            self.db.session.query(Message)
+            .filter(
+                Message.conversation_id == self.conversation.id,
+                Message.answer != "",
+                Message.is_deleted == False,
+                Message.status.in_([
+                    MessageStatus.NORMAL,
+                    MessageStatus.STOP,
+                    MessageStatus.TIMEOUT
+                ]),
+            )
+            .order_by(desc("created_at"))
+            .limit(message_limit)
+            .all()
+        )
+
+        # Reverse to restore chronological order
         messages = list(reversed(messages))
 
-        # 3. Convert message ORM objects into LangChain message list
+        # 3. Convert DB messages into LangChain-compatible message objects
         prompt_messages = []
         for message in messages:
             prompt_messages.extend([
@@ -50,12 +64,14 @@ class TokenBufferMemory:
                 AIMessage(content=message.answer),
             ])
 
-        # 4. Use LangChain's trim_messages to trim history by token limit
+        # 4. Use LangChain's trim_messages to prune the list based on token count
         return trim_messages(
             messages=prompt_messages,
             max_tokens=max_token_limit,
             token_counter=self.model_instance,
             strategy="last",
+            start_on="human",
+            end_on="ai",
         )
 
     def get_history_prompt_text(
@@ -65,9 +81,9 @@ class TokenBufferMemory:
             max_token_limit: int = 2000,
             message_limit: int = 10,
     ) -> str:
-        """Get text-formatted conversation history for short-term memory (for text-generation models)"""
-        # 1. Retrieve message history
+        """Convert conversation history into a text buffer (short-term memory text for LLMs)."""
+        # 1. Get historical message list
         messages = self.get_history_prompt_messages(max_token_limit, message_limit)
 
-        # 2. Convert message list to text using LangChain's get_buffer_string()
+        # 2. Convert message list to plain text using LangChain's get_buffer_string
         return get_buffer_string(messages, human_prefix, ai_prefix)
