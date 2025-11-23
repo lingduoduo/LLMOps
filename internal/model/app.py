@@ -3,7 +3,6 @@
 """
 @File    : app.py
 """
-from internal.entity.app_entity import AppConfigType, DEFAULT_APP_CONFIG
 from sqlalchemy import (
     Column,
     UUID,
@@ -16,23 +15,24 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import JSONB
 
+from internal.entity.app_entity import AppConfigType, DEFAULT_APP_CONFIG
 from internal.entity.conversation_entity import InvokeFrom
 from internal.extension.database_extension import db
 from .conversation import Conversation
 
 
 class App(db.Model):
-    """Base model for AI applications"""
+    """Base model class for AI applications"""
     __tablename__ = "app"
     __table_args__ = (
         PrimaryKeyConstraint("id", name="pk_app_id"),
     )
 
     id = Column(UUID, nullable=False, server_default=text("uuid_generate_v4()"))
-    account_id = Column(UUID, nullable=False)  # Creator account ID
-    app_config_id = Column(UUID, nullable=True)  # Published configuration ID (None means not yet published)
-    draft_app_config_id = Column(UUID, nullable=True)  # Associated draft configuration ID
-    debug_conversation_id = Column(UUID, nullable=True)  # Debugging conversation ID (None means no record)
+    account_id = Column(UUID, nullable=False)  # ID of the account that created this app
+    app_config_id = Column(UUID, nullable=True)  # Published config ID; None means not published
+    draft_app_config_id = Column(UUID, nullable=True)  # Associated draft config ID
+    debug_conversation_id = Column(UUID, nullable=True)  # Debug conversation ID; None means no conversation yet
     name = Column(String(255), nullable=False, server_default=text("''::character varying"))  # App name
     icon = Column(String(255), nullable=False, server_default=text("''::character varying"))  # App icon
     description = Column(Text, nullable=False, server_default=text("''::text"))  # App description
@@ -46,15 +46,22 @@ class App(db.Model):
     created_at = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP(0)"))
 
     @property
+    def app_config(self) -> "AppConfig":
+        """Read-only property that returns the current runtime config of the app"""
+        if not self.app_config_id:
+            return None
+        return db.session.query(AppConfig).get(self.app_config_id)
+
+    @property
     def draft_app_config(self) -> "AppConfigVersion":
-        """Read-only property: return the current draft configuration for this app"""
-        # 1. Retrieve the current draft configuration for the app
+        """Read-only property that returns the current draft config of the app"""
+        # 1. Fetch the current draft config for this app
         app_config_version = db.session.query(AppConfigVersion).filter(
             AppConfigVersion.app_id == self.id,
             AppConfigVersion.config_type == AppConfigType.DRAFT,
         ).one_or_none()
 
-        # 2. If no configuration exists, create a default one
+        # 2. If it does not exist, create a default draft config
         if not app_config_version:
             app_config_version = AppConfigVersion(
                 app_id=self.id,
@@ -69,8 +76,8 @@ class App(db.Model):
 
     @property
     def debug_conversation(self) -> "Conversation":
-        """Retrieve the app’s debugging conversation record"""
-        # 1. Get the conversation record using debug_conversation_id
+        """Get the debug conversation record for this app"""
+        # 1. Get the debug conversation record based on debug_conversation_id
         debug_conversation = None
         if self.debug_conversation_id is not None:
             debug_conversation = db.session.query(Conversation).filter(
@@ -78,11 +85,11 @@ class App(db.Model):
                 Conversation.invoke_from == InvokeFrom.DEBUGGER,
             ).one_or_none()
 
-        # 2. If not found, create a new conversation
+        # 2. If it does not exist, create a new one
         if not self.debug_conversation_id or not debug_conversation:
-            # 3. Use an auto-commit context for DB operations
+            # 3. Enter an auto-commit context
             with db.auto_commit():
-                # 4. Create a new debug conversation and flush to get its ID
+                # 4. Create a new debug conversation record and flush to get its ID
                 debug_conversation = Conversation(
                     app_id=self.id,
                     name="New Conversation",
@@ -92,34 +99,42 @@ class App(db.Model):
                 db.session.add(debug_conversation)
                 db.session.flush()
 
-                # 5. Update the current app’s debug_conversation_id
+                # 5. Update the debug_conversation_id for the current app record
                 self.debug_conversation_id = debug_conversation.id
 
         return debug_conversation
 
 
 class AppConfig(db.Model):
-    """App configuration model"""
+    """Application configuration model"""
     __tablename__ = "app_config"
     __table_args__ = (
         PrimaryKeyConstraint("id", name="pk_app_config_id"),
     )
 
-    id = Column(UUID, nullable=False, server_default=text("uuid_generate_v4()"))  # Configuration ID
-    app_id = Column(UUID, nullable=False)  # Linked app ID
+    id = Column(UUID, nullable=False, server_default=text("uuid_generate_v4()"))  # Config ID
+    app_id = Column(UUID, nullable=False)  # Associated app ID
     model_config = Column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))  # Model configuration
-    dialog_round = Column(Integer, nullable=False, server_default=text("0"))  # Context round count
+    dialog_round = Column(Integer, nullable=False,
+                          server_default=text("0"))  # Number of dialogue context rounds to retain
     preset_prompt = Column(Text, nullable=False, server_default=text("''::text"))  # Preset prompt
-    tools = Column(JSONB, nullable=False, server_default=text("'[]'::jsonb"))  # Associated tools
-    workflows = Column(JSONB, nullable=False, server_default=text("'[]'::jsonb"))  # Associated workflows
+    tools = Column(JSONB, nullable=False, server_default=text("'[]'::jsonb"))  # List of tools associated with the app
+    workflows = Column(JSONB, nullable=False,
+                       server_default=text("'[]'::jsonb"))  # List of workflows associated with the app
     retrieval_config = Column(JSONB, nullable=False, server_default=text("'[]'::jsonb"))  # Retrieval configuration
     long_term_memory = Column(JSONB, nullable=False,
                               server_default=text("'{}'::jsonb"))  # Long-term memory configuration
-    opening_statement = Column(Text, nullable=False, server_default=text("''::text"))  # Opening statement
+    opening_statement = Column(Text, nullable=False, server_default=text("''::text"))  # Opening statement text
     opening_questions = Column(JSONB, nullable=False, server_default=text("'[]'::jsonb"))  # Suggested opening questions
     speech_to_text = Column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))  # Speech-to-text configuration
     text_to_speech = Column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))  # Text-to-speech configuration
-    review_config = Column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))  # Review configuration
+    suggested_after_answer = Column(
+        JSONB,
+        nullable=False,
+        server_default=text("'{\"enable\": true}'::jsonb"),
+    )  # Generate suggested questions after answering
+    review_config = Column(JSONB, nullable=False,
+                           server_default=text("'{}'::jsonb"))  # Review / moderation configuration
     updated_at = Column(
         DateTime,
         nullable=False,
@@ -128,33 +143,50 @@ class AppConfig(db.Model):
     )
     created_at = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP(0)"))
 
+    @property
+    def app_dataset_joins(self) -> list["AppDatasetJoin"]:
+        """Read-only property that returns the knowledge base association records for this config"""
+        return (
+            db.session.query(AppDatasetJoin).filter(
+                AppDatasetJoin.app_id == self.app_id
+            ).all()
+        )
+
 
 class AppConfigVersion(db.Model):
-    """Versioned app configuration history — stores both draft and published versions"""
+    """Application config version history table, storing draft and published configs"""
     __tablename__ = "app_config_version"
     __table_args__ = (
         PrimaryKeyConstraint("id", name="pk_app_config_version_id"),
     )
 
-    id = Column(UUID, nullable=False, server_default=text("uuid_generate_v4()"))  # Configuration ID
-    app_id = Column(UUID, nullable=False)  # Linked app ID
+    id = Column(UUID, nullable=False, server_default=text("uuid_generate_v4()"))  # Config ID
+    app_id = Column(UUID, nullable=False)  # Associated app ID
     model_config = Column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))  # Model configuration
-    dialog_round = Column(Integer, nullable=False, server_default=text("0"))  # Context round count
-    preset_prompt = Column(Text, nullable=False, server_default=text("''::text"))  # Character setup and response logic
-    tools = Column(JSONB, nullable=False, server_default=text("'[]'::jsonb"))  # Associated tools
-    workflows = Column(JSONB, nullable=False, server_default=text("'[]'::jsonb"))  # Associated workflows
-    datasets = Column(JSONB, nullable=False, server_default=text("'[]'::jsonb"))  # Associated knowledge base datasets
+    dialog_round = Column(Integer, nullable=False,
+                          server_default=text("0"))  # Number of dialogue context rounds to retain
+    preset_prompt = Column(Text, nullable=False, server_default=text("''::text"))  # Persona and reply logic
+    tools = Column(JSONB, nullable=False, server_default=text("'[]'::jsonb"))  # List of tools associated with the app
+    workflows = Column(JSONB, nullable=False,
+                       server_default=text("'[]'::jsonb"))  # List of workflows associated with the app
+    datasets = Column(JSONB, nullable=False,
+                      server_default=text("'[]'::jsonb"))  # List of knowledge bases associated with the app
     retrieval_config = Column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))  # Retrieval configuration
     long_term_memory = Column(JSONB, nullable=False,
                               server_default=text("'{}'::jsonb"))  # Long-term memory configuration
-    opening_statement = Column(Text, nullable=False, server_default=text("''::text"))  # Opening statement
+    opening_statement = Column(Text, nullable=False, server_default=text("''::text"))  # Opening statement text
     opening_questions = Column(JSONB, nullable=False, server_default=text("'[]'::jsonb"))  # Suggested opening questions
     speech_to_text = Column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))  # Speech-to-text configuration
     text_to_speech = Column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))  # Text-to-speech configuration
-    review_config = Column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))  # Review configuration
-    version = Column(Integer, nullable=False, server_default=text("0"))  # Version number
-    config_type = Column(String(255), nullable=False,
-                         server_default=text("''::character varying"))  # Configuration type
+    suggested_after_answer = Column(
+        JSONB,
+        nullable=False,
+        server_default=text("'{\"enable\": true}'::jsonb"),
+    )  # Generate suggested questions after answering
+    review_config = Column(JSONB, nullable=False,
+                           server_default=text("'{}'::jsonb"))  # Review / moderation configuration
+    version = Column(Integer, nullable=False, server_default=text("0"))  # Published version number
+    config_type = Column(String(255), nullable=False, server_default=text("''::character varying"))  # Config type
     updated_at = Column(
         DateTime,
         nullable=False,
@@ -165,7 +197,7 @@ class AppConfigVersion(db.Model):
 
 
 class AppDatasetJoin(db.Model):
-    """Association table linking apps with their datasets"""
+    """Model for app–knowledge-base association records"""
     __tablename__ = "app_dataset_join"
     __table_args__ = (
         PrimaryKeyConstraint("id", name="pk_app_dataset_join_id"),
