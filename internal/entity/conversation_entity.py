@@ -120,7 +120,8 @@ class InvokeFrom(str, Enum):
 
 
 class MessageStatus(str, Enum):
-    """Conversation message status."""
-    NORMAL = "normal"  # Normal
-    STOP = "stop"  # Stopped
-    ERROR = "error"  # Error occurred
+    """Message status enum"""
+    NORMAL = "normal"
+    ERROR = "error"
+    STOP = "stop"
+    TIMEOUT = "timeout"

@@ -7,13 +7,13 @@ from enum import Enum
 
 
 class AppStatus(str, Enum):
-    """Enumeration of application statuses"""
+    """Application status enum"""
     DRAFT = "draft"
     PUBLISHED = "published"
 
 
 class AppConfigType(str, Enum):
-    """Enumeration of application configuration types"""
+    """Application configuration type enum"""
     DRAFT = "draft"
     PUBLISHED = "published"
 
@@ -53,6 +53,9 @@ DEFAULT_APP_CONFIG = {
         "enable": False,
         "voice": "echo",
         "auto_play": False,
+    },
+    "suggested_after_answer": {
+        "enable": True,
     },
     "review_config": {
         "enable": False,
