@@ -235,28 +235,144 @@ class AppHandler:
         # content = dataset_retrieval.invoke("What is LLM agent?")
         # return success_json({"content": content})
 
-        from internal.core.agent.agents import FunctionCallAgent
-        from internal.core.agent.entities.agent_entity import AgentConfig
-        from langchain_openai import ChatOpenAI
-        from langchain_core.messages import HumanMessage
-        from internal.core.tools.builtin_tools.providers.google import google_serper
-        import uuid
+        # from internal.core.agent.agents import FunctionCallAgent
+        # from internal.core.agent.entities.agent_entity import AgentConfig
+        # from langchain_openai import ChatOpenAI
+        # from langchain_core.messages import HumanMessage
+        # from internal.core.tools.builtin_tools.providers.google import google_serper
+        # import uuid
+        #
+        # # Initialize the FunctionCallAgent with an OpenAI model and configured tools
+        # agent = FunctionCallAgent(
+        #     llm=ChatOpenAI(model="gpt-4o-mini"),
+        #     agent_config=AgentConfig(
+        #         user_id=uuid.uuid4(),  # Generate a random user ID for this request
+        #         tools=[google_serper()],  # Register the Google Serper search tool
+        #     )
+        # )
+        #
+        # # Invoke the agent with a test query
+        # agent_result = agent.invoke({
+        #     "messages": [
+        #         HumanMessage("Help me search for the top 3 results of the 2024 Beijing Half Marathon.")
+        #     ]
+        # })
+        #
+        # # Return the agent result as JSON
+        # return success_json({"agent_result": agent_result.model_dump()})
 
-        # Initialize the FunctionCallAgent with an OpenAI model and configured tools
-        agent = FunctionCallAgent(
-            llm=ChatOpenAI(model="gpt-4o-mini"),
-            agent_config=AgentConfig(
-                user_id=uuid.uuid4(),  # Generate a random user ID for this request
-                tools=[google_serper()],  # Register the Google Serper search tool
+        from internal.core.workflow import Workflow
+        from internal.core.workflow.entities.workflow_entity import WorkflowConfig
+
+        # Minimal workflow: Start -> End
+        start_id = "11111111-1111-1111-1111-111111111111"
+        end_id = "22222222-2222-2222-2222-222222222222"
+
+        nodes = [
+            {
+                "id": start_id,
+                "node_type": "start",
+                "title": "Start",
+                "description": "Minimal start node for workflow testing.",
+                "inputs": [
+                    {
+                        "name": "query",
+                        "type": "string",
+                        "description": "User input query",
+                        "required": True,
+                        "value": {
+                            "type": "generated",
+                            "content": "",
+                        }
+                    },
+                    {
+                        "name": "location",
+                        "type": "string",
+                        "description": "City/location to query",
+                        "required": False,
+                        "value": {
+                            "type": "generated",
+                            "content": "",
+                        }
+                    },
+                ],
+            },
+            {
+                "id": end_id,
+                "node_type": "end",
+                "title": "End",
+                "description": "Minimal end node; just returns inputs and a literal field.",
+                "outputs": [
+                    {
+                        "name": "query",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": start_id,
+                                "ref_var_name": "query",
+                            },
+                        },
+                    },
+                    {
+                        "name": "location",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": start_id,
+                                "ref_var_name": "location",
+                            },
+                        },
+                    },
+                    {
+                        "name": "username",
+                        "type": "string",
+                        "value": {
+                            "type": "literal",
+                            "content": "Ling",
+                        },
+                    },
+                ],
+            },
+        ]
+
+        edges = [
+            {
+                "id": "33333333-3333-3333-3333-333333333333",
+                "source": start_id,
+                "source_type": "start",
+                "target": end_id,
+                "target_type": "end",
+            },
+        ]
+
+        workflow = Workflow(
+            workflow_config=WorkflowConfig(
+                account_id=current_user.id,
+                name="minimal_workflow",
+                description="Minimal workflow: start -> end",
+                nodes=nodes,
+                edges=edges,
             )
         )
 
-        # Invoke the agent with a test query
-        agent_result = agent.invoke({
-            "messages": [
-                HumanMessage("Help me search for the top 3 results of the 2024 Beijing Half Marathon.")
-            ]
-        })
+        # Simple test input
+        result = workflow.invoke(
+            {"query": "Test minimal workflow", "location": "New Jersey"}
+        )
 
-        # Return the agent result as JSON
-        return success_json({"agent_result": agent_result.model_dump()})
+        return success_json(
+            {
+                **result,
+                "info": {
+                    "name": workflow.name,
+                    "description": workflow.description,
+                    "args_schema": workflow.args_schema.schema(),
+                },
+                # If node_results are Pydantic / dataclass-like objects:
+                "node_results": [
+                    node_result.dict() for node_result in result["node_results"]
+                ],
+            }
+        )

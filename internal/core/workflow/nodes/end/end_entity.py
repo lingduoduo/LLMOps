@@ -11,4 +11,4 @@ from internal.core.workflow.entities.variable_entity import VariableEntity
 
 class EndNodeData(BaseNodeData):
     """End Node Data Model"""
-    outputs: list[VariableEntity] = Field(default_factory=list)  # 结束节点需要输出的数据
+    outputs: list[VariableEntity] = Field(default_factory=list)
