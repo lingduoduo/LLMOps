@@ -57,14 +57,13 @@ class StartNode(BaseNode):
             outputs[input.name] = input_value
 
         # 5. Build workflow state update (node result)
-        return {
-            "node_results": [
-                NodeResult(
-                    node_data=self.node_data,
-                    status=NodeStatus.SUCCEEDED,
-                    inputs=state["inputs"],
-                    outputs=outputs,
-                    latency=(time.perf_counter() - start_at),
-                )
-            ]
+        return {"node_results": [
+            NodeResult(
+                node_data=self.node_data,
+                status=NodeStatus.SUCCEEDED,
+                inputs=state["inputs"],
+                outputs=outputs,
+                latency=(time.perf_counter() - start_at),
+            )
+        ]
         }
