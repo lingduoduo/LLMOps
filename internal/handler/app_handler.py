@@ -235,6 +235,7 @@ class AppHandler:
         # content = dataset_retrieval.invoke("What is LLM agent?")
         # return success_json({"content": content})
 
+        ############# Test Functional Call Agents #############
         # from internal.core.agent.agents import FunctionCallAgent
         # from internal.core.agent.entities.agent_entity import AgentConfig
         # from langchain_openai import ChatOpenAI
@@ -261,19 +262,21 @@ class AppHandler:
         # # Return the agent result as JSON
         # return success_json({"agent_result": agent_result.model_dump()})
 
+        ############# Test Workflow #############
         from internal.core.workflow import Workflow
         from internal.core.workflow.entities.workflow_entity import WorkflowConfig
 
-        # Minimal workflow: Start -> End
-        start_id = "11111111-1111-1111-1111-111111111111"
-        end_id = "22222222-2222-2222-2222-222222222222"
+        # Minimal workflow: Start -> LLM -> End
+        start_id = "18d938c4-ecd7-4a6b-9403-3625224b96cc"
+        llm_id = "eba75e0b-21b7-46ed-8d21-791724f0740f"
+        end_id = "860c8411-37ed-4872-b53f-30afa0290211"
 
         nodes = [
             {
                 "id": start_id,
                 "node_type": "start",
                 "title": "Start",
-                "description": "Minimal start node for workflow testing.",
+                "description": "The starting node of the workflow; supports defining workflow entry inputs.",
                 "inputs": [
                     {
                         "name": "query",
@@ -295,13 +298,48 @@ class AppHandler:
                             "content": "",
                         }
                     },
+                ]
+            },
+            {
+                "id": llm_id,
+                "node_type": "llm",
+                "title": "Large Language Model",
+                "description": "",
+                "inputs": [
+                    {
+                        "name": "query",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": start_id,
+                                "ref_var_name": "query",
+                            },
+                        }
+                    },
+                    # NOTE: we drop the `context` input here to keep the workflow minimal
                 ],
+                "prompt": (
+                    "You are a powerful AI assistant. Please respond to the user's question: {{query}}.\n\n"
+                    "If helpful, you may also use the following context:\n\n<context>{{context}}</context>"
+                ),
+                "model_config": {
+                    "provider": "openai",
+                    "model": "gpt-4o-mini",
+                    "parameters": {
+                        "temperature": 0.5,
+                        "top_p": 0.85,
+                        "frequency_penalty": 0.2,
+                        "presence_penalty": 0.2,
+                        "max_tokens": 8192,
+                    },
+                }
             },
             {
                 "id": end_id,
                 "node_type": "end",
                 "title": "End",
-                "description": "Minimal end node; just returns inputs and a literal field.",
+                "description": "The end node of the workflow; supports defining final output variables.",
                 "outputs": [
                     {
                         "name": "query",
@@ -312,7 +350,7 @@ class AppHandler:
                                 "ref_node_id": start_id,
                                 "ref_var_name": "query",
                             },
-                        },
+                        }
                     },
                     {
                         "name": "location",
@@ -322,8 +360,8 @@ class AppHandler:
                             "content": {
                                 "ref_node_id": start_id,
                                 "ref_var_name": "location",
-                            },
-                        },
+                            }
+                        }
                     },
                     {
                         "name": "username",
@@ -331,17 +369,37 @@ class AppHandler:
                         "value": {
                             "type": "literal",
                             "content": "Ling",
-                        },
+                        }
                     },
-                ],
+                    {
+                        "name": "llm_output",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": llm_id,
+                                "ref_var_name": "output",
+                            }
+                        }
+                    },
+                ]
             },
         ]
 
         edges = [
+            # Start -> LLM
             {
-                "id": "33333333-3333-3333-3333-333333333333",
+                "id": "675fcd37-f308-8008-a6f4-389a0b1ed0ca",
                 "source": start_id,
                 "source_type": "start",
+                "target": llm_id,
+                "target_type": "llm",
+            },
+            # LLM -> End
+            {
+                "id": "675f9964-0028-8008-8046-d017996f3d3c",
+                "source": llm_id,
+                "source_type": "llm",
                 "target": end_id,
                 "target_type": "end",
             },
@@ -350,29 +408,24 @@ class AppHandler:
         workflow = Workflow(
             workflow_config=WorkflowConfig(
                 account_id=current_user.id,
-                name="minimal_workflow",
-                description="Minimal workflow: start -> end",
+                name="workflow_min_llm",
+                description="Minimal workflow: start -> LLM -> end",
                 nodes=nodes,
                 edges=edges,
             )
         )
 
-        # Simple test input
-        result = workflow.invoke(
-            {"query": "Test minimal workflow", "location": "New Jersey"}
-        )
+        result = workflow.invoke({
+            "query": "What prompts are there about front-end?",
+            "location": "New Jersey",
+        })
 
-        return success_json(
-            {
-                **result,
-                "info": {
-                    "name": workflow.name,
-                    "description": workflow.description,
-                    "args_schema": workflow.args_schema.schema(),
-                },
-                # If node_results are Pydantic / dataclass-like objects:
-                "node_results": [
-                    node_result.dict() for node_result in result["node_results"]
-                ],
-            }
-        )
+        return success_json({
+            **result,
+            "info": {
+                "name": workflow.name,
+                "description": workflow.description,
+                "args_schema": workflow.args_schema.schema(),
+            },
+            "node_results": [node_result.dict() for node_result in result["node_results"]],
+        })
