@@ -27,8 +27,8 @@ class BaseNodeData(BaseModel):
 
     class Position(BaseModel):
         """Node position model (for UI layout, etc.)."""
-        x: float = 0
-        y: float = 0
+        x: float = 0.0
+        y: float = 0.0
 
     class Config:
         # Allow population by field name (useful when aliases are used elsewhere)
