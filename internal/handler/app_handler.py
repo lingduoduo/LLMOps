@@ -266,9 +266,10 @@ class AppHandler:
         from internal.core.workflow import Workflow
         from internal.core.workflow.entities.workflow_entity import WorkflowConfig
 
-        # Minimal workflow: Start -> LLM -> End
+        # Workflow: Start -> LLM -> Template Transform -> End
         start_id = "18d938c4-ecd7-4a6b-9403-3625224b96cc"
         llm_id = "eba75e0b-21b7-46ed-8d21-791724f0740f"
+        template_id = "623b7671-0bc2-446c-bf5e-5e25032a522e"
         end_id = "860c8411-37ed-4872-b53f-30afa0290211"
 
         nodes = [
@@ -317,11 +318,10 @@ class AppHandler:
                             },
                         }
                     },
-                    # NOTE: we drop the `context` input here to keep the workflow minimal
                 ],
                 "prompt": (
                     "You are a powerful AI assistant. Please respond to the user's question: {{query}}.\n\n"
-                    "If helpful, you may also use the following context:\n\n<context>{{context}}</context>"
+                    "Provide a concise and helpful answer."
                 ),
                 "model_config": {
                     "provider": "openai",
@@ -334,6 +334,52 @@ class AppHandler:
                         "max_tokens": 8192,
                     },
                 }
+            },
+            {
+                "id": template_id,
+                "node_type": "template_transform",
+                "title": "Template Transform",
+                "description": "Combine LLM output and input fields into a formatted block.",
+                "inputs": [
+                    {
+                        "name": "location",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": start_id,
+                                "ref_var_name": "location",
+                            },
+                        }
+                    },
+                    {
+                        "name": "query",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": start_id,
+                                "ref_var_name": "query"
+                            }
+                        }
+                    },
+                    {
+                        "name": "llm_output",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": llm_id,
+                                "ref_var_name": "output",
+                            }
+                        }
+                    }
+                ],
+                "template": (
+                    "Address: {{location}}\n"
+                    "Question: {{query}}\n\n"
+                    "Answer:\n{{llm_output}}"
+                ),
             },
             {
                 "id": end_id,
@@ -378,6 +424,17 @@ class AppHandler:
                             "type": "ref",
                             "content": {
                                 "ref_node_id": llm_id,
+                                "ref_var_name": "output"
+                            }
+                        }
+                    },
+                    {
+                        "name": "template_combine",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": template_id,
                                 "ref_var_name": "output",
                             }
                         }
@@ -389,17 +446,25 @@ class AppHandler:
         edges = [
             # Start -> LLM
             {
-                "id": "675fcd37-f308-8008-a6f4-389a0b1ed0ca",
+                "id": "77777777-7777-7777-7777-777777777777",
                 "source": start_id,
                 "source_type": "start",
                 "target": llm_id,
                 "target_type": "llm",
             },
-            # LLM -> End
+            # LLM -> Template Transform
             {
-                "id": "675f9964-0028-8008-8046-d017996f3d3c",
+                "id": "88888888-8888-8888-8888-888888888888",
                 "source": llm_id,
                 "source_type": "llm",
+                "target": template_id,
+                "target_type": "template_transform",
+            },
+            # Template Transform -> End
+            {
+                "id": "99999999-9999-9999-9999-999999999999",
+                "source": template_id,
+                "source_type": "template_transform",
                 "target": end_id,
                 "target_type": "end",
             },
@@ -408,8 +473,8 @@ class AppHandler:
         workflow = Workflow(
             workflow_config=WorkflowConfig(
                 account_id=current_user.id,
-                name="workflow_min_llm",
-                description="Minimal workflow: start -> LLM -> end",
+                name="workflow_llm_template",
+                description="Minimal workflow: start -> LLM -> template_transform -> end",
                 nodes=nodes,
                 edges=edges,
             )
