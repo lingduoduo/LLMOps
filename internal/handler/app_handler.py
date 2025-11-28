@@ -265,6 +265,7 @@ class AppHandler:
         ############# Test Workflow #############
         from internal.core.workflow import Workflow
         from internal.core.workflow.entities.workflow_entity import WorkflowConfig
+
         # 1. Define nodes
         nodes = [
             # ---------- Start node ----------
@@ -297,12 +298,48 @@ class AppHandler:
                 ],
             },
 
-            # ---------- LLM node (no real retrieval, context is mocked) ----------
+            # ---------- Dataset retrieval node ----------
+            {
+                "id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
+                "node_type": "dataset_retrieval",
+                "title": "Knowledge Base Retrieval",
+                "description": "Retrieve relevant documents based on the user query.",
+                "inputs": [
+                    {
+                        "name": "query",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
+                                "ref_var_name": "query",
+                            },
+                        },
+                    }
+                ],
+                "dataset_ids": [
+                    "1cbb6449-5463-49a4-b0ef-1b94cdf747d7",
+                    "798f5324-c82e-44c2-94aa-035afbe88839",
+                ],
+                # Explicit retrieval output
+                "outputs": [
+                    {
+                        "name": "combine_documents",
+                        "type": "string",
+                        "value": {
+                            "type": "generated",
+                            "content": "",
+                        },
+                    },
+                ],
+            },
+
+            # ---------- LLM node (now uses retrieval context) ----------
             {
                 "id": "eba75e0b-21b7-46ed-8d21-791724f0740f",
                 "node_type": "llm",
                 "title": "Large Language Model",
-                "description": "Answer the user query using mocked context.",
+                "description": "Answer the user query using retrieved context.",
                 "inputs": [
                     {
                         "name": "query",
@@ -316,16 +353,14 @@ class AppHandler:
                         },
                     },
                     {
-                        # instead of dataset_retrieval.combine_documents, we just
-                        # send a literal context so this node never depends on datasets
                         "name": "context",
                         "type": "string",
                         "value": {
-                            "type": "literal",
-                            "content": (
-                                "This is MOCKED context. In a real workflow, this would "
-                                "come from the dataset_retrieval node."
-                            ),
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
+                                "ref_var_name": "combine_documents",
+                            },
                         },
                     },
                 ],
@@ -333,7 +368,7 @@ class AppHandler:
                     "You are a helpful AI assistant.\n\n"
                     "User question:\n"
                     "{{query}}\n\n"
-                    "Relevant context (may be mocked):\n"
+                    "Relevant context (may be empty):\n"
                     "<context>{{context}}</context>\n\n"
                     "Answer the question as well as you can."
                 ),
@@ -350,7 +385,7 @@ class AppHandler:
                 },
             },
 
-            # ---------- Code node (mocked retrieval content) ----------
+            # ---------- Code node (post-process retrieval + LLM) ----------
             {
                 "id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
                 "node_type": "code",
@@ -361,12 +396,11 @@ class AppHandler:
                         "name": "combine_documents",
                         "type": "string",
                         "value": {
-                            # fully mocked; no dependency on any other node
-                            "type": "literal",
-                            "content": (
-                                "This is MOCKED retrieval content used only for testing the "
-                                "Code node. Replace this later with real dataset output."
-                            ),
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
+                                "ref_var_name": "combine_documents",
+                            },
                         },
                     },
                     {
@@ -382,27 +416,27 @@ class AppHandler:
                     },
                 ],
                 "code": """def main(params):
-        # Get retrieval content or default text
-        docs = params.get("combine_documents")
-        if not docs:
-            docs = (
-                "This is default retrieval content for testing. "
-                "It is used when the dataset retrieval returns empty. "
-                "You can modify this to simulate retrieval outputs."
-            )
-    
-        # Get LLM output or default demo text
-        answer = params.get("llm_output")
-        if not answer:
-            answer = "This is a placeholder LLM answer (for testing)."
-    
-        snippet = docs[:200]
-    
-        return {
-            "snippet": snippet,
-            "answer_length": len(answer),
-            "fallback_used": params.get("combine_documents") is None or params.get("combine_documents") == ""
-        }""",
+            # Get retrieval content or default text
+            docs = params.get("combine_documents")
+            if not docs:
+                docs = (
+                    "This is default retrieval content for testing. "
+                    "It is used when the dataset retrieval returns empty. "
+                    "You can modify this to simulate retrieval outputs."
+                )
+
+            # Get LLM output or default demo text
+            answer = params.get("llm_output")
+            if not answer:
+                answer = "This is a placeholder LLM answer (for testing)."
+
+            snippet = docs[:200]
+
+            return {
+                "snippet": snippet,
+                "answer_length": len(answer),
+                "fallback_used": params.get("combine_documents") is None or params.get("combine_documents") == ""
+            }""",
                 "outputs": [
                     {
                         "name": "snippet",
@@ -579,31 +613,38 @@ class AppHandler:
             },
         ]
 
-        # 2. Edges: start -> llm -> code -> template -> end
+        # 2. Edges: start -> dataset_retrieval -> llm -> code -> template -> end
         edges = [
             {
                 "id": "675fca50-1228-4000-8000-000000000001",
                 "source": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
                 "source_type": "start",
+                "target": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
+                "target_type": "dataset_retrieval",
+            },
+            {
+                "id": "675fca50-1228-4000-8000-000000000002",
+                "source": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
+                "source_type": "dataset_retrieval",
                 "target": "eba75e0b-21b7-46ed-8d21-791724f0740f",
                 "target_type": "llm",
             },
             {
-                "id": "675fca50-1228-4000-8000-000000000002",
+                "id": "675fca50-1228-4000-8000-000000000003",
                 "source": "eba75e0b-21b7-46ed-8d21-791724f0740f",
                 "source_type": "llm",
                 "target": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
                 "target_type": "code",
             },
             {
-                "id": "675fca50-1228-4000-8000-000000000003",
+                "id": "675fca50-1228-4000-8000-000000000004",
                 "source": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
                 "source_type": "code",
                 "target": "623b7671-0bc2-446c-bf5e-5e25032a522e",
                 "target_type": "template_transform",
             },
             {
-                "id": "675fca50-1228-4000-8000-000000000004",
+                "id": "675fca50-1228-4000-8000-000000000005",
                 "source": "623b7671-0bc2-446c-bf5e-5e25032a522e",
                 "source_type": "template_transform",
                 "target": "860c8411-37ed-4872-b53f-30afa0290211",
@@ -611,11 +652,12 @@ class AppHandler:
             },
         ]
 
+        # 3. Build workflow & invoke (this part you already had)
         workflow = Workflow(
             workflow_config=WorkflowConfig(
                 account_id=current_user.id,
                 name="workflow_demo_mocked",
-                description="Demo workflow: start -> LLM -> code -> template -> end (mocked retrieval).",
+                description="Demo workflow: start -> retrieval -> llm -> code -> template -> end.",
                 nodes=nodes,
                 edges=edges,
             )
