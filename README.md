@@ -1,6 +1,69 @@
 # LLMOps
 
-### App Framework
+#### **1. Frontend Layer**
+
+- **Tech Stack:** React + WebSocket
+- **Functions:**
+  - Implements the WebUI (web interface)
+  - Provides identity authentication
+  - Ensures cross-platform compatibility
+
+------
+
+#### **2. Dialogue Engine**
+
+- **Tech Stack:** LangChain + Flask + Redis
+- **Functions:**
+  - Orchestrates multi-Agent dialogue flows
+  - Handles coordination and turn-taking
+  - Maintains conversational context (session persistence)
+
+------
+
+#### **3. Intent Recognition**
+
+- **Tech Stack:** Sklearn + BERT + ONNX
+- **Functions:**
+  - Integrates multiple model types for intent classification
+  - Supports model fusion and hot updates
+
+------
+
+#### **4. Knowledge Base Retrieval**
+
+- **Tech Stack:** Elasticsearch + Weaviate + Neo4j
+- **Functions:**
+  - Enables multi-source retrieval and hybrid search
+  - Performs graph reasoning and relationship inference
+
+------
+
+#### **5. Backend Services**
+
+- **Tech Stack:** Flask + PostgreSQL + Redis
+- **Functions:**
+  - Manages user authentication and access control
+  - Maintains audit and operation logs
+
+------
+
+#### **6. Deployment Platform**
+
+- **Tech Stack:** Docker + Kubernetes 
+- **Functions:**
+  - Supports multi-environment deployment
+  - Provides elasticity and automatic scaling
+
+------
+
+#### **7. Monitoring and Observability**
+
+- **Tech Stack:** Prometheus + Grafana + Arize
+- **Functions:**
+  - Implements full-chain monitoring and alerting
+  - Enables system-level log aggregation and analysis
+
+### App Framework for Backend Services
 
 ```
 .
