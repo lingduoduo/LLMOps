@@ -263,39 +263,47 @@ class AppHandler:
         # return success_json({"agent_result": agent_result.model_dump()})
 
         ############# Test Workflow #############
-
         from internal.core.workflow import Workflow
         from internal.core.workflow.entities.workflow_entity import WorkflowConfig
-        from flask_login import current_user
 
-        # Minimal workflow: start -> retrieval -> llm -> template -> end
+        # 1. Define nodes
         nodes = [
-            # Start node
+            # ---------- Start node ----------
             {
                 "id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
                 "node_type": "start",
                 "title": "Start",
-                "description": "Workflow entry point.",
+                "description": "Workflow entry point; defines user inputs.",
                 "inputs": [
                     {
                         "name": "query",
                         "type": "string",
-                        "description": "User question",
+                        "description": "User input query",
                         "required": True,
                         "value": {
                             "type": "generated",
                             "content": "",
                         },
-                    }
+                    },
+                    {
+                        "name": "location",
+                        "type": "string",
+                        "description": "User location or city (optional)",
+                        "required": False,
+                        "value": {
+                            "type": "generated",
+                            "content": "",
+                        },
+                    },
                 ],
             },
 
-            # Dataset retrieval node
+            # ---------- Dataset retrieval node ----------
             {
                 "id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
                 "node_type": "dataset_retrieval",
-                "title": "Knowledge Retrieval",
-                "description": "Retrieve relevant documents.",
+                "title": "Knowledge Base Retrieval",
+                "description": "Retrieve relevant documents based on the user query.",
                 "inputs": [
                     {
                         "name": "query",
@@ -313,14 +321,25 @@ class AppHandler:
                     "1cbb6449-5463-49a4-b0ef-1b94cdf747d7",
                     "798f5324-c82e-44c2-94aa-035afbe88839",
                 ],
+                # Explicit retrieval output
+                "outputs": [
+                    {
+                        "name": "combine_documents",
+                        "type": "string",
+                        "value": {
+                            "type": "generated",
+                            "content": "",
+                        },
+                    },
+                ],
             },
 
-            # LLM node (uses query + retrieval context)
+            # ---------- LLM node (now uses retrieval context) ----------
             {
                 "id": "eba75e0b-21b7-46ed-8d21-791724f0740f",
                 "node_type": "llm",
                 "title": "Large Language Model",
-                "description": "Answer question using retrieved context.",
+                "description": "Answer the user query using retrieved context.",
                 "inputs": [
                     {
                         "name": "query",
@@ -339,7 +358,6 @@ class AppHandler:
                         "value": {
                             "type": "ref",
                             "content": {
-                                # Use retrieval output as LLM context
                                 "ref_node_id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
                                 "ref_var_name": "combine_documents",
                             },
@@ -348,29 +366,123 @@ class AppHandler:
                 ],
                 "prompt": (
                     "You are a helpful AI assistant.\n\n"
-                    "User question: {{query}}\n\n"
-                    "Relevant context:\n<context>{{context}}</context>"
+                    "User question:\n"
+                    "{{query}}\n\n"
+                    "Relevant context (may be empty):\n"
+                    "<context>{{context}}</context>\n\n"
+                    "Answer the question as well as you can."
                 ),
                 "model_config": {
                     "provider": "openai",
                     "model": "gpt-4o-mini",
                     "parameters": {
-                        "temperature": 0.5,
+                        "temperature": 0.3,
                         "top_p": 0.85,
                         "frequency_penalty": 0.2,
                         "presence_penalty": 0.2,
-                        "max_tokens": 2048,
+                        "max_tokens": 512,
                     },
                 },
             },
 
-            # Template transform node (combine question + LLM answer)
+            # ---------- Code node (post-process retrieval + LLM) ----------
+            {
+                "id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
+                "node_type": "code",
+                "title": "Code Post-processing",
+                "description": "Post-process LLM answer and documents with safe defaults.",
+                "inputs": [
+                    {
+                        "name": "combine_documents",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
+                                "ref_var_name": "combine_documents",
+                            },
+                        },
+                    },
+                    {
+                        "name": "llm_output",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": "eba75e0b-21b7-46ed-8d21-791724f0740f",
+                                "ref_var_name": "output",
+                            },
+                        },
+                    },
+                ],
+                "code": """def main(params):
+            # Get retrieval content or default text
+            docs = params.get("combine_documents")
+            if not docs:
+                docs = (
+                    "This is default retrieval content for testing. "
+                    "It is used when the dataset retrieval returns empty. "
+                    "You can modify this to simulate retrieval outputs."
+                )
+
+            # Get LLM output or default demo text
+            answer = params.get("llm_output")
+            if not answer:
+                answer = "This is a placeholder LLM answer (for testing)."
+
+            snippet = docs[:200]
+
+            return {
+                "snippet": snippet,
+                "answer_length": len(answer),
+                "fallback_used": params.get("combine_documents") is None or params.get("combine_documents") == ""
+            }""",
+                "outputs": [
+                    {
+                        "name": "snippet",
+                        "type": "string",
+                        "value": {
+                            "type": "generated",
+                            "content": "",
+                        },
+                    },
+                    {
+                        "name": "answer_length",
+                        "type": "int",
+                        "value": {
+                            "type": "generated",
+                            "content": 0,
+                        },
+                    },
+                    {
+                        "name": "fallback_used",
+                        "type": "boolean",
+                        "value": {
+                            "type": "generated",
+                            "content": False,
+                        },
+                    },
+                ],
+            },
+
+            # ---------- Template transform node ----------
             {
                 "id": "623b7671-0bc2-446c-bf5e-5e25032a522e",
                 "node_type": "template_transform",
                 "title": "Template Transform",
-                "description": "Format final answer.",
+                "description": "Combine query, location, LLM answer and snippet into a final message.",
                 "inputs": [
+                    {
+                        "name": "location",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
+                                "ref_var_name": "location",
+                            },
+                        },
+                    },
                     {
                         "name": "query",
                         "type": "string",
@@ -383,7 +495,7 @@ class AppHandler:
                         },
                     },
                     {
-                        "name": "answer",
+                        "name": "llm_output",
                         "type": "string",
                         "value": {
                             "type": "ref",
@@ -393,23 +505,68 @@ class AppHandler:
                             },
                         },
                     },
+                    {
+                        "name": "snippet",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
+                                "ref_var_name": "snippet",
+                            },
+                        },
+                    },
                 ],
                 "template": (
-                    "### Final Response\n\n"
-                    "Question: {{query}}\n\n"
-                    "Answer:\n{{answer}}"
+                    "Location: {{location}}\n"
+                    "User question: {{query}}\n\n"
+                    "LLM answer:\n{{llm_output}}\n\n"
+                    "Retrieved-doc snippet (or default):\n{{snippet}}\n"
                 ),
             },
 
-            # End node (expose final_answer)
+            # ---------- End node ----------
             {
                 "id": "860c8411-37ed-4872-b53f-30afa0290211",
                 "node_type": "end",
                 "title": "End",
-                "description": "Workflow outputs.",
+                "description": "Final output variables of the workflow.",
                 "outputs": [
                     {
-                        "name": "final_answer",
+                        "name": "query",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
+                                "ref_var_name": "query",
+                            },
+                        },
+                    },
+                    {
+                        "name": "location",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
+                                "ref_var_name": "location",
+                            },
+                        },
+                    },
+                    {
+                        "name": "llm_output",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": "eba75e0b-21b7-46ed-8d21-791724f0740f",
+                                "ref_var_name": "output",
+                            },
+                        },
+                    },
+                    {
+                        "name": "template_output",
                         "type": "string",
                         "value": {
                             "type": "ref",
@@ -418,39 +575,76 @@ class AppHandler:
                                 "ref_var_name": "output",
                             },
                         },
-                    }
+                    },
+                    {
+                        "name": "snippet",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
+                                "ref_var_name": "snippet",
+                            },
+                        },
+                    },
+                    {
+                        "name": "answer_length",
+                        "type": "int",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
+                                "ref_var_name": "answer_length",
+                            },
+                        },
+                    },
+                    {
+                        "name": "fallback_used",
+                        "type": "boolean",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
+                                "ref_var_name": "fallback_used",
+                            },
+                        },
+                    },
                 ],
             },
         ]
 
+        # 2. Edges: start -> dataset_retrieval -> llm -> code -> template -> end
         edges = [
-            # start -> retrieval
             {
-                "id": "675fca50-1228-8008-82dc-0c714158534c",
+                "id": "675fca50-1228-4000-8000-000000000001",
                 "source": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
                 "source_type": "start",
                 "target": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
                 "target_type": "dataset_retrieval",
             },
-            # retrieval -> llm
             {
-                "id": "675fcd37-f308-8008-a6f4-389a0b1ed0ca",
+                "id": "675fca50-1228-4000-8000-000000000002",
                 "source": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
                 "source_type": "dataset_retrieval",
                 "target": "eba75e0b-21b7-46ed-8d21-791724f0740f",
                 "target_type": "llm",
             },
-            # llm -> template
             {
-                "id": "675fa28c-6f94-8008-b5ae-2eba3300b2e6",
+                "id": "675fca50-1228-4000-8000-000000000003",
                 "source": "eba75e0b-21b7-46ed-8d21-791724f0740f",
                 "source_type": "llm",
+                "target": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
+                "target_type": "code",
+            },
+            {
+                "id": "675fca50-1228-4000-8000-000000000004",
+                "source": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
+                "source_type": "code",
                 "target": "623b7671-0bc2-446c-bf5e-5e25032a522e",
                 "target_type": "template_transform",
             },
-            # template -> end
             {
-                "id": "675f9964-0028-8008-8046-d017996f3d3c",
+                "id": "675fca50-1228-4000-8000-000000000005",
                 "source": "623b7671-0bc2-446c-bf5e-5e25032a522e",
                 "source_type": "template_transform",
                 "target": "860c8411-37ed-4872-b53f-30afa0290211",
@@ -458,18 +652,22 @@ class AppHandler:
             },
         ]
 
+        # 3. Build workflow & invoke (this part you already had)
         workflow = Workflow(
             workflow_config=WorkflowConfig(
                 account_id=current_user.id,
-                name="minimal_rag_workflow",
-                description="Start -> Retrieval -> LLM -> Template -> End",
+                name="workflow_demo_mocked",
+                description="Demo workflow: start -> retrieval -> llm -> code -> template -> end.",
                 nodes=nodes,
                 edges=edges,
             )
         )
 
         result = workflow.invoke(
-            {"query": "What prompts are useful for front-end engineering interviews?"}
+            {
+                "query": "What prompts are there about front-end?",
+                "location": "New Jersey",
+            }
         )
 
         return success_json(
