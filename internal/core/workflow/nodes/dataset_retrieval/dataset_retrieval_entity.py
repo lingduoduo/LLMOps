@@ -21,7 +21,7 @@ class RetrievalConfig(BaseModel):
     """Retrieval configuration."""
     retrieval_strategy: RetrievalStrategy = RetrievalStrategy.SEMANTIC  # Retrieval strategy
     k: int = 4  # Max number of results to return
-    score: float = 0  # Score threshold
+    score: float = 0.0  # Score threshold
 
 
 class DatasetRetrievalNodeData(BaseNodeData):
