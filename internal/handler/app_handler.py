@@ -263,49 +263,39 @@ class AppHandler:
         # return success_json({"agent_result": agent_result.model_dump()})
 
         ############# Test Workflow #############
+
         from internal.core.workflow import Workflow
         from internal.core.workflow.entities.workflow_entity import WorkflowConfig
+        from flask_login import current_user
 
-        # Workflow: Start -> LLM -> Template Transform -> End
-        start_id = "18d938c4-ecd7-4a6b-9403-3625224b96cc"
-        llm_id = "eba75e0b-21b7-46ed-8d21-791724f0740f"
-        template_id = "623b7671-0bc2-446c-bf5e-5e25032a522e"
-        end_id = "860c8411-37ed-4872-b53f-30afa0290211"
-
+        # Minimal workflow: start -> retrieval -> llm -> template -> end
         nodes = [
+            # Start node
             {
-                "id": start_id,
+                "id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
                 "node_type": "start",
                 "title": "Start",
-                "description": "The starting node of the workflow; supports defining workflow entry inputs.",
+                "description": "Workflow entry point.",
                 "inputs": [
                     {
                         "name": "query",
                         "type": "string",
-                        "description": "User input query",
+                        "description": "User question",
                         "required": True,
                         "value": {
                             "type": "generated",
                             "content": "",
-                        }
-                    },
-                    {
-                        "name": "location",
-                        "type": "string",
-                        "description": "City/location to query",
-                        "required": False,
-                        "value": {
-                            "type": "generated",
-                            "content": "",
-                        }
-                    },
-                ]
+                        },
+                    }
+                ],
             },
+
+            # Dataset retrieval node
             {
-                "id": llm_id,
-                "node_type": "llm",
-                "title": "Large Language Model",
-                "description": "",
+                "id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
+                "node_type": "dataset_retrieval",
+                "title": "Knowledge Retrieval",
+                "description": "Retrieve relevant documents.",
                 "inputs": [
                     {
                         "name": "query",
@@ -313,15 +303,53 @@ class AppHandler:
                         "value": {
                             "type": "ref",
                             "content": {
-                                "ref_node_id": start_id,
+                                "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
                                 "ref_var_name": "query",
                             },
-                        }
+                        },
+                    }
+                ],
+                "dataset_ids": [
+                    "1cbb6449-5463-49a4-b0ef-1b94cdf747d7",
+                    "798f5324-c82e-44c2-94aa-035afbe88839",
+                ],
+            },
+
+            # LLM node (uses query + retrieval context)
+            {
+                "id": "eba75e0b-21b7-46ed-8d21-791724f0740f",
+                "node_type": "llm",
+                "title": "Large Language Model",
+                "description": "Answer question using retrieved context.",
+                "inputs": [
+                    {
+                        "name": "query",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
+                                "ref_var_name": "query",
+                            },
+                        },
+                    },
+                    {
+                        "name": "context",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                # Use retrieval output as LLM context
+                                "ref_node_id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
+                                "ref_var_name": "combine_documents",
+                            },
+                        },
                     },
                 ],
                 "prompt": (
-                    "You are a powerful AI assistant. Please respond to the user's question: {{query}}.\n\n"
-                    "Provide a concise and helpful answer."
+                    "You are a helpful AI assistant.\n\n"
+                    "User question: {{query}}\n\n"
+                    "Relevant context:\n<context>{{context}}</context>"
                 ),
                 "model_config": {
                     "provider": "openai",
@@ -331,141 +359,101 @@ class AppHandler:
                         "top_p": 0.85,
                         "frequency_penalty": 0.2,
                         "presence_penalty": 0.2,
-                        "max_tokens": 8192,
+                        "max_tokens": 2048,
                     },
-                }
+                },
             },
+
+            # Template transform node (combine question + LLM answer)
             {
-                "id": template_id,
+                "id": "623b7671-0bc2-446c-bf5e-5e25032a522e",
                 "node_type": "template_transform",
                 "title": "Template Transform",
-                "description": "Combine LLM output and input fields into a formatted block.",
+                "description": "Format final answer.",
                 "inputs": [
                     {
-                        "name": "location",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": start_id,
-                                "ref_var_name": "location",
-                            },
-                        }
-                    },
-                    {
                         "name": "query",
                         "type": "string",
                         "value": {
                             "type": "ref",
                             "content": {
-                                "ref_node_id": start_id,
-                                "ref_var_name": "query"
-                            }
-                        }
-                    },
-                    {
-                        "name": "llm_output",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": llm_id,
-                                "ref_var_name": "output",
-                            }
-                        }
-                    }
-                ],
-                "template": (
-                    "Address: {{location}}\n"
-                    "Question: {{query}}\n\n"
-                    "Answer:\n{{llm_output}}"
-                ),
-            },
-            {
-                "id": end_id,
-                "node_type": "end",
-                "title": "End",
-                "description": "The end node of the workflow; supports defining final output variables.",
-                "outputs": [
-                    {
-                        "name": "query",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": start_id,
+                                "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
                                 "ref_var_name": "query",
                             },
-                        }
+                        },
                     },
                     {
-                        "name": "location",
+                        "name": "answer",
                         "type": "string",
                         "value": {
                             "type": "ref",
                             "content": {
-                                "ref_node_id": start_id,
-                                "ref_var_name": "location",
-                            }
-                        }
-                    },
-                    {
-                        "name": "username",
-                        "type": "string",
-                        "value": {
-                            "type": "literal",
-                            "content": "Ling",
-                        }
-                    },
-                    {
-                        "name": "llm_output",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": llm_id,
-                                "ref_var_name": "output"
-                            }
-                        }
-                    },
-                    {
-                        "name": "template_combine",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": template_id,
+                                "ref_node_id": "eba75e0b-21b7-46ed-8d21-791724f0740f",
                                 "ref_var_name": "output",
-                            }
-                        }
+                            },
+                        },
                     },
-                ]
+                ],
+                "template": (
+                    "### Final Response\n\n"
+                    "Question: {{query}}\n\n"
+                    "Answer:\n{{answer}}"
+                ),
+            },
+
+            # End node (expose final_answer)
+            {
+                "id": "860c8411-37ed-4872-b53f-30afa0290211",
+                "node_type": "end",
+                "title": "End",
+                "description": "Workflow outputs.",
+                "outputs": [
+                    {
+                        "name": "final_answer",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": "623b7671-0bc2-446c-bf5e-5e25032a522e",
+                                "ref_var_name": "output",
+                            },
+                        },
+                    }
+                ],
             },
         ]
 
         edges = [
-            # Start -> LLM
+            # start -> retrieval
             {
-                "id": "77777777-7777-7777-7777-777777777777",
-                "source": start_id,
+                "id": "675fca50-1228-8008-82dc-0c714158534c",
+                "source": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
                 "source_type": "start",
-                "target": llm_id,
+                "target": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
+                "target_type": "dataset_retrieval",
+            },
+            # retrieval -> llm
+            {
+                "id": "675fcd37-f308-8008-a6f4-389a0b1ed0ca",
+                "source": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
+                "source_type": "dataset_retrieval",
+                "target": "eba75e0b-21b7-46ed-8d21-791724f0740f",
                 "target_type": "llm",
             },
-            # LLM -> Template Transform
+            # llm -> template
             {
-                "id": "88888888-8888-8888-8888-888888888888",
-                "source": llm_id,
+                "id": "675fa28c-6f94-8008-b5ae-2eba3300b2e6",
+                "source": "eba75e0b-21b7-46ed-8d21-791724f0740f",
                 "source_type": "llm",
-                "target": template_id,
+                "target": "623b7671-0bc2-446c-bf5e-5e25032a522e",
                 "target_type": "template_transform",
             },
-            # Template Transform -> End
+            # template -> end
             {
-                "id": "99999999-9999-9999-9999-999999999999",
-                "source": template_id,
+                "id": "675f9964-0028-8008-8046-d017996f3d3c",
+                "source": "623b7671-0bc2-446c-bf5e-5e25032a522e",
                 "source_type": "template_transform",
-                "target": end_id,
+                "target": "860c8411-37ed-4872-b53f-30afa0290211",
                 "target_type": "end",
             },
         ]
@@ -473,24 +461,25 @@ class AppHandler:
         workflow = Workflow(
             workflow_config=WorkflowConfig(
                 account_id=current_user.id,
-                name="workflow_llm_template",
-                description="Minimal workflow: start -> LLM -> template_transform -> end",
+                name="minimal_rag_workflow",
+                description="Start -> Retrieval -> LLM -> Template -> End",
                 nodes=nodes,
                 edges=edges,
             )
         )
 
-        result = workflow.invoke({
-            "query": "What prompts are there about front-end?",
-            "location": "New Jersey",
-        })
+        result = workflow.invoke(
+            {"query": "What prompts are useful for front-end engineering interviews?"}
+        )
 
-        return success_json({
-            **result,
-            "info": {
-                "name": workflow.name,
-                "description": workflow.description,
-                "args_schema": workflow.args_schema.schema(),
-            },
-            "node_results": [node_result.dict() for node_result in result["node_results"]],
-        })
+        return success_json(
+            {
+                **result,
+                "info": {
+                    "name": workflow.name,
+                    "description": workflow.description,
+                    "args_schema": workflow.args_schema.schema(),
+                },
+                "node_results": [node_result.dict() for node_result in result["node_results"]],
+            }
+        )
