@@ -10,7 +10,7 @@
 
 ------
 
-#### **2. Dialogue Engine**
+#### **2. Chat Engine**
 
 - **Tech Stack:** LangChain + Flask + Redis
 - **Functions:**
