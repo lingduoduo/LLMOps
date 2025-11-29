@@ -67,3 +67,38 @@ class VectorDatabaseService:
     @property
     def collection(self) -> Collection:
         return self.client.collections.get(COLLECTION_NAME)
+#
+#     def add_dataset_documents(
+#             self,
+#             dataset_id: str,
+#             texts: list[str],
+#     ) -> None:
+#         """
+#         Store raw texts in Weaviate under the given dataset_id.
+#         """
+#         docs = [
+#             Document(
+#                 page_content=text,
+#                 metadata={"dataset_id": dataset_id,
+#                           "document_enabled": True,
+#                           "segment_enabled": True
+#                           },
+#             )
+#             for text in texts
+#         ]
+#         self.vector_store.add_documents(docs)
+#
+#
+# vdb = VectorDatabaseService()
+# vdb.add_dataset_documents(
+#     dataset_id="1cbb6449-5463-49a4-b0ef-1b94cdf747d7",
+#     texts=[
+#         "Intro to front-end prompts and patterns. Best practices for writing prompts for React components...",
+#     ],
+# )
+# vdb.add_dataset_documents(
+#     dataset_id="798f5324-c82e-44c2-94aa-035afbe88839",
+#     texts=[
+#         "DevOps runbook for LLM observability dashboards.",
+#     ],
+# )
