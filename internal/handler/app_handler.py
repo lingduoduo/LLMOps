@@ -298,12 +298,50 @@ class AppHandler:
                 ],
             },
 
-            # ---------- Dataset retrieval node ----------
+            # ---------- Dataset retrieval node (DISABLED for now) ----------
+            # {
+            #     "id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
+            #     "node_type": "dataset_retrieval",
+            #     "title": "Knowledge Base Retrieval",
+            #     "description": "Retrieve relevant documents based on the user query.",
+            #     "inputs": [
+            #         {
+            #             "name": "query",
+            #             "type": "string",
+            #             "value": {
+            #                 "type": "ref",
+            #                 "content": {
+            #                     "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
+            #                     "ref_var_name": "query",
+            #                 },
+            #             },
+            #         }
+            #     ],
+            #     "dataset_ids": [
+            #         # "1cbb6449-5463-49a4-b0ef-1b94cdf747d7",
+            #         # "798f5324-c82e-44c2-94aa-035afbe88839",
+            #     ],
+            #     "outputs": [
+            #         {
+            #             "name": "combine_documents",
+            #             "type": "string",
+            #             "value": {
+            #                 "type": "generated",
+            #                 "content": "",
+            #             },
+            #         },
+            #     ],
+            # },
+
+            # ---------- Tool node (google_serper) ----------
             {
-                "id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
-                "node_type": "dataset_retrieval",
-                "title": "Knowledge Base Retrieval",
-                "description": "Retrieve relevant documents based on the user query.",
+                "id": "2f6cf40d-0219-421b-92ff-229fdde15ecb",
+                "node_type": "tool",
+                "title": "Built-in Tool: Google Serper",
+                "description": "Call google_serper with the user query.",
+                "type": "builtin_tool",
+                "provider_id": "google",
+                "tool_id": "google_serper",
                 "inputs": [
                     {
                         "name": "query",
@@ -317,29 +355,24 @@ class AppHandler:
                         },
                     }
                 ],
-                "dataset_ids": [
-                    "1cbb6449-5463-49a4-b0ef-1b94cdf747d7",
-                    "798f5324-c82e-44c2-94aa-035afbe88839",
-                ],
-                # Explicit retrieval output
                 "outputs": [
                     {
-                        "name": "combine_documents",
+                        "name": "text",
                         "type": "string",
                         "value": {
                             "type": "generated",
                             "content": "",
                         },
-                    },
+                    }
                 ],
             },
 
-            # ---------- LLM node (now uses retrieval context) ----------
+            # ---------- LLM node ----------
             {
                 "id": "eba75e0b-21b7-46ed-8d21-791724f0740f",
                 "node_type": "llm",
                 "title": "Large Language Model",
-                "description": "Answer the user query using retrieved context.",
+                "description": "Answer the user query using tool/context.",
                 "inputs": [
                     {
                         "name": "query",
@@ -358,8 +391,12 @@ class AppHandler:
                         "value": {
                             "type": "ref",
                             "content": {
-                                "ref_node_id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
-                                "ref_var_name": "combine_documents",
+                                # currently use google_serper output as context
+                                "ref_node_id": "2f6cf40d-0219-421b-92ff-229fdde15ecb",
+                                "ref_var_name": "text",
+                                # when retrieval is fixed, you can switch this to:
+                                # "ref_node_id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
+                                # "ref_var_name": "combine_documents",
                             },
                         },
                     },
@@ -383,9 +420,19 @@ class AppHandler:
                         "max_tokens": 512,
                     },
                 },
+                "outputs": [
+                    {
+                        "name": "output",
+                        "type": "string",
+                        "value": {
+                            "type": "generated",
+                            "content": "",
+                        },
+                    }
+                ],
             },
 
-            # ---------- Code node (post-process retrieval + LLM) ----------
+            # ---------- Code node (post-process tool + LLM) ----------
             {
                 "id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
                 "node_type": "code",
@@ -398,8 +445,12 @@ class AppHandler:
                         "value": {
                             "type": "ref",
                             "content": {
-                                "ref_node_id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
-                                "ref_var_name": "combine_documents",
+                                # for now, use google_serper text instead of dataset retrieval
+                                "ref_node_id": "2f6cf40d-0219-421b-92ff-229fdde15ecb",
+                                "ref_var_name": "text",
+                                # later you can point this to dataset_retrieval:
+                                # "ref_node_id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
+                                # "ref_var_name": "combine_documents",
                             },
                         },
                     },
@@ -416,22 +467,22 @@ class AppHandler:
                     },
                 ],
                 "code": """def main(params):
-            # Get retrieval content or default text
+            # Get retrieval/tool content or default text
             docs = params.get("combine_documents")
             if not docs:
                 docs = (
                     "This is default retrieval content for testing. "
-                    "It is used when the dataset retrieval returns empty. "
+                    "It is used when the tool or retrieval returns empty. "
                     "You can modify this to simulate retrieval outputs."
                 )
-
+        
             # Get LLM output or default demo text
             answer = params.get("llm_output")
             if not answer:
                 answer = "This is a placeholder LLM answer (for testing)."
-
+        
             snippet = docs[:200]
-
+        
             return {
                 "snippet": snippet,
                 "answer_length": len(answer),
@@ -609,23 +660,51 @@ class AppHandler:
                             },
                         },
                     },
+                    {
+                        "name": "google_search_result",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": "2f6cf40d-0219-421b-92ff-229fdde15ecb",
+                                "ref_var_name": "text",
+                            },
+                        },
+                    },
                 ],
             },
         ]
 
-        # 2. Edges: start -> dataset_retrieval -> llm -> code -> template -> end
+        # 2. Edges: start -> tool -> llm -> code -> template -> end
         edges = [
             {
                 "id": "675fca50-1228-4000-8000-000000000001",
                 "source": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
                 "source_type": "start",
-                "target": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
-                "target_type": "dataset_retrieval",
+                "target": "2f6cf40d-0219-421b-92ff-229fdde15ecb",
+                "target_type": "tool",
             },
+
+            # Retrieval edges (DISABLED for now)
+            # {
+            #     "id": "675fca50-1228-4000-8000-000000000010",
+            #     "source": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
+            #     "source_type": "start",
+            #     "target": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
+            #     "target_type": "dataset_retrieval",
+            # },
+            # {
+            #     "id": "675fca50-1228-4000-8000-000000000011",
+            #     "source": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
+            #     "source_type": "dataset_retrieval",
+            #     "target": "eba75e0b-21b7-46ed-8d21-791724f0740f",
+            #     "target_type": "llm",
+            # },
+
             {
                 "id": "675fca50-1228-4000-8000-000000000002",
-                "source": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
-                "source_type": "dataset_retrieval",
+                "source": "2f6cf40d-0219-421b-92ff-229fdde15ecb",
+                "source_type": "tool",
                 "target": "eba75e0b-21b7-46ed-8d21-791724f0740f",
                 "target_type": "llm",
             },
@@ -652,12 +731,12 @@ class AppHandler:
             },
         ]
 
-        # 3. Build workflow & invoke (this part you already had)
+        # 3. Build workflow & invoke
         workflow = Workflow(
             workflow_config=WorkflowConfig(
                 account_id=current_user.id,
-                name="workflow_demo_mocked",
-                description="Demo workflow: start -> retrieval -> llm -> code -> template -> end.",
+                name="workflow_demo_with_tool_no_retrieval",
+                description="Demo workflow: start -> tool -> llm -> code -> template -> end.",
                 nodes=nodes,
                 edges=edges,
             )
