@@ -263,6 +263,7 @@ class AppHandler:
         # return success_json({"agent_result": agent_result.model_dump()})
 
         ############# Test Workflow #############
+
         from internal.core.workflow import Workflow
         from internal.core.workflow.entities.workflow_entity import WorkflowConfig
 
@@ -298,7 +299,7 @@ class AppHandler:
                 ],
             },
 
-            # ---------- Dataset retrieval node (DISABLED for now) ----------
+            # ---------- Dataset retrieval node (kept for later, currently unused) ----------
             # {
             #     "id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
             #     "node_type": "dataset_retrieval",
@@ -333,6 +334,27 @@ class AppHandler:
             #     ],
             # },
 
+            # ---------- HTTP Request Node ----------
+            {
+                "id": "675fca50-1228-8008-82dc-0c714158534c",
+                "node_type": "http_request",
+                "title": "HTTP Request",
+                "description": "Simple GET request to langchain.com",
+                "url": "https://www.langchain.com/",
+                "method": "get",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "response",
+                        "type": "string",
+                        "value": {
+                            "type": "generated",
+                            "content": "",
+                        },
+                    }
+                ],
+            },
+
             # ---------- Tool node (google_serper) ----------
             {
                 "id": "2f6cf40d-0219-421b-92ff-229fdde15ecb",
@@ -340,8 +362,8 @@ class AppHandler:
                 "title": "Built-in Tool: Google Serper",
                 "description": "Call google_serper with the user query.",
                 "type": "builtin_tool",
-                "provider_id": "google",
-                "tool_id": "google_serper",
+                "provider_id": "google",  # must match your provider id in config
+                "tool_id": "google_serper",  # internal tool name
                 "inputs": [
                     {
                         "name": "query",
@@ -372,7 +394,7 @@ class AppHandler:
                 "id": "eba75e0b-21b7-46ed-8d21-791724f0740f",
                 "node_type": "llm",
                 "title": "Large Language Model",
-                "description": "Answer the user query using tool/context.",
+                "description": "Answer the user query using HTTP response as context.",
                 "inputs": [
                     {
                         "name": "query",
@@ -391,12 +413,8 @@ class AppHandler:
                         "value": {
                             "type": "ref",
                             "content": {
-                                # currently use google_serper output as context
-                                "ref_node_id": "2f6cf40d-0219-421b-92ff-229fdde15ecb",
-                                "ref_var_name": "text",
-                                # when retrieval is fixed, you can switch this to:
-                                # "ref_node_id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
-                                # "ref_var_name": "combine_documents",
+                                "ref_node_id": "675fca50-1228-8008-82dc-0c714158534c",
+                                "ref_var_name": "response",
                             },
                         },
                     },
@@ -420,24 +438,14 @@ class AppHandler:
                         "max_tokens": 512,
                     },
                 },
-                "outputs": [
-                    {
-                        "name": "output",
-                        "type": "string",
-                        "value": {
-                            "type": "generated",
-                            "content": "",
-                        },
-                    }
-                ],
             },
 
-            # ---------- Code node (post-process tool + LLM) ----------
+            # ---------- Code node (post-process LLM + context) ----------
             {
                 "id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
                 "node_type": "code",
                 "title": "Code Post-processing",
-                "description": "Post-process LLM answer and documents with safe defaults.",
+                "description": "Post-process LLM answer and context with safe defaults.",
                 "inputs": [
                     {
                         "name": "combine_documents",
@@ -445,12 +453,8 @@ class AppHandler:
                         "value": {
                             "type": "ref",
                             "content": {
-                                # for now, use google_serper text instead of dataset retrieval
-                                "ref_node_id": "2f6cf40d-0219-421b-92ff-229fdde15ecb",
-                                "ref_var_name": "text",
-                                # later you can point this to dataset_retrieval:
-                                # "ref_node_id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
-                                # "ref_var_name": "combine_documents",
+                                "ref_node_id": "675fca50-1228-8008-82dc-0c714158534c",
+                                "ref_var_name": "response",
                             },
                         },
                     },
@@ -467,27 +471,27 @@ class AppHandler:
                     },
                 ],
                 "code": """def main(params):
-            # Get retrieval/tool content or default text
-            docs = params.get("combine_documents")
-            if not docs:
-                docs = (
-                    "This is default retrieval content for testing. "
-                    "It is used when the tool or retrieval returns empty. "
-                    "You can modify this to simulate retrieval outputs."
-                )
-        
-            # Get LLM output or default demo text
-            answer = params.get("llm_output")
-            if not answer:
-                answer = "This is a placeholder LLM answer (for testing)."
-        
-            snippet = docs[:200]
-        
-            return {
-                "snippet": snippet,
-                "answer_length": len(answer),
-                "fallback_used": params.get("combine_documents") is None or params.get("combine_documents") == ""
-            }""",
+        # Get context content (HTTP response) or default text
+        docs = params.get("combine_documents")
+        if not docs:
+            docs = (
+                "This is default retrieval content for testing. "
+                "It is used when the dataset retrieval or HTTP request returns empty. "
+                "You can modify this to simulate retrieval outputs."
+            )
+    
+        # Get LLM output or default demo text
+        answer = params.get("llm_output")
+        if not answer:
+            answer = "This is a placeholder LLM answer (for testing)."
+    
+        snippet = docs[:200]
+    
+        return {
+            "snippet": snippet,
+            "answer_length": len(answer),
+            "fallback_used": params.get("combine_documents") in (None, ""),
+        }""",
                 "outputs": [
                     {
                         "name": "snippet",
@@ -572,7 +576,7 @@ class AppHandler:
                     "Location: {{location}}\n"
                     "User question: {{query}}\n\n"
                     "LLM answer:\n{{llm_output}}\n\n"
-                    "Retrieved-doc snippet (or default):\n{{snippet}}\n"
+                    "Retrieved/HTTP snippet (or default):\n{{snippet}}\n"
                 ),
             },
 
@@ -671,40 +675,34 @@ class AppHandler:
                             },
                         },
                     },
+                    {
+                        "name": "http_response",
+                        "type": "string",
+                        "value": {
+                            "type": "ref",
+                            "content": {
+                                "ref_node_id": "675fca50-1228-8008-82dc-0c714158534c",
+                                "ref_var_name": "response",
+                            },
+                        },
+                    },
                 ],
             },
         ]
 
-        # 2. Edges: start -> tool -> llm -> code -> template -> end
+        # 2. Edges: start -> http -> llm -> code -> tool -> template -> end
         edges = [
             {
                 "id": "675fca50-1228-4000-8000-000000000001",
                 "source": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
                 "source_type": "start",
-                "target": "2f6cf40d-0219-421b-92ff-229fdde15ecb",
-                "target_type": "tool",
+                "target": "675fca50-1228-8008-82dc-0c714158534c",
+                "target_type": "http_request",
             },
-
-            # Retrieval edges (DISABLED for now)
-            # {
-            #     "id": "675fca50-1228-4000-8000-000000000010",
-            #     "source": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
-            #     "source_type": "start",
-            #     "target": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
-            #     "target_type": "dataset_retrieval",
-            # },
-            # {
-            #     "id": "675fca50-1228-4000-8000-000000000011",
-            #     "source": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
-            #     "source_type": "dataset_retrieval",
-            #     "target": "eba75e0b-21b7-46ed-8d21-791724f0740f",
-            #     "target_type": "llm",
-            # },
-
             {
                 "id": "675fca50-1228-4000-8000-000000000002",
-                "source": "2f6cf40d-0219-421b-92ff-229fdde15ecb",
-                "source_type": "tool",
+                "source": "675fca50-1228-8008-82dc-0c714158534c",
+                "source_type": "http_request",
                 "target": "eba75e0b-21b7-46ed-8d21-791724f0740f",
                 "target_type": "llm",
             },
@@ -719,11 +717,18 @@ class AppHandler:
                 "id": "675fca50-1228-4000-8000-000000000004",
                 "source": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
                 "source_type": "code",
+                "target": "2f6cf40d-0219-421b-92ff-229fdde15ecb",
+                "target_type": "tool",
+            },
+            {
+                "id": "675fca50-1228-4000-8000-000000000005",
+                "source": "2f6cf40d-0219-421b-92ff-229fdde15ecb",
+                "source_type": "tool",
                 "target": "623b7671-0bc2-446c-bf5e-5e25032a522e",
                 "target_type": "template_transform",
             },
             {
-                "id": "675fca50-1228-4000-8000-000000000005",
+                "id": "675fca50-1228-4000-8000-000000000006",
                 "source": "623b7671-0bc2-446c-bf5e-5e25032a522e",
                 "source_type": "template_transform",
                 "target": "860c8411-37ed-4872-b53f-30afa0290211",
@@ -735,8 +740,11 @@ class AppHandler:
         workflow = Workflow(
             workflow_config=WorkflowConfig(
                 account_id=current_user.id,
-                name="workflow_demo_with_tool_no_retrieval",
-                description="Demo workflow: start -> tool -> llm -> code -> template -> end.",
+                name="workflow_demo_with_http_and_tool",
+                description=(
+                    "Demo workflow: start -> http_request -> llm -> code -> tool -> "
+                    "template -> end (dataset_retrieval temporarily disabled)."
+                ),
                 nodes=nodes,
                 edges=edges,
             )
