@@ -177,7 +177,12 @@ class Workflow(BaseTool):
             graph.add_edge(source_nodes, target_node)
 
         # 9. Compile the graph into a runnable workflow
-        return graph.compile()
+        workflow = graph.compile()
+        image_data = workflow.get_graph().draw_mermaid_png()
+        with open("workflow.png", "wb") as f:
+            f.write(image_data)
+
+        return workflow
 
     def _run(self, *args: Any, **kwargs: Any) -> Any:
         """Base run method for the workflow tool."""
