@@ -22,13 +22,15 @@ from internal.handler import (
     AIHandler,
     ApiKeyHandler,
     OpenAPIHandler,
+    BuiltinAppHandler,
+    WorkflowHandler,
 )
 
 
 @inject
 @dataclass
 class Router:
-    """Application Router"""
+    """Router"""
     app_handler: AppHandler
     builtin_tool_handler: BuiltinToolHandler
     api_tool_handler: ApiToolHandler
@@ -42,17 +44,23 @@ class Router:
     ai_handler: AIHandler
     api_key_handler: ApiKeyHandler
     openapi_handler: OpenAPIHandler
+    builtin_app_handler: BuiltinAppHandler
+    workflow_handler: WorkflowHandler
 
     def register_router(self, app: Flask):
-        """Register all routes"""
+        """Register routes"""
         # 1. Create blueprints
         bp = Blueprint("llmops", __name__, url_prefix="")
         openapi_bp = Blueprint("openapi", __name__, url_prefix="")
 
-        # 2. Bind URLs to controller methods
+        # 2. Bind URLs to controller methods (Apps)
         bp.add_url_rule("/ping", view_func=self.app_handler.ping)
+        # bp.add_url_rule("/apps", view_func=self.app_handler.get_apps_with_page)
         bp.add_url_rule("/apps", methods=["POST"], view_func=self.app_handler.create_app)
         bp.add_url_rule("/apps/<uuid:app_id>", view_func=self.app_handler.get_app)
+        # bp.add_url_rule("/apps/<uuid:app_id>", methods=["POST"], view_func=self.app_handler.update_app)
+        # bp.add_url_rule("/apps/<uuid:app_id>/delete", methods=["POST"], view_func=self.app_handler.delete_app)
+        # bp.add_url_rule("/apps/<uuid:app_id>/copy", methods=["POST"], view_func=self.app_handler.copy_app)
         bp.add_url_rule("/apps/<uuid:app_id>/draft-app-config", view_func=self.app_handler.get_draft_app_config)
         bp.add_url_rule(
             "/apps/<uuid:app_id>/draft-app-config",
@@ -107,7 +115,7 @@ class Router:
             view_func=self.app_handler.get_debug_conversation_messages_with_page,
         )
 
-        # 3. Built-in tool marketplace
+        # 3. Built-in tools module
         bp.add_url_rule("/builtin-tools", view_func=self.builtin_tool_handler.get_builtin_tools)
         bp.add_url_rule(
             "/builtin-tools/<string:provider_name>/tools/<string:tool_name>",
@@ -122,7 +130,7 @@ class Router:
             view_func=self.builtin_tool_handler.get_categories,
         )
 
-        # 4. Custom API tool module
+        # 4. Custom API tools module
         bp.add_url_rule(
             "/api-tools",
             view_func=self.api_tool_handler.get_api_tool_providers_with_page,
@@ -160,7 +168,7 @@ class Router:
         bp.add_url_rule("/upload-files/file", methods=["POST"], view_func=self.upload_file_handler.upload_file)
         bp.add_url_rule("/upload-files/image", methods=["POST"], view_func=self.upload_file_handler.upload_image)
 
-        # 5. Dataset / Knowledge Base module
+        # 5. Dataset / knowledge base module
         bp.add_url_rule("/datasets", view_func=self.dataset_handler.get_datasets_with_page)
         bp.add_url_rule("/datasets", methods=["POST"], view_func=self.dataset_handler.create_dataset)
         bp.add_url_rule("/datasets/<uuid:dataset_id>", view_func=self.dataset_handler.get_dataset)
@@ -237,7 +245,7 @@ class Router:
             view_func=self.dataset_handler.hit,
         )
 
-        # 6. OAuth & Authentication
+        # 6. OAuth & auth module
         bp.add_url_rule(
             "/oauth/<string:provider_name>",
             view_func=self.oauth_handler.provider,
@@ -258,13 +266,13 @@ class Router:
             view_func=self.auth_handler.logout,
         )
 
-        # 7. Account Settings
+        # 7. Account settings module
         bp.add_url_rule("/account", view_func=self.account_handler.get_current_user)
         bp.add_url_rule("/account/password", methods=["POST"], view_func=self.account_handler.update_password)
         bp.add_url_rule("/account/name", methods=["POST"], view_func=self.account_handler.update_name)
         bp.add_url_rule("/account/avatar", methods=["POST"], view_func=self.account_handler.update_avatar)
 
-        # 8. AI Assistance module
+        # 8. AI assistant module
         bp.add_url_rule("/ai/optimize-prompt", methods=["POST"], view_func=self.ai_handler.optimize_prompt)
         bp.add_url_rule(
             "/ai/suggested-questions",
@@ -272,7 +280,7 @@ class Router:
             view_func=self.ai_handler.generate_suggested_questions,
         )
 
-        # 9. API Key module
+        # 9. API key module
         bp.add_url_rule("/openapi/api-keys", view_func=self.api_key_handler.get_api_keys_with_page)
         bp.add_url_rule(
             "/openapi/api-keys",
@@ -300,6 +308,54 @@ class Router:
             view_func=self.openapi_handler.chat,
         )
 
-        # 10. Register blueprints to the Flask application
+        # 10. Built-in apps module
+        bp.add_url_rule("/builtin-apps/categories", view_func=self.builtin_app_handler.get_builtin_app_categories)
+        bp.add_url_rule("/builtin-apps", view_func=self.builtin_app_handler.get_builtin_apps)
+        bp.add_url_rule(
+            "/builtin-apps/add-builtin-app-to-space",
+            methods=["POST"],
+            view_func=self.builtin_app_handler.add_builtin_app_to_space,
+        )
+
+        # 11. Workflow module
+        bp.add_url_rule("/workflows", view_func=self.workflow_handler.get_workflows_with_page)
+        bp.add_url_rule("/workflows", methods=["POST"], view_func=self.workflow_handler.create_workflow)
+        bp.add_url_rule("/workflows/<uuid:workflow_id>", view_func=self.workflow_handler.get_workflow)
+        bp.add_url_rule(
+            "/workflows/<uuid:workflow_id>",
+            methods=["POST"],
+            view_func=self.workflow_handler.update_workflow,
+        )
+        bp.add_url_rule(
+            "/workflows/<uuid:workflow_id>/delete",
+            methods=["POST"],
+            view_func=self.workflow_handler.delete_workflow,
+        )
+        bp.add_url_rule(
+            "/workflows/<uuid:workflow_id>/draft-graph",
+            methods=["POST"],
+            view_func=self.workflow_handler.update_draft_graph,
+        )
+        bp.add_url_rule(
+            "/workflows/<uuid:workflow_id>/draft-graph",
+            view_func=self.workflow_handler.get_draft_graph,
+        )
+        bp.add_url_rule(
+            "/workflows/<uuid:workflow_id>/debug",
+            methods=["POST"],
+            view_func=self.workflow_handler.debug_workflow,
+        )
+        bp.add_url_rule(
+            "/workflows/<uuid:workflow_id>/publish",
+            methods=["POST"],
+            view_func=self.workflow_handler.publish_workflow,
+        )
+        bp.add_url_rule(
+            "/workflows/<uuid:workflow_id>/cancel-publish",
+            methods=["POST"],
+            view_func=self.workflow_handler.cancel_publish_workflow,
+        )
+
+        # 12. Register blueprints on the Flask app
         app.register_blueprint(bp)
         app.register_blueprint(openapi_bp)
