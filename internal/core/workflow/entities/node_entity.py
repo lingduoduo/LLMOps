@@ -11,7 +11,7 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 
 
 class NodeType(str, Enum):
-    """Node type enum."""
+    """Available node types."""
     START = "start"
     LLM = "llm"
     TOOL = "tool"
@@ -23,31 +23,23 @@ class NodeType(str, Enum):
 
 
 class BaseNodeData(BaseModel):
-    """Base node metadata."""
+    """Basic node metadata."""
 
     class Position(BaseModel):
-        """Node position model (for UI layout, etc.)."""
+        """Position of the node in the UI canvas."""
         x: float = 0.0
         y: float = 0.0
 
     class Config:
-        # Allow population by field name (useful when aliases are used elsewhere)
         allow_population_by_field_name = True
 
-    # Unique node identifier
-    id: UUID
-
-    # Node type
-    node_type: NodeType
-
-    # Node title (must be unique within a workflow)
-    title: str = ""
-
-    # Node description
-    description: str = ""
-
-    # Node position (e.g., canvas coordinates)
-    position: Position = Field(default_factory=lambda: {"x": 0, "y": 0})
+    id: UUID  # Unique node ID
+    node_type: NodeType  # Node type
+    title: str = ""  # Node title (must be unique)
+    description: str = ""  # Node description
+    position: Position = Field(  # Node coordinates
+        default_factory=lambda: BaseNodeData.Position(x=0, y=0)
+    )
 
 
 class NodeStatus(str, Enum):
@@ -58,21 +50,10 @@ class NodeStatus(str, Enum):
 
 
 class NodeResult(BaseModel):
-    """Node execution result."""
-    # Node metadata
-    node_data: BaseNodeData
-
-    # Execution status
+    """Execution result of a node."""
+    node_data: BaseNodeData  # Metadata of the node
     status: NodeStatus = NodeStatus.RUNNING
-
-    # Input data passed into this node
-    inputs: dict[str, Any] = Field(default_factory=dict)
-
-    # Output data produced by this node
-    outputs: dict[str, Any] = Field(default_factory=dict)
-
-    # Latency in seconds
-    latency: float = 0.0
-
-    # Error message, if any
-    error: str = ""
+    inputs: dict[str, Any] = Field(default_factory=dict)  # Node input data
+    outputs: dict[str, Any] = Field(default_factory=dict)  # Node output data
+    latency: float = 0  # Execution time
+    error: str = ""  # Error message (if any)
