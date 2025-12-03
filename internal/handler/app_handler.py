@@ -12,6 +12,9 @@ from injector import inject
 
 from internal.schema.app_schema import (
     CreateAppReq,
+    UpdateAppReq,
+    GetAppsWithPageReq,
+    GetAppsWithPageResp,
     GetAppResp,
     GetPublishHistoriesWithPageReq,
     GetPublishHistoriesWithPageResp,
@@ -29,147 +32,194 @@ from pkg.response import validate_error_json, success_json, success_message, com
 @inject
 @dataclass
 class AppHandler:
-    """Application controller (Flask route handler for app-related operations)"""
+    """Application controller"""
     app_service: AppService
     retrieval_service: RetrievalService
 
     @login_required
     def create_app(self):
-        """Create a new application record"""
-        # 1. Extract and validate the request data
+        """Call service to create a new app record"""
+        # 1. Extract request and validate
         req = CreateAppReq()
         if not req.validate():
             return validate_error_json(req.errors)
 
-        # 2. Call the service layer to create the app
+        # 2. Call service to create app info
         app = self.app_service.create_app(req, current_user)
 
-        # 3. Return success response with new app ID
+        # 3. Return success response with created app id
         return success_json({"id": app.id})
 
     @login_required
     def get_app(self, app_id: UUID):
-        """Retrieve basic information of a specific application"""
+        """Get basic information of a specific app"""
         app = self.app_service.get_app(app_id, current_user)
         resp = GetAppResp()
         return success_json(resp.dump(app))
 
     @login_required
+    def update_app(self, app_id: UUID):
+        """Update a specific app based on the provided information"""
+        # 1. Extract data and validate
+        req = UpdateAppReq()
+        if not req.validate():
+            return validate_error_json(req.errors)
+
+        # 2. Call service to update data
+        self.app_service.update_app(app_id, current_user, **req.data)
+
+        return success_message("Successfully updated Agent application")
+
+    @login_required
+    def copy_app(self, app_id: UUID):
+        """Quickly copy an app based on the given app id"""
+        app = self.app_service.copy_app(app_id, current_user)
+        return success_json({"id": app.id})
+
+    @login_required
+    def delete_app(self, app_id: UUID):
+        """Delete a specific app based on the provided information"""
+        self.app_service.delete_app(app_id, current_user)
+        return success_message("Successfully deleted Agent application")
+
+    @login_required
+    def get_apps_with_page(self):
+        """Get a paginated list of apps for the current logged-in account"""
+        # 1. Extract data and validate
+        req = GetAppsWithPageReq(request.args)
+        if not req.validate():
+            return validate_error_json(req.errors)
+
+        # 2. Call service to get list data and paginator
+        apps, paginator = self.app_service.get_apps_with_page(req, current_user)
+
+        # 3. Build response structure and return
+        resp = GetAppsWithPageResp(many=True)
+
+        return success_json(PageModel(list=resp.dump(apps), paginator=paginator))
+
+    @login_required
     def get_draft_app_config(self, app_id: UUID):
-        """Fetch the latest draft configuration of the specified application"""
+        """Get the latest draft configuration for the specified app"""
         draft_config = self.app_service.get_draft_app_config(app_id, current_user)
         return success_json(draft_config)
 
     @login_required
     def update_draft_app_config(self, app_id: UUID):
-        """Update the latest draft configuration of the specified application"""
-        # 1. Extract draft configuration from request body
+        """Update the latest draft configuration for the specified app"""
+        # 1. Get draft configuration from request JSON
         draft_app_config = request.get_json(force=True, silent=True) or {}
 
-        # 2. Call service to update the draft configuration
+        # 2. Call service to update the app's draft configuration
         self.app_service.update_draft_app_config(app_id, draft_app_config, current_user)
 
-        return success_message("App draft configuration updated successfully")
+        return success_message("Successfully updated app draft configuration")
 
     @login_required
     def publish(self, app_id: UUID):
-        """Publish or update the current draft configuration of the specified application"""
+        """Publish/update a specific draft configuration for the app"""
         self.app_service.publish_draft_app_config(app_id, current_user)
-        return success_message("Application configuration published/updated successfully")
+        return success_message("Successfully published/updated app configuration")
 
     @login_required
     def cancel_publish(self, app_id: UUID):
-        """Cancel the published configuration of the specified application"""
+        """Cancel the published configuration for the specified app"""
         self.app_service.cancel_publish_app_config(app_id, current_user)
-        return success_message("Application configuration publication canceled successfully")
-
-    @login_required
-    def get_publish_histories_with_page(self, app_id: UUID):
-        """Get paginated list of published configuration histories for the application"""
-        # 1. Extract and validate request parameters
-        req = GetPublishHistoriesWithPageReq(request.args)
-        if not req.validate():
-            return validate_error_json(req.errors)
-
-        # 2. Retrieve paginated list data from service
-        app_config_versions, paginator = self.app_service.get_publish_histories_with_page(app_id, req, current_user)
-
-        # 3. Build and return paginated response
-        resp = GetPublishHistoriesWithPageResp(many=True)
-        return success_json(PageModel(list=resp.dump(app_config_versions), paginator=paginator))
+        return success_message("Successfully cancelled published app configuration")
 
     @login_required
     def fallback_history_to_draft(self, app_id: UUID):
-        """Revert a historical configuration version back to the draft"""
-        # 1. Extract and validate request data
+        """Rollback a specific historical configuration version to draft for the app"""
+        # 1. Extract data and validate
         req = FallbackHistoryToDraftReq()
         if not req.validate():
             return validate_error_json(req.errors)
 
-        # 2. Call service to revert the specified version to draft
+        # 2. Call service to rollback the specified version to draft
         self.app_service.fallback_history_to_draft(app_id, req.app_config_version_id.data, current_user)
 
-        return success_message("Historical configuration reverted to draft successfully")
+        return success_message("Successfully rolled back historical configuration to draft")
+
+    @login_required
+    def get_publish_histories_with_page(self, app_id: UUID):
+        """Get the publish history list for the specified app"""
+        # 1. Get request data and validate
+        req = GetPublishHistoriesWithPageReq(request.args)
+        if not req.validate():
+            return validate_error_json(req.errors)
+
+        # 2. Call service to get paginated list data
+        app_config_versions, paginator = self.app_service.get_publish_histories_with_page(
+            app_id, req, current_user
+        )
+
+        # 3. Build response structure and return
+        resp = GetPublishHistoriesWithPageResp(many=True)
+
+        return success_json(PageModel(list=resp.dump(app_config_versions), paginator=paginator))
 
     @login_required
     def get_debug_conversation_summary(self, app_id: UUID):
-        """Retrieve long-term memory summary for the application's debug conversation"""
+        """Get long-term memory (summary) of the debug conversation for the specified app"""
         summary = self.app_service.get_debug_conversation_summary(app_id, current_user)
         return success_json({"summary": summary})
 
     @login_required
     def update_debug_conversation_summary(self, app_id: UUID):
-        """Update the long-term memory summary for the application's debug conversation"""
-        # 1. Extract and validate request data
+        """Update long-term memory (summary) of the debug conversation for the specified app"""
+        # 1. Extract data and validate
         req = UpdateDebugConversationSummaryReq()
         if not req.validate():
             return validate_error_json(req.errors)
 
-        # 2. Call service to update the summary
+        # 2. Call service to update debug conversation long-term memory
         self.app_service.update_debug_conversation_summary(app_id, req.summary.data, current_user)
 
-        return success_message("AI application long-term memory updated successfully")
+        return success_message("Successfully updated AI app long-term memory")
 
     @login_required
     def delete_debug_conversation(self, app_id: UUID):
-        """Clear all debug conversation records for the specified application"""
+        """Clear all debug conversation records for the specified app"""
         self.app_service.delete_debug_conversation(app_id, current_user)
-        return success_message("Application debug conversation records cleared successfully")
+        return success_message("Successfully cleared app debug conversation records")
 
     @login_required
     def debug_chat(self, app_id: UUID):
-        """Initiate a debugging chat session for the specified application"""
-        # 1. Extract and validate input data
+        """Start a debug chat with the specified app using the provided query"""
+        # 1. Extract data and validate
         req = DebugChatReq()
         if not req.validate():
             return validate_error_json(req.errors)
 
-        # 2. Call service to start a debug conversation
+        # 2. Call service to start debug conversation
         response = self.app_service.debug_chat(app_id, req.query.data, current_user)
 
         return compact_generate_response(response)
 
     @login_required
     def stop_debug_chat(self, app_id: UUID, task_id: UUID):
-        """Stop a running debug chat session by task ID"""
+        """Stop a specific debug chat task for the given app"""
         self.app_service.stop_debug_chat(app_id, task_id, current_user)
-        return success_message("Application debug chat stopped successfully")
+        return success_message("Successfully stopped app debug conversation")
 
     @login_required
     def get_debug_conversation_messages_with_page(self, app_id: UUID):
-        """Retrieve paginated debug conversation messages for the application"""
-        # 1. Extract and validate query parameters
+        """Get a paginated list of debug conversation messages for the specified app"""
+        # 1. Extract request data and validate
         req = GetDebugConversationMessagesWithPageReq(request.args)
         if not req.validate():
             return validate_error_json(req.errors)
 
-        # 2. Retrieve data from the service layer
-        messages, paginator = self.app_service.get_debug_conversation_messages_with_page(app_id, req, current_user)
+        # 2. Call service to get data
+        messages, paginator = self.app_service.get_debug_conversation_messages_with_page(
+            app_id, req, current_user
+        )
 
-        # 3. Build paginated response
+        # 3. Build response structure
         resp = GetDebugConversationMessagesWithPageResp(many=True)
-        return success_json(PageModel(list=resp.dump(messages), paginator=paginator))
 
+        return success_json(PageModel(list=resp.dump(messages), paginator=paginator))
+    
     @login_required
     def ping(self):
         # """Health check endpoint"""
