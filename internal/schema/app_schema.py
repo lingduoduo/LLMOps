@@ -10,6 +10,7 @@ from marshmallow import Schema, fields, pre_dump
 from wtforms import StringField, IntegerField
 from wtforms.validators import DataRequired, Length, URL, ValidationError, Optional, NumberRange
 
+from internal.entity.app_entity import AppStatus
 from internal.lib.helper import datetime_to_timestamp
 from internal.model import App, AppConfigVersion, Message
 from pkg.paginator import PaginatorReq
@@ -17,30 +18,72 @@ from pkg.paginator import PaginatorReq
 
 class CreateAppReq(FlaskForm):
     """Request schema for creating an Agent application"""
-    name = StringField(
-        "name",
-        validators=[
-            DataRequired("Application name must not be empty"),
-            Length(max=40, message="Application name cannot exceed 40 characters"),
-        ],
-    )
-    icon = StringField(
-        "icon",
-        validators=[
-            DataRequired("Application icon must not be empty"),
-            URL(message="Application icon must be a valid image URL"),
-        ],
-    )
-    description = StringField(
-        "description",
-        validators=[
-            Length(max=800, message="Application description cannot exceed 800 characters"),
-        ],
-    )
+    name = StringField("name", validators=[
+        DataRequired("Application name cannot be empty"),
+        Length(max=40, message="Application name cannot exceed 40 characters"),
+    ])
+    icon = StringField("icon", validators=[
+        DataRequired("Application icon cannot be empty"),
+        URL(message="Application icon must be a valid image URL"),
+    ])
+    description = StringField("description", validators=[
+        Length(max=800, message="Application description cannot exceed 800 characters")
+    ])
+
+
+class UpdateAppReq(FlaskForm):
+    """Request schema for updating an Agent application"""
+    name = StringField("name", validators=[
+        DataRequired("Application name cannot be empty"),
+        Length(max=40, message="Application name cannot exceed 40 characters"),
+    ])
+    icon = StringField("icon", validators=[
+        DataRequired("Application icon cannot be empty"),
+        URL(message="Application icon must be a valid image URL"),
+    ])
+    description = StringField("description", validators=[
+        Length(max=800, message="Application description cannot exceed 800 characters")
+    ])
+
+
+class GetAppsWithPageReq(PaginatorReq):
+    """Request schema for paginated application list"""
+    search_word = StringField("search_word", default="", validators=[Optional()])
+
+
+class GetAppsWithPageResp(Schema):
+    """Response schema for paginated application list"""
+    id = fields.UUID(dump_default="")
+    name = fields.String(dump_default="")
+    icon = fields.String(dump_default="")
+    description = fields.String(dump_default="")
+    preset_prompt = fields.String(dump_default="")
+    model_config = fields.Dict(dump_default={})
+    status = fields.String(dump_default="")
+    updated_at = fields.Integer(dump_default=0)
+    created_at = fields.Integer(dump_default=0)
+
+    @pre_dump
+    def process_data(self, data: App, **kwargs):
+        app_config = data.app_config if data.status == AppStatus.PUBLISHED else data.draft_app_config
+        return {
+            "id": data.id,
+            "name": data.name,
+            "icon": data.icon,
+            "description": data.description,
+            "preset_prompt": app_config.preset_prompt,
+            "model_config": {
+                "provider": app_config.model_config.get("provider", ""),
+                "model": app_config.model_config.get("model", "")
+            },
+            "status": data.status,
+            "updated_at": datetime_to_timestamp(data.updated_at),
+            "created_at": datetime_to_timestamp(data.created_at),
+        }
 
 
 class GetAppResp(Schema):
-    """Response schema for retrieving basic application information"""
+    """Response schema for basic application info"""
     id = fields.UUID(dump_default="")
     debug_conversation_id = fields.UUID(dump_default="")
     name = fields.String(dump_default="")
@@ -67,12 +110,12 @@ class GetAppResp(Schema):
 
 
 class GetPublishHistoriesWithPageReq(PaginatorReq):
-    """Request schema for paginated retrieval of application publish history"""
-    pass
+    """Request schema for paginated publish history list"""
+    ...
 
 
 class GetPublishHistoriesWithPageResp(Schema):
-    """Response schema for paginated list of application publish history"""
+    """Response schema for paginated publish history list"""
     id = fields.UUID(dump_default="")
     version = fields.Integer(dump_default=0)
     created_at = fields.Integer(dump_default=0)
@@ -87,16 +130,13 @@ class GetPublishHistoriesWithPageResp(Schema):
 
 
 class FallbackHistoryToDraftReq(FlaskForm):
-    """Request schema for reverting a historical configuration version back to draft"""
-    app_config_version_id = StringField(
-        "app_config_version_id",
-        validators=[
-            DataRequired("Configuration version ID to revert must not be empty"),
-        ],
-    )
+    """Request schema for reverting a history version back to draft"""
+    app_config_version_id = StringField("app_config_version_id", validators=[
+        DataRequired("Configuration version ID cannot be empty")
+    ])
 
     def validate_app_config_version_id(self, field: StringField) -> None:
-        """Validate that the configuration version ID is a valid UUID"""
+        """Validate the configuration version ID"""
         try:
             UUID(field.data)
         except Exception:
@@ -104,34 +144,27 @@ class FallbackHistoryToDraftReq(FlaskForm):
 
 
 class UpdateDebugConversationSummaryReq(FlaskForm):
-    """Request schema for updating the long-term memory summary of a debug conversation"""
+    """Request schema for updating long-term memory summary"""
     summary = StringField("summary", default="")
 
 
 class DebugChatReq(FlaskForm):
-    """Request schema for starting a debug chat session"""
-    query = StringField(
-        "query",
-        validators=[
-            DataRequired("User query must not be empty"),
-        ],
-    )
+    """Request schema for debug chat"""
+    query = StringField("query", validators=[
+        DataRequired("User query cannot be empty"),
+    ])
 
 
 class GetDebugConversationMessagesWithPageReq(PaginatorReq):
-    """Request schema for paginated retrieval of debug conversation messages"""
-    created_at = IntegerField(
-        "created_at",
-        default=0,
-        validators=[
-            Optional(),
-            NumberRange(min=0, message="The minimum value for created_at cursor is 0"),
-        ],
-    )
+    """Request schema for paginated debug conversation messages"""
+    created_at = IntegerField("created_at", default=0, validators=[
+        Optional(),
+        NumberRange(min=0, message="created_at cursor minimum value is 0")
+    ])
 
 
 class GetDebugConversationMessagesWithPageResp(Schema):
-    """Response schema for paginated list of debug conversation messages"""
+    """Response schema for paginated debug conversation messages"""
     id = fields.UUID(dump_default="")
     conversation_id = fields.UUID(dump_default="")
     query = fields.String(dump_default="")
@@ -150,19 +183,16 @@ class GetDebugConversationMessagesWithPageResp(Schema):
             "answer": data.answer,
             "total_token_count": data.total_token_count,
             "latency": data.latency,
-            "agent_thoughts": [
-                {
-                    "id": agent_thought.id,
-                    "position": agent_thought.position,
-                    "event": agent_thought.event,
-                    "thought": agent_thought.thought,
-                    "observation": agent_thought.observation,
-                    "tool": agent_thought.tool,
-                    "tool_input": agent_thought.tool_input,
-                    "latency": agent_thought.latency,
-                    "created_at": datetime_to_timestamp(agent_thought.created_at),
-                }
-                for agent_thought in data.agent_thoughts
-            ],
+            "agent_thoughts": [{
+                "id": agent_thought.id,
+                "position": agent_thought.position,
+                "event": agent_thought.event,
+                "thought": agent_thought.thought,
+                "observation": agent_thought.observation,
+                "tool": agent_thought.tool,
+                "tool_input": agent_thought.tool_input,
+                "latency": agent_thought.latency,
+                "created_at": datetime_to_timestamp(agent_thought.created_at),
+            } for agent_thought in data.agent_thoughts],
             "created_at": datetime_to_timestamp(data.created_at),
         }
