@@ -27,6 +27,7 @@ from internal.entity.app_entity import AppStatus, AppConfigType, DEFAULT_APP_CON
 from internal.entity.conversation_entity import InvokeFrom, MessageStatus
 from internal.entity.dataset_entity import RetrievalSource
 from internal.exception import NotFoundException, ForbiddenException, ValidateErrorException, FailException
+from internal.lib.helper import remove_fields
 from internal.model import (
     App,
     Account,
@@ -40,6 +41,7 @@ from internal.model import (
 )
 from internal.schema.app_schema import (
     CreateAppReq,
+    GetAppsWithPageReq,
     GetPublishHistoriesWithPageReq,
     GetDebugConversationMessagesWithPageReq,
 )
@@ -65,9 +67,9 @@ class AppService(BaseService):
 
     def create_app(self, req: CreateAppReq, account: Account) -> App:
         """Create an Agent application"""
-        # 1. Open DB auto-commit context
+        # 1. Open an auto-commit DB context
         with self.db.auto_commit():
-            # 2. Create the app record and flush so we can obtain the app ID
+            # 2. Create an app record and flush to get the app ID
             app = App(
                 account_id=account.id,
                 name=req.name.data,
@@ -78,7 +80,7 @@ class AppService(BaseService):
             self.db.session.add(app)
             self.db.session.flush()
 
-            # 3. Add the draft config record
+            # 3. Add an initial draft config record
             app_config_version = AppConfigVersion(
                 app_id=app.id,
                 version=0,
@@ -88,30 +90,102 @@ class AppService(BaseService):
             self.db.session.add(app_config_version)
             self.db.session.flush()
 
-            # 4. Set the draft_app_config_id on the app
+            # 4. Attach the draft config ID to the app
             app.draft_app_config_id = app_config_version.id
 
-        # 5. Return the created app record
+        # 5. Return the created app
         return app
 
     def get_app(self, app_id: UUID, account: Account) -> App:
-        """Get the basic application information based on the given app ID"""
-        # 1. Query the DB for basic app information
+        """Get basic app info by ID"""
+        # 1. Query the DB for the app
         app = self.get(App, app_id)
 
-        # 2. Check whether the app exists
+        # 2. Check if the app exists
         if not app:
-            raise NotFoundException("The application does not exist, please verify and try again")
+            raise NotFoundException("The application does not exist, please verify and try again.")
 
-        # 3. Check whether the current account has access to this app
+        # 3. Check whether the current account has permission to access this app
         if app.account_id != account.id:
             raise ForbiddenException(
-                "The current account is not authorized to access this application, please verify and try again")
+                "The current account has no permission to access this application. Please verify and try again.")
 
         return app
 
+    def delete_app(self, app_id: UUID, account: Account) -> App:
+        """Delete an app by app ID + account. For now, only delete the basic app info."""
+        app = self.get_app(app_id, account)
+        self.delete(app)
+        return app
+
+    def update_app(self, app_id: UUID, account: Account, **kwargs) -> App:
+        """Update the specified app based on app ID + account + payload"""
+        app = self.get_app(app_id, account)
+        self.update(app, **kwargs)
+        return app
+
+    def copy_app(self, app_id: UUID, account: Account) -> App:
+        """Copy an Agent app by ID and create a new Agent with the same settings"""
+        # 1. Get the app + draft config and validate permissions
+        app = self.get_app(app_id, account)
+        draft_app_config = app.draft_app_config
+
+        # 2. Convert ORM objects to dict and strip unused fields
+        app_dict = app.__dict__.copy()
+        draft_app_config_dict = draft_app_config.__dict__.copy()
+
+        # 3. Remove fields that should not be copied
+        app_remove_fields = [
+            "id", "app_config_id", "draft_app_config_id", "debug_conversation_id",
+            "status", "updated_at", "created_at", "_sa_instance_state",
+        ]
+        draft_app_config_remove_fields = [
+            "id", "app_id", "version", "updated_at", "created_at", "_sa_instance_state",
+        ]
+        remove_fields(app_dict, app_remove_fields)
+        remove_fields(draft_app_config_dict, draft_app_config_remove_fields)
+
+        # 4. Open an auto-commit DB context
+        with self.db.auto_commit():
+            # 5. Create a new app record
+            new_app = App(**app_dict, status=AppStatus.DRAFT)
+            self.db.session.add(new_app)
+            self.db.session.flush()
+
+            # 6. Add a draft config for the new app
+            new_draft_app_config = AppConfigVersion(
+                **draft_app_config_dict,
+                app_id=new_app.id,
+                version=0,
+            )
+            self.db.session.add(new_draft_app_config)
+            self.db.session.flush()
+
+            # 7. Update the app’s draft config ID
+            new_app.draft_app_config_id = new_draft_app_config.id
+
+        # 8. Return the newly created app
+        return new_app
+
+    def get_apps_with_page(self, req: GetAppsWithPageReq, account: Account) -> tuple[list[App], Paginator]:
+        """Get a paginated list of apps under the current logged-in account"""
+        # 1. Build paginator
+        paginator = Paginator(db=self.db, req=req)
+
+        # 2. Build filter conditions
+        filters = [App.account_id == account.id]
+        if req.search_word.data:
+            filters.append(App.name.ilike(f"%{req.search_word.data}%"))
+
+        # 3. Execute pagination query
+        apps = paginator.paginate(
+            self.db.session.query(App).filter(*filters).order_by(desc("created_at"))
+        )
+
+        return apps, paginator
+
     def get_draft_app_config(self, app_id: UUID, account: Account) -> dict[str, Any]:
-        """Get the draft configuration of the specified application"""
+        """Get the draft config for a specified app ID"""
         app = self.get_app(app_id, account)
         return self.app_config_service.get_draft_app_config(app)
 
@@ -121,18 +195,18 @@ class AppService(BaseService):
             draft_app_config: dict[str, Any],
             account: Account,
     ) -> AppConfigVersion:
-        """Update the latest draft configuration of the specified application using the given draft config"""
-        # 1. Get and validate the app
+        """Update the latest draft config of the specified app"""
+        # 1. Get app info and validate permissions
         app = self.get_app(app_id, account)
 
-        # 2. Validate the provided draft configuration
+        # 2. Validate the passed draft config
         draft_app_config = self._validate_draft_app_config(draft_app_config, account)
 
-        # 3. Get the latest draft config record for this app
+        # 3. Get the current draft config record of the app
         draft_app_config_record = app.draft_app_config
         self.update(
             draft_app_config_record,
-            # todo: Because we currently use server_onupdate, this field needs to be updated manually for now
+            # todo: Because we currently use server_onupdate, we temporarily pass updated_at manually
             updated_at=datetime.now(),
             **draft_app_config,
         )
@@ -140,12 +214,12 @@ class AppService(BaseService):
         return draft_app_config_record
 
     def publish_draft_app_config(self, app_id: UUID, account: Account) -> App:
-        """Publish/update the draft configuration of the specified application as its runtime configuration"""
-        # 1. Get the app and its draft configuration
+        """Publish/update the draft config of an app to its runtime config"""
+        # 1. Get app and draft config
         app = self.get_app(app_id, account)
         draft_app_config = self.get_draft_app_config(app_id, account)
 
-        # 2. Create the runtime config (for now we do not delete old runtime configs)
+        # 2. Create a runtime application config (for now we don't delete older runtime configs)
         app_config = self.create(
             AppConfig,
             app_id=app_id,
@@ -161,7 +235,7 @@ class AppService(BaseService):
                 }
                 for tool in draft_app_config["tools"]
             ],
-            # todo: This may change once the workflow module is completed
+            # todo: Will be updated after the workflow module is finished
             workflows=draft_app_config["workflows"],
             retrieval_config=draft_app_config["retrieval_config"],
             long_term_memory=draft_app_config["long_term_memory"],
@@ -173,32 +247,33 @@ class AppService(BaseService):
             review_config=draft_app_config["review_config"],
         )
 
-        # 3. Update the app's runtime config and status
+        # 3. Update app's runtime config and status
         self.update(app, app_config_id=app_config.id, status=AppStatus.PUBLISHED)
 
-        # 4. Delete existing knowledge base association records
+        # 4. First delete existing knowledge-base associations
         with self.db.auto_commit():
             self.db.session.query(AppDatasetJoin).filter(
                 AppDatasetJoin.app_id == app_id,
             ).delete()
 
-        # 5. Add new knowledge base association records
+        # 5. Add new knowledge-base associations
         for dataset in draft_app_config["datasets"]:
             self.create(AppDatasetJoin, app_id=app_id, dataset_id=dataset["id"])
 
-        # 6. Get the app draft record and remove id, version, config_type, updated_at, created_at fields
+        # 6. Copy draft config and remove id/version/config_type/updated_at/created_at fields
         draft_app_config_copy = app.draft_app_config.__dict__.copy()
-        remove_fields = ["id", "version", "config_type", "updated_at", "created_at", "_sa_instance_state"]
-        for field in remove_fields:
-            draft_app_config_copy.pop(field)
+        remove_fields(
+            draft_app_config_copy,
+            ["id", "version", "config_type", "updated_at", "created_at", "_sa_instance_state"],
+        )
 
-        # 7. Get the current maximum published version number
+        # 7. Get the current max published version
         max_version = self.db.session.query(func.coalesce(func.max(AppConfigVersion.version), 0)).filter(
             AppConfigVersion.app_id == app_id,
             AppConfigVersion.config_type == AppConfigType.PUBLISHED,
         ).scalar()
 
-        # 8. Insert a new published version history record
+        # 8. Insert a new published version record
         self.create(
             AppConfigVersion,
             version=max_version + 1,
@@ -209,18 +284,18 @@ class AppService(BaseService):
         return app
 
     def cancel_publish_app_config(self, app_id: UUID, account: Account) -> App:
-        """Cancel publication of the specified application's configuration"""
-        # 1. Get the app and validate permissions
+        """Cancel the published config for the specified app"""
+        # 1. Get app info and validate permissions
         app = self.get_app(app_id, account)
 
-        # 2. Check whether the app is published
+        # 2. Check whether the app is currently published
         if app.status != AppStatus.PUBLISHED:
-            raise FailException("The application has not been published, please verify and try again")
+            raise FailException("The current application is not published, please verify and try again.")
 
-        # 3. Set app status back to DRAFT and clear runtime config ID
+        # 3. Reset app status to DRAFT and clear runtime config ID
         self.update(app, status=AppStatus.DRAFT, app_config_id=None)
 
-        # 4. Delete knowledge base associations for this app
+        # 4. Delete the app's associated knowledge-base records
         with self.db.auto_commit():
             self.db.session.query(AppDatasetJoin).filter(
                 AppDatasetJoin.app_id == app_id,
@@ -234,8 +309,8 @@ class AppService(BaseService):
             req: GetPublishHistoriesWithPageReq,
             account: Account
     ) -> tuple[list[AppConfigVersion], Paginator]:
-        """Get the paginated list of published configuration history for the specified application"""
-        # 1. Validate app and permissions
+        """Get paginated publish history records for a specified app"""
+        # 1. Get app info and validate permissions
         self.get_app(app_id, account)
 
         # 2. Build paginator
@@ -257,30 +332,30 @@ class AppService(BaseService):
             app_config_version_id: UUID,
             account: Account,
     ) -> AppConfigVersion:
-        """Fallback a specific historical configuration version to the draft configuration"""
-        # 1. Validate app and permissions
+        """Rollback a specified historical config version to draft"""
+        # 1. Get app info and validate permissions
         app = self.get_app(app_id, account)
 
-        # 2. Query the specified historical configuration version
+        # 2. Query the specified historical config version
         app_config_version = self.get(AppConfigVersion, app_config_version_id)
         if not app_config_version:
-            raise NotFoundException(
-                "The specified historical configuration version does not exist, please verify and try again")
+            raise NotFoundException("The historical configuration version does not exist, please verify and try again.")
 
-        # 3. Clean the historical config (remove deleted tools, datasets, workflows)
+        # 3. Copy the historical config and remove fields that shouldn't be carried over
         draft_app_config_dict = app_config_version.__dict__.copy()
-        remove_fields = ["id", "app_id", "version", "config_type", "updated_at", "created_at", "_sa_instance_state"]
-        for field in remove_fields:
-            draft_app_config_dict.pop(field)
+        remove_fields(
+            draft_app_config_dict,
+            ["id", "app_id", "version", "config_type", "updated_at", "created_at", "_sa_instance_state"],
+        )
 
-        # 4. Validate the historical configuration
+        # 4. Validate the historical config
         draft_app_config_dict = self._validate_draft_app_config(draft_app_config_dict, account)
 
-        # 5. Update the draft configuration
+        # 5. Update the draft config record
         draft_app_config_record = app.draft_app_config
         self.update(
             draft_app_config_record,
-            # todo: Patch to update the timestamp
+            # todo: Patch for updating the timestamp
             updated_at=datetime.now(),
             **draft_app_config_dict,
         )
@@ -288,53 +363,53 @@ class AppService(BaseService):
         return draft_app_config_record
 
     def get_debug_conversation_summary(self, app_id: UUID, account: Account) -> str:
-        """Get the long-term memory (summary) of the debug conversation for the specified application"""
-        # 1. Validate app and permissions
+        """Get the long-term memory summary for the debug conversation of a specified app"""
+        # 1. Get app info and validate permissions
         app = self.get_app(app_id, account)
 
-        # 2. Get the draft config and check whether long-term memory is enabled
+        # 2. Get the app draft config and check if long-term memory is enabled
         draft_app_config = self.get_draft_app_config(app_id, account)
         if draft_app_config["long_term_memory"]["enable"] is False:
-            raise FailException("Long-term memory is not enabled for this application")
+            raise FailException("Long-term memory is not enabled for this application, unable to retrieve it.")
 
         return app.debug_conversation.summary
 
     def update_debug_conversation_summary(self, app_id: UUID, summary: str, account: Account) -> Conversation:
-        """Update the long-term memory (summary) of the debug conversation for the specified application"""
-        # 1. Validate app and permissions
+        """Update the long-term memory summary for a specified app's debug conversation"""
+        # 1. Get app info and validate permissions
         app = self.get_app(app_id, account)
 
-        # 2. Get the draft config and check whether long-term memory is enabled
+        # 2. Get the app draft config and check if long-term memory is enabled
         draft_app_config = self.get_draft_app_config(app_id, account)
         if draft_app_config["long_term_memory"]["enable"] is False:
-            raise FailException("Long-term memory is not enabled for this application")
+            raise FailException("Long-term memory is not enabled for this application, unable to update it.")
 
-        # 3. Update long-term memory for the debug conversation
+        # 3. Update debug conversation summary
         debug_conversation = app.debug_conversation
         self.update(debug_conversation, summary=summary)
 
         return debug_conversation
 
     def delete_debug_conversation(self, app_id: UUID, account: Account) -> App:
-        """Delete the debug conversation of the specified application"""
-        # 1. Validate app and permissions
+        """Delete the debug conversation for the specified app"""
+        # 1. Get app info and validate permissions
         app = self.get_app(app_id, account)
 
-        # 2. If debug_conversation_id is not set, nothing to do
+        # 2. If there is no debug_conversation_id, nothing to do
         if not app.debug_conversation_id:
             return app
 
-        # 3. Otherwise, reset debug_conversation_id to None
+        # 3. Reset debug_conversation_id to None
         self.update(app, debug_conversation_id=None)
 
         return app
 
     def debug_chat(self, app_id: UUID, query: str, account: Account) -> Generator:
-        """Trigger a debug conversation for the specified application using the given query"""
-        # 1. Validate app and permissions
+        """Start a debug conversation with the specified app using the given query"""
+        # 1. Get app info and validate permissions
         app = self.get_app(app_id, account)
 
-        # 2. Get the latest draft config for this app
+        # 2. Get the latest draft config
         draft_app_config = self.get_draft_app_config(app_id, account)
 
         # 3. Get the app's debug conversation
@@ -351,14 +426,13 @@ class AppService(BaseService):
             status=MessageStatus.NORMAL,
         )
 
-        # todo: 5. Instantiate different LLM models based on model_config.
-        #       This will change once multi-LLM support is added.
+        # todo: 5. Instantiate different LLM models based on model_config. Will be extended after multi-LLM support.
         llm = ChatOpenAI(
             model=draft_app_config["model_config"]["model"],
             **draft_app_config["model_config"]["parameters"],
         )
 
-        # 6. Initialize TokenBufferMemory for short-term memory extraction
+        # 6. Instantiate TokenBufferMemory to extract short-term memory
         token_buffer_memory = TokenBufferMemory(
             db=self.db,
             conversation=debug_conversation,
@@ -368,10 +442,10 @@ class AppService(BaseService):
             message_limit=draft_app_config["dialog_round"],
         )
 
-        # 7. Convert tools in the draft config to LangChain tools
+        # 7. Convert tools in draft config to LangChain tools
         tools = self.app_config_service.get_langchain_tools_by_tools_config(draft_app_config["tools"])
 
-        # 8. Check whether there are associated datasets
+        # 8. Check if any datasets are associated
         if draft_app_config["datasets"]:
             # 9. Build a LangChain retrieval tool for the datasets
             dataset_retrieval = self.retrieval_service.create_langchain_tool_from_search(
@@ -383,7 +457,7 @@ class AppService(BaseService):
             )
             tools.append(dataset_retrieval)
 
-        # todo: 10. Build the Agent. Currently we use FunctionCallAgent.
+        # todo: 10. Build an Agent, currently using FunctionCallAgent
         agent = FunctionCallAgent(
             llm=llm,
             agent_config=AgentConfig(
@@ -401,18 +475,18 @@ class AppService(BaseService):
             "history": history,
             "long_term_memory": debug_conversation.summary,
         }):
-            # 11. Extract event ID
+            # 11. Extract thought and answer
             event_id = str(agent_thought.id)
 
-            # 12. Fill agent_thoughts, preparing to store to DB
+            # 12. Fill agent_thoughts for later persistence
             if agent_thought.event != QueueEvent.PING:
-                # 13. For AGENT_MESSAGE, we accumulate content; otherwise we overwrite
+                # 13. For AGENT_MESSAGE events, we accumulate; for others we overwrite
                 if agent_thought.event == QueueEvent.AGENT_MESSAGE:
                     if event_id not in agent_thoughts:
-                        # 14. Initialize the agent message event
+                        # 14. Initialize an agent message event
                         agent_thoughts[event_id] = agent_thought
                     else:
-                        # 15. Accumulate the agent's message content
+                        # 15. Accumulate agent message content
                         agent_thoughts[event_id] = agent_thoughts[event_id].model_copy(update={
                             "thought": agent_thoughts[event_id].thought + agent_thought.thought,
                             "answer": agent_thoughts[event_id].answer + agent_thought.answer,
@@ -433,7 +507,7 @@ class AppService(BaseService):
             }
             yield f"event: {agent_thought.event}\ndata:{json.dumps(data)}\n\n"
 
-        # 22. Persist the message and reasoning process in a separate thread
+        # 22. Persist the message and reasoning process asynchronously
         thread = Thread(
             target=self.conversation_service.save_agent_thoughts,
             kwargs={
@@ -449,8 +523,8 @@ class AppService(BaseService):
         thread.start()
 
     def stop_debug_chat(self, app_id: UUID, task_id: UUID, account: Account) -> None:
-        """Stop a debug conversation for the specified app and task"""
-        # 1. Validate app and permissions
+        """Stop a debug chat stream for the specified app + task ID + account"""
+        # 1. Get app info and validate permissions
         self.get_app(app_id, account)
 
         # 2. Use AgentQueueManager to stop the specific task
@@ -462,18 +536,18 @@ class AppService(BaseService):
             req: GetDebugConversationMessagesWithPageReq,
             account: Account
     ) -> tuple[list[Message], Paginator]:
-        """Get paginated debug conversation messages for the specified application"""
-        # 1. Validate app and permissions
+        """Get a paginated list of debug conversation messages for an app"""
+        # 1. Get app info and validate permissions
         app = self.get_app(app_id, account)
 
-        # 2. Get the app's debug conversation
+        # 2. Get the debug conversation of the app
         debug_conversation = app.debug_conversation
 
-        # 3. Build paginator and filter conditions
+        # 3. Build paginator and cursor conditions
         paginator = Paginator(db=self.db, req=req)
         filters = []
         if req.created_at.data:
-            # 4. Convert timestamp to DateTime
+            # 4. Convert timestamp to datetime
             created_at_datetime = datetime.fromtimestamp(req.created_at.data)
             filters.append(Message.created_at <= created_at_datetime)
 
@@ -490,8 +564,8 @@ class AppService(BaseService):
         return messages, paginator
 
     def _validate_draft_app_config(self, draft_app_config: dict[str, Any], account: Account) -> dict[str, Any]:
-        """Validate the given draft application configuration and return the validated data"""
-        # 1. Check that the draft config contains at least one acceptable field
+        """Validate the incoming draft app config and return the validated data"""
+        # 1. Validate that the draft config has at least one acceptable field
         acceptable_fields = [
             "model_config", "dialog_round", "preset_prompt",
             "tools", "workflows", "datasets", "retrieval_config",
@@ -499,51 +573,50 @@ class AppService(BaseService):
             "speech_to_text", "text_to_speech", "suggested_after_answer", "review_config",
         ]
 
-        # 2. Ensure all fields are within the acceptable set
+        # 2. Check whether provided fields are within acceptable ones
         if (
                 not draft_app_config
                 or not isinstance(draft_app_config, dict)
                 or set(draft_app_config.keys()) - set(acceptable_fields)
         ):
-            raise ValidateErrorException("Invalid draft configuration fields, please verify and try again")
+            raise ValidateErrorException("Draft configuration fields are invalid, please verify and try again.")
 
-        # todo: 3. Validate model_config when multi-LLM support is added
+        # todo: 3. Validate model_config when multiple LLM providers are integrated
 
-        # 4. Validate dialog_round (context rounds), including type and range
+        # 4. Validate dialog_round type and range
         if "dialog_round" in draft_app_config:
             dialog_round = draft_app_config["dialog_round"]
             if not isinstance(dialog_round, int) or not (0 <= dialog_round <= 100):
-                raise ValidateErrorException("The context round count must be an integer in the range 0–100")
+                raise ValidateErrorException("The number of context rounds must be an integer in the range 0–100.")
 
         # 5. Validate preset_prompt
         if "preset_prompt" in draft_app_config:
             preset_prompt = draft_app_config["preset_prompt"]
             if not isinstance(preset_prompt, str) or len(preset_prompt) > 2000:
-                raise ValidateErrorException(
-                    "Preset prompt must be a string with length in the range 0–2000 characters")
+                raise ValidateErrorException("Persona and reply logic must be a string with length 0–2000.")
 
         # 6. Validate tools
         if "tools" in draft_app_config:
             tools = draft_app_config["tools"]
             validate_tools = []
 
-            # 6.1 tools must be a list; an empty list means no tools are bound
+            # 6.1 tools must be a list; an empty list means no tools bound
             if not isinstance(tools, list):
-                raise ValidateErrorException("The tool list must be a list")
-            # 6.2 Length of tools must not exceed 5
+                raise ValidateErrorException("Tool list must be a list.")
+            # 6.2 tools length cannot exceed 5
             if len(tools) > 5:
-                raise ValidateErrorException("An Agent cannot bind more than 5 tools")
-            # 6.3 Validate each tool
+                raise ValidateErrorException("An Agent cannot bind more than 5 tools.")
+            # 6.3 Validate each tool in the list
             for tool in tools:
                 # 6.4 Tool must be non-empty and of type dict
                 if not tool or not isinstance(tool, dict):
-                    raise ValidateErrorException("Invalid tool binding parameters")
-                # 6.5 The keys must be exactly {type, provider_id, tool_id, params}
+                    raise ValidateErrorException("Invalid tool binding parameters.")
+                # 6.5 Tool keys must be exactly type/provider_id/tool_id/params
                 if set(tool.keys()) != {"type", "provider_id", "tool_id", "params"}:
-                    raise ValidateErrorException("Invalid tool binding parameters")
+                    raise ValidateErrorException("Invalid tool binding parameters.")
                 # 6.6 type must be either builtin_tool or api_tool
                 if tool["type"] not in ["builtin_tool", "api_tool"]:
-                    raise ValidateErrorException("Invalid tool type in tool binding parameters")
+                    raise ValidateErrorException("Invalid tool binding parameters.")
                 # 6.7 Validate provider_id and tool_id
                 if (
                         not tool["provider_id"]
@@ -551,11 +624,11 @@ class AppService(BaseService):
                         or not isinstance(tool["provider_id"], str)
                         or not isinstance(tool["tool_id"], str)
                 ):
-                    raise ValidateErrorException("Invalid provider or tool identifier in tool binding parameters")
-                # 6.8 Validate params, which must be a dict
+                    raise ValidateErrorException("Invalid tool provider or tool identifier.")
+                # 6.8 Validate params is a dict
                 if not isinstance(tool["params"], dict):
-                    raise ValidateErrorException("Custom tool parameter format is incorrect")
-                # 6.9 Check whether the tool actually exists, split into builtin_tool and api_tool
+                    raise ValidateErrorException("Tool custom parameters must be in dict format.")
+                # 6.9 Check whether the tool actually exists (builtin_tool vs api_tool)
                 if tool["type"] == "builtin_tool":
                     builtin_tool = self.builtin_provider_manager.get_tool(tool["provider_id"], tool["tool_id"])
                     if not builtin_tool:
@@ -571,38 +644,38 @@ class AppService(BaseService):
 
                 validate_tools.append(tool)
 
-            # 6.10 Check whether tools are duplicated
+            # 6.10 Check duplicate tool bindings
             check_tools = [f"{tool['provider_id']}_{tool['tool_id']}" for tool in validate_tools]
             if len(set(check_tools)) != len(validate_tools):
-                raise ValidateErrorException("Duplicate tools detected in tool bindings")
+                raise ValidateErrorException("Duplicate tools detected in tool bindings.")
 
-            # 6.11 Reassign validated tools
+            # 6.11 Assign validated tools back
             draft_app_config["tools"] = validate_tools
 
-        # todo: 7. Validate workflows once the workflow module is completed
+        # todo: 7. Validate workflows after the workflow module is implemented
         if "workflows" in draft_app_config:
             draft_app_config["workflows"] = []
 
-        # 8. Validate datasets (knowledge base list)
+        # 8. Validate datasets (knowledge bases)
         if "datasets" in draft_app_config:
             datasets = draft_app_config["datasets"]
 
-            # 8.1 datasets must be a list
+            # 8.1 Datasets must be a list
             if not isinstance(datasets, list):
-                raise ValidateErrorException("Knowledge base list parameter format is incorrect")
-            # 8.2 Number of datasets must not exceed 5
+                raise ValidateErrorException("Dataset binding list has an invalid format.")
+            # 8.2 Cannot bind more than 5 datasets
             if len(datasets) > 5:
-                raise ValidateErrorException("An Agent cannot bind more than 5 knowledge bases")
-            # 8.3 Validate each dataset parameter
+                raise ValidateErrorException("An Agent cannot bind more than 5 knowledge bases.")
+            # 8.3 Validate each dataset ID
             for dataset_id in datasets:
                 try:
                     UUID(dataset_id)
                 except Exception:
-                    raise ValidateErrorException("Each knowledge base identifier must be a valid UUID")
-            # 8.4 Check for duplicates
+                    raise ValidateErrorException("Knowledge base IDs must be valid UUIDs.")
+            # 8.4 Check for duplicate datasets
             if len(set(datasets)) != len(datasets):
-                raise ValidateErrorException("Duplicate knowledge bases detected in bindings")
-            # 8.5 Validate dataset permissions and remove datasets not owned by the current account
+                raise ValidateErrorException("Duplicate knowledge bases detected in binding list.")
+            # 8.5 Validate dataset permissions, keeping only those belonging to the current account
             dataset_records = self.db.session.query(Dataset).filter(
                 Dataset.id.in_(datasets),
                 Dataset.account_id == account.id,
@@ -614,36 +687,36 @@ class AppService(BaseService):
         if "retrieval_config" in draft_app_config:
             retrieval_config = draft_app_config["retrieval_config"]
 
-            # 9.1 Must be non-empty dict
+            # 9.1 retrieval_config must be non-empty and a dict
             if not retrieval_config or not isinstance(retrieval_config, dict):
-                raise ValidateErrorException("Retrieval configuration format is incorrect")
-            # 9.2 Validate field set
+                raise ValidateErrorException("Retrieval configuration has an invalid format.")
+            # 9.2 Validate required fields
             if set(retrieval_config.keys()) != {"retrieval_strategy", "k", "score"}:
-                raise ValidateErrorException("Retrieval configuration format is incorrect")
+                raise ValidateErrorException("Retrieval configuration has an invalid format.")
             # 9.3 Validate retrieval_strategy
             if retrieval_config["retrieval_strategy"] not in ["semantic", "full_text", "hybrid"]:
-                raise ValidateErrorException("Retrieval strategy format is incorrect")
-            # 9.4 Validate max recall number k
+                raise ValidateErrorException("Retrieval strategy setting is invalid.")
+            # 9.4 Validate k (max number of retrieved documents)
             if not isinstance(retrieval_config["k"], int) or not (0 <= retrieval_config["k"] <= 10):
                 raise ValidateErrorException(
-                    "The maximum number of retrieved items must be an integer in the range 0–10")
-            # 9.5 Validate score / minimum similarity
+                    "The maximum number of retrieved documents must be an integer in the range 0–10.")
+            # 9.5 Validate score (minimum similarity threshold)
             if not isinstance(retrieval_config["score"], float) or not (0 <= retrieval_config["score"] <= 1):
-                raise ValidateErrorException("The minimum relevance score must be a float in the range 0–1")
+                raise ValidateErrorException("The minimum similarity score must be a float in the range 0–1.")
 
-        # 10. Validate long_term_memory configuration
+        # 10. Validate long_term_memory
         if "long_term_memory" in draft_app_config:
             long_term_memory = draft_app_config["long_term_memory"]
 
             # 10.1 Check format
             if not long_term_memory or not isinstance(long_term_memory, dict):
-                raise ValidateErrorException("Long-term memory configuration format is incorrect")
-            # 10.2 Check properties
+                raise ValidateErrorException("Long-term memory configuration has an invalid format.")
+            # 10.2 Check attributes
             if (
                     set(long_term_memory.keys()) != {"enable"}
                     or not isinstance(long_term_memory["enable"], bool)
             ):
-                raise ValidateErrorException("Long-term memory configuration format is incorrect")
+                raise ValidateErrorException("Long-term memory configuration has an invalid format.")
 
         # 11. Validate opening_statement
         if "opening_statement" in draft_app_config:
@@ -651,7 +724,7 @@ class AppService(BaseService):
 
             # 11.1 Check type and length
             if not isinstance(opening_statement, str) or len(opening_statement) > 2000:
-                raise ValidateErrorException("Opening statement length must be in the range 0–2000")
+                raise ValidateErrorException("Opening statement length must be between 0 and 2000 characters.")
 
         # 12. Validate opening_questions
         if "opening_questions" in draft_app_config:
@@ -659,11 +732,11 @@ class AppService(BaseService):
 
             # 12.1 Must be a list with length <= 3
             if not isinstance(opening_questions, list) or len(opening_questions) > 3:
-                raise ValidateErrorException("There can be at most 3 opening questions")
+                raise ValidateErrorException("Opening questions cannot exceed 3 items.")
             # 12.2 Each opening question must be a string
             for opening_question in opening_questions:
                 if not isinstance(opening_question, str):
-                    raise ValidateErrorException("Each opening question must be a string")
+                    raise ValidateErrorException("Each opening question must be a string.")
 
         # 13. Validate speech_to_text
         if "speech_to_text" in draft_app_config:
@@ -671,13 +744,13 @@ class AppService(BaseService):
 
             # 13.1 Check format
             if not speech_to_text or not isinstance(speech_to_text, dict):
-                raise ValidateErrorException("Speech-to-text configuration format is incorrect")
-            # 13.2 Check properties
+                raise ValidateErrorException("Speech-to-text configuration has an invalid format.")
+            # 13.2 Check attributes
             if (
                     set(speech_to_text.keys()) != {"enable"}
                     or not isinstance(speech_to_text["enable"], bool)
             ):
-                raise ValidateErrorException("Speech-to-text configuration format is incorrect")
+                raise ValidateErrorException("Speech-to-text configuration has an invalid format.")
 
         # 14. Validate text_to_speech
         if "text_to_speech" in draft_app_config:
@@ -685,16 +758,16 @@ class AppService(BaseService):
 
             # 14.1 Must be a dict
             if not isinstance(text_to_speech, dict):
-                raise ValidateErrorException("Text-to-speech configuration format is incorrect")
-            # 14.2 Validate fields and types
+                raise ValidateErrorException("Text-to-speech configuration has an invalid format.")
+            # 14.2 Validate fields
             if (
                     set(text_to_speech.keys()) != {"enable", "voice", "auto_play"}
                     or not isinstance(text_to_speech["enable"], bool)
-                    # todo: Add more voices once multi-modal Agent support is implemented
+                    # todo: Add more voices after multimodal Agent support
                     or text_to_speech["voice"] not in ["echo"]
                     or not isinstance(text_to_speech["auto_play"], bool)
             ):
-                raise ValidateErrorException("Text-to-speech configuration format is incorrect")
+                raise ValidateErrorException("Text-to-speech configuration has an invalid format.")
 
         # 15. Validate suggested_after_answer
         if "suggested_after_answer" in draft_app_config:
@@ -702,27 +775,27 @@ class AppService(BaseService):
 
             # 15.1 Check format
             if not suggested_after_answer or not isinstance(suggested_after_answer, dict):
-                raise ValidateErrorException("Suggested-questions-after-answer configuration format is incorrect")
-            # 15.2 Check fields
+                raise ValidateErrorException("Suggested-after-answer configuration has an invalid format.")
+            # 15.2 Validate fields
             if (
                     set(suggested_after_answer.keys()) != {"enable"}
                     or not isinstance(suggested_after_answer["enable"], bool)
             ):
-                raise ValidateErrorException("Suggested-questions-after-answer configuration format is incorrect")
+                raise ValidateErrorException("Suggested-after-answer configuration has an invalid format.")
 
-        # 16. Validate review_config (content moderation / review config)
+        # 16. Validate review_config
         if "review_config" in draft_app_config:
             review_config = draft_app_config["review_config"]
 
-            # 16.1 Must be a non-empty dict
+            # 16.1 Must be non-empty dict
             if not review_config or not isinstance(review_config, dict):
-                raise ValidateErrorException("Review configuration format is incorrect")
-            # 16.2 Validate field set
+                raise ValidateErrorException("Review configuration has an invalid format.")
+            # 16.2 Validate keys
             if set(review_config.keys()) != {"enable", "keywords", "inputs_config", "outputs_config"}:
-                raise ValidateErrorException("Review configuration format is incorrect")
+                raise ValidateErrorException("Review configuration has an invalid format.")
             # 16.3 Validate enable
             if not isinstance(review_config["enable"], bool):
-                raise ValidateErrorException("review.enable must be a boolean")
+                raise ValidateErrorException("review.enable has an invalid format.")
             # 16.4 Validate keywords
             if (
                     not isinstance(review_config["keywords"], list)
@@ -730,10 +803,10 @@ class AppService(BaseService):
                     or len(review_config["keywords"]) > 100
             ):
                 raise ValidateErrorException(
-                    "review.keywords must be a non-empty list (when enabled) and contain at most 100 keywords")
+                    "review.keywords must be non-empty (when enabled) and contain at most 100 keywords.")
             for keyword in review_config["keywords"]:
                 if not isinstance(keyword, str):
-                    raise ValidateErrorException("Each review.keyword must be a string")
+                    raise ValidateErrorException("Each review.keyword must be a string.")
             # 16.5 Validate inputs_config
             if (
                     not review_config["inputs_config"]
@@ -742,5 +815,29 @@ class AppService(BaseService):
                     or not isinstance(review_config["inputs_config"]["enable"], bool)
                     or not isinstance(review_config["inputs_config"]["preset_response"], str)
             ):
-                raise ValidateErrorException("review.inputs_config must be a dict with valid fields")
+                raise ValidateErrorException("review.inputs_config must be a dict with valid fields.")
             # 16.6 Validate outputs_config
+            if (
+                    not review_config["outputs_config"]
+                    or not isinstance(review_config["outputs_config"], dict)
+                    or set(review_config["outputs_config"].keys()) != {"enable"}
+                    or not isinstance(review_config["outputs_config"]["enable"], bool)
+            ):
+                raise ValidateErrorException("review.outputs_config has an invalid format.")
+            # 16.7 When review is enabled, at least one of inputs_config or outputs_config must be enabled
+            if review_config["enable"]:
+                if (
+                        review_config["inputs_config"]["enable"] is False
+                        and review_config["outputs_config"]["enable"] is False
+                ):
+                    raise ValidateErrorException(
+                        "At least one of input review or output review must be enabled when review is turned on.")
+
+                if (
+                        review_config["inputs_config"]["enable"]
+                        and review_config["inputs_config"]["preset_response"].strip() == ""
+                ):
+                    raise ValidateErrorException(
+                        "Preset response for input review cannot be empty when input review is enabled.")
+
+        return draft_app_config
