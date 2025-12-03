@@ -12,6 +12,7 @@ from .app_service import AppService
 from .aws_service import S3Service
 from .base_service import BaseService
 from .base_service import BaseService
+from .builtin_app_service import BuiltinAppService
 from .builtin_tool_service import BuiltinToolService
 from .conversation_service import ConversationService
 from .dataset_service import DatasetService
@@ -54,5 +55,6 @@ __all__ = [
     "AIService",
     "ApiKeyService",
     "OpenAPIService",
-    "WorkflowService"
+    "WorkflowService",
+    "BuiltinAppService"
 ]
