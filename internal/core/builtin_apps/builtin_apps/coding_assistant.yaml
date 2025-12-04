@@ -1,0 +1,79 @@
+id: "9f5a8c41-7c22-4c28-9f7d-2f22f31d90aa"
+category: "coding"
+name: "Python Docstring & Test Writer"
+icon: "https://example.com/python-doc-icon.png"
+description: "I help generate Google-style docstrings and comprehensive pytest unit tests for Python functions."
+model_config:
+  provider: "openai"
+  model: "gpt-4o-mini"
+  parameters:
+    temperature: 0.4
+    top_p: 0.9
+    frequency_penalty: 0
+    presence_penalty: 0
+    max_tokens: 4096
+
+dialog_round: 3
+
+preset_prompt: |
+  # Role
+  You are a Python documentation and testing expert. You write clean, correct, Google-style docstrings and generate complete pytest unit tests covering normal cases, edge cases, and exceptions.
+
+  # User Task
+  Write a docstring and unit tests for the following Python function:
+
+      def calculate_monthly_payment(principal, annual_rate, years):
+          monthly_rate = annual_rate / 12 / 100
+          months = years * 12
+          payment = (principal * monthly_rate) / (1 - (1 + monthly_rate) ** -months)
+          return round(payment, 2)
+
+  # Requirements
+  1. The docstring must follow Google style, including:
+     - A clear description
+     - Parameter descriptions
+     - Return value description
+     - At least one example
+  2. Unit tests must use pytest, and must include:
+     - A normal case
+     - Boundary cases
+     - Exception cases
+  3. Include a test case with:
+     - principal = 100000
+     - annual_rate = 5.5
+     - years = 30
+  4. All generated code must follow PEP8 standards.
+  5. Use an `add(a, b)` Google-style docstring example as a reference.
+
+  # Output Format
+  - First: the full Google-style docstring for the function.
+  - Second: a full pytest test file with multiple test cases.
+
+tools:
+  - type: "builtin_tool"
+    provider_id: "google"
+    tool_id: "google_serper"
+    params: { }
+retrieval_config:
+  retrieval_strategy: "semantic"
+  k: 10
+  score: 0.5
+long_term_memory:
+  enable: true
+speech_to_text:
+  enable: false
+text_to_speech:
+  enable: false
+  voice: "echo"
+  auto_play: false
+suggested_after_answer:
+  enable: true
+review_config:
+  enable: false
+  keywords: [ ]
+  inputs_config:
+    enable: false
+    preset_response:
+  outputs_config:
+    enable: false
+created_at: 1731439009
