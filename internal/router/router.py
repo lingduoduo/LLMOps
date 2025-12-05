@@ -24,13 +24,14 @@ from internal.handler import (
     OpenAPIHandler,
     BuiltinAppHandler,
     WorkflowHandler,
+    LanguageModelHandler,
 )
 
 
 @inject
 @dataclass
 class Router:
-    """Router"""
+    """路由"""
     app_handler: AppHandler
     builtin_tool_handler: BuiltinToolHandler
     api_tool_handler: ApiToolHandler
@@ -46,6 +47,7 @@ class Router:
     openapi_handler: OpenAPIHandler
     builtin_app_handler: BuiltinAppHandler
     workflow_handler: WorkflowHandler
+    language_model_handler: LanguageModelHandler
 
     def register_router(self, app: Flask):
         """Register routes"""
@@ -356,6 +358,17 @@ class Router:
             view_func=self.workflow_handler.cancel_publish_workflow,
         )
 
-        # 12. Register blueprints on the Flask app
+        # 12. Language Models
+        bp.add_url_rule("/language-models", view_func=self.language_model_handler.get_language_models)
+        bp.add_url_rule(
+            "/language-models/<string:provider_name>/icon",
+            view_func=self.language_model_handler.get_language_model_icon,
+        )
+        bp.add_url_rule(
+            "/language-models/<string:provider_name>/<string:model_name>",
+            view_func=self.language_model_handler.get_language_model,
+        )
+
+        # 13. Register blueprints on the Flask app
         app.register_blueprint(bp)
         app.register_blueprint(openapi_bp)

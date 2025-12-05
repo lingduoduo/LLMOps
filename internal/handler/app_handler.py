@@ -10,6 +10,7 @@ from flask import request
 from flask_login import login_required, current_user
 from injector import inject
 
+from internal.core.language_model import LanguageModelManager
 from internal.schema.app_schema import (
     CreateAppReq,
     UpdateAppReq,
@@ -35,6 +36,7 @@ class AppHandler:
     """Application controller"""
     app_service: AppService
     retrieval_service: RetrievalService
+    language_model_manager: LanguageModelManager
 
     @login_required
     def create_app(self):
@@ -219,7 +221,7 @@ class AppHandler:
         resp = GetDebugConversationMessagesWithPageResp(many=True)
 
         return success_json(PageModel(list=resp.dump(messages), paginator=paginator))
-    
+
     @login_required
     def ping(self):
         # """Health check endpoint"""
@@ -313,520 +315,536 @@ class AppHandler:
         # return success_json({"agent_result": agent_result.model_dump()})
 
         ############# Test Workflow #############
-        from internal.core.workflow import Workflow
-        from internal.core.workflow.entities.workflow_entity import WorkflowConfig
-        from flask_login import current_user
+        # from internal.core.workflow import Workflow
+        # from internal.core.workflow.entities.workflow_entity import WorkflowConfig
+        # from flask_login import current_user
+        #
+        # # 1. Define nodes
+        # nodes = [
+        #     # ---------- Start node ----------
+        #     {
+        #         "id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
+        #         "node_type": "start",
+        #         "title": "Start",
+        #         "description": "Workflow entry point; defines user inputs.",
+        #         "inputs": [
+        #             {
+        #                 "name": "query",
+        #                 "type": "string",
+        #                 "description": "User input query",
+        #                 "required": True,
+        #                 "value": {
+        #                     "type": "generated",
+        #                     "content": "",
+        #                 },
+        #             },
+        #             {
+        #                 "name": "location",
+        #                 "type": "string",
+        #                 "description": "User location or city (optional)",
+        #                 "required": False,
+        #                 "value": {
+        #                     "type": "generated",
+        #                     "content": "",
+        #                 },
+        #             },
+        #         ],
+        #     },
+        #
+        #     # ---------- Dataset retrieval node (TEMPORARILY DISABLED) ----------
+        #     # {
+        #     #     "id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
+        #     #     "node_type": "dataset_retrieval",
+        #     #     "title": "Knowledge Base Retrieval",
+        #     #     "description": "Retrieve relevant documents based on the user query.",
+        #     #     "inputs": [
+        #     #         {
+        #     #             "name": "query",
+        #     #             "type": "string",
+        #     #             "value": {
+        #     #                 "type": "ref",
+        #     #                 "content": {
+        #     #                     "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
+        #     #                     "ref_var_name": "query",
+        #     #                 },
+        #     #             },
+        #     #         }
+        #     #     ],
+        #     #     "dataset_ids": [
+        #     #         "1cbb6449-5463-49a4-b0ef-1b94cdf747d7",
+        #     #         "798f5324-c82e-44c2-94aa-035afbe88839",
+        #     #     ],
+        #     #     "outputs": [
+        #     #         {
+        #     #             "name": "combine_documents",
+        #     #             "type": "string",
+        #     #             "value": {
+        #     #                 "type": "generated",
+        #     #                 "content": "",
+        #     #             },
+        #     #         },
+        #     #     ],
+        #     # },
+        #
+        #     # ---------- HTTP Request Node (Path 1) ----------
+        #     {
+        #         "id": "675fca50-1228-8008-82dc-0c714158534c",
+        #         "node_type": "http_request",
+        #         "title": "HTTP Request",
+        #         "description": "Simple GET request to langchain.com",
+        #         "url": "https://www.langchain.com/",
+        #         "method": "get",
+        #         "inputs": [],
+        #         "outputs": [
+        #             {
+        #                 "name": "response",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "generated",
+        #                     "content": "",
+        #                 },
+        #             }
+        #         ],
+        #     },
+        #
+        #     # ---------- LLM node (uses HTTP response as context) ----------
+        #     {
+        #         "id": "eba75e0b-21b7-46ed-8d21-791724f0740f",
+        #         "node_type": "llm",
+        #         "title": "Large Language Model",
+        #         "description": "Answer the user query using HTTP response as context.",
+        #         "inputs": [
+        #             {
+        #                 "name": "query",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
+        #                         "ref_var_name": "query",
+        #                     },
+        #                 },
+        #             },
+        #             {
+        #                 "name": "context",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "675fca50-1228-8008-82dc-0c714158534c",  # http_request
+        #                         "ref_var_name": "response",
+        #                     },
+        #                 },
+        #             },
+        #         ],
+        #         "prompt": (
+        #             "You are a helpful AI assistant.\n\n"
+        #             "User question:\n"
+        #             "{{query}}\n\n"
+        #             "Relevant context (may be empty):\n"
+        #             "<context>{{context}}</context>\n\n"
+        #             "Answer the question as well as you can."
+        #         ),
+        #         "model_config": {
+        #             "provider": "openai",
+        #             "model": "gpt-4o-mini",
+        #             "parameters": {
+        #                 "temperature": 0.3,
+        #                 "top_p": 0.85,
+        #                 "frequency_penalty": 0.2,
+        #                 "presence_penalty": 0.2,
+        #                 "max_tokens": 512,
+        #             },
+        #         },
+        #     },
+        #
+        #     # ---------- Code node (post-process HTTP + LLM) ----------
+        #     {
+        #         "id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
+        #         "node_type": "code",
+        #         "title": "Code Post-processing",
+        #         "description": "Post-process LLM answer and HTTP content with safe defaults.",
+        #         "inputs": [
+        #             {
+        #                 "name": "combine_documents",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "675fca50-1228-8008-82dc-0c714158534c",  # http_request
+        #                         "ref_var_name": "response",
+        #                     },
+        #                 },
+        #             },
+        #             {
+        #                 "name": "llm_output",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "eba75e0b-21b7-46ed-8d21-791724f0740f",
+        #                         "ref_var_name": "output",
+        #                     },
+        #                 },
+        #             },
+        #         ],
+        #         "code": """def main(params):
+        #     # Get HTTP content or default text
+        #     docs = params.get("combine_documents")
+        #     if not docs:
+        #         docs = (
+        #             "This is default HTTP content for testing. "
+        #             "It is used when the HTTP request returns empty. "
+        #             "You can modify this to simulate HTTP outputs."
+        #         )
+        #
+        #     # Get LLM output or default demo text
+        #     answer = params.get("llm_output")
+        #     if not answer:
+        #         answer = "This is a placeholder LLM answer (for testing)."
+        #
+        #     snippet = docs[:200]
+        #
+        #     return {
+        #         "snippet": snippet,
+        #         "answer_length": len(answer),
+        #         "fallback_used": params.get("combine_documents") is None or params.get("combine_documents") == ""
+        #     }""",
+        #         "outputs": [
+        #             {
+        #                 "name": "snippet",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "generated",
+        #                     "content": "",
+        #                 },
+        #             },
+        #             {
+        #                 "name": "answer_length",
+        #                 "type": "int",
+        #                 "value": {
+        #                     "type": "generated",
+        #                     "content": 0,
+        #                 },
+        #             },
+        #             {
+        #                 "name": "fallback_used",
+        #                 "type": "boolean",
+        #                 "value": {
+        #                     "type": "generated",
+        #                     "content": False,
+        #                 },
+        #             },
+        #         ],
+        #     },
+        #
+        #     # ---------- Template transform node (Path 1) ----------
+        #     {
+        #         "id": "623b7671-0bc2-446c-bf5e-5e25032a522e",
+        #         "node_type": "template_transform",
+        #         "title": "Template Transform",
+        #         "description": "Combine query, location, LLM answer and snippet into a final message.",
+        #         "inputs": [
+        #             {
+        #                 "name": "location",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
+        #                         "ref_var_name": "location",
+        #                     },
+        #                 },
+        #             },
+        #             {
+        #                 "name": "query",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
+        #                         "ref_var_name": "query",
+        #                     },
+        #                 },
+        #             },
+        #             {
+        #                 "name": "llm_output",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "eba75e0b-21b7-46ed-8d21-791724f0740f",
+        #                         "ref_var_name": "output",
+        #                     },
+        #                 },
+        #             },
+        #             {
+        #                 "name": "snippet",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
+        #                         "ref_var_name": "snippet",
+        #                     },
+        #                 },
+        #             },
+        #         ],
+        #         "template": (
+        #             "Location: {{location}}\n"
+        #             "User question: {{query}}\n\n"
+        #             "LLM answer:\n{{llm_output}}\n\n"
+        #             "HTTP snippet (or default):\n{{snippet}}\n"
+        #         ),
+        #     },
+        #
+        #     # ---------- Tool node (google_serper, Path 2) ----------
+        #     {
+        #         "id": "2f6cf40d-0219-421b-92ff-229fdde15ecb",
+        #         "node_type": "tool",
+        #         "title": "Built-in Tool: Google Serper",
+        #         "description": "Call google_serper with the user query.",
+        #         "type": "builtin_tool",
+        #         "provider_id": "google",
+        #         "tool_id": "google_serper",
+        #         "inputs": [
+        #             {
+        #                 "name": "query",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
+        #                         "ref_var_name": "query",
+        #                     },
+        #                 },
+        #             }
+        #         ],
+        #         "outputs": [
+        #             {
+        #                 "name": "text",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "generated",
+        #                     "content": "",
+        #                 },
+        #             }
+        #         ],
+        #     },
+        #
+        #     # ---------- End node ----------
+        #     {
+        #         "id": "860c8411-37ed-4872-b53f-30afa0290211",
+        #         "node_type": "end",
+        #         "title": "End",
+        #         "description": "Final output variables of the workflow.",
+        #         "outputs": [
+        #             {
+        #                 "name": "query",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
+        #                         "ref_var_name": "query",
+        #                     },
+        #                 },
+        #             },
+        #             {
+        #                 "name": "location",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
+        #                         "ref_var_name": "location",
+        #                     },
+        #                 },
+        #             },
+        #             {
+        #                 "name": "llm_output",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "eba75e0b-21b7-46ed-8d21-791724f0740f",
+        #                         "ref_var_name": "output",
+        #                     },
+        #                 },
+        #             },
+        #             {
+        #                 "name": "template_output",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "623b7671-0bc2-446c-bf5e-5e25032a522e",
+        #                         "ref_var_name": "output",
+        #                     },
+        #                 },
+        #             },
+        #             {
+        #                 "name": "snippet",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
+        #                         "ref_var_name": "snippet",
+        #                     },
+        #                 },
+        #             },
+        #             {
+        #                 "name": "answer_length",
+        #                 "type": "int",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
+        #                         "ref_var_name": "answer_length",
+        #                     },
+        #                 },
+        #             },
+        #             {
+        #                 "name": "fallback_used",
+        #                 "type": "boolean",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
+        #                         "ref_var_name": "fallback_used",
+        #                     },
+        #                 },
+        #             },
+        #             {
+        #                 "name": "google_search_result",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "2f6cf40d-0219-421b-92ff-229fdde15ecb",
+        #                         "ref_var_name": "text",
+        #                     },
+        #                 },
+        #             },
+        #             {
+        #                 "name": "http_response",
+        #                 "type": "string",
+        #                 "value": {
+        #                     "type": "ref",
+        #                     "content": {
+        #                         "ref_node_id": "675fca50-1228-8008-82dc-0c714158534c",
+        #                         "ref_var_name": "response",
+        #                     },
+        #                 },
+        #             },
+        #         ],
+        #     },
+        # ]
+        #
+        # # 2. Edges: two active paths (HTTP/LLM chain + tool), retrieval commented out
+        # edges = [
+        #     # ========= Path 1: HTTP -> LLM -> Code -> Template -> End =========
+        #     {
+        #         "id": "675fca50-1228-4000-8000-000000000001",
+        #         "source": "18d938c4-ecd7-4a6b-9403-3625224b96cc",  # start
+        #         "source_type": "start",
+        #         "target": "675fca50-1228-8008-82dc-0c714158534c",  # http_request
+        #         "target_type": "http_request",
+        #     },
+        #     {
+        #         "id": "675fca50-1228-4000-8000-000000000002",
+        #         "source": "675fca50-1228-8008-82dc-0c714158534c",  # http_request
+        #         "source_type": "http_request",
+        #         "target": "eba75e0b-21b7-46ed-8d21-791724f0740f",  # llm
+        #         "target_type": "llm",
+        #     },
+        #     {
+        #         "id": "675fca50-1228-4000-8000-000000000003",
+        #         "source": "eba75e0b-21b7-46ed-8d21-791724f0740f",  # llm
+        #         "source_type": "llm",
+        #         "target": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",  # code
+        #         "target_type": "code",
+        #     },
+        #     {
+        #         "id": "675fca50-1228-4000-8000-000000000004",
+        #         "source": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",  # code
+        #         "source_type": "code",
+        #         "target": "623b7671-0bc2-446c-bf5e-5e25032a522e",  # template_transform
+        #         "target_type": "template_transform",
+        #     },
+        #     {
+        #         "id": "675fca50-1228-4000-8000-000000000005",
+        #         "source": "623b7671-0bc2-446c-bf5e-5e25032a522e",  # template_transform
+        #         "source_type": "template_transform",
+        #         "target": "860c8411-37ed-4872-b53f-30afa0290211",  # end
+        #         "target_type": "end",
+        #     },
+        #
+        #     # ========= Path 2: Tool (google_serper) -> End =========
+        #     {
+        #         "id": "675fca50-1228-4000-8000-000000000006",
+        #         "source": "18d938c4-ecd7-4a6b-9403-3625224b96cc",  # start
+        #         "source_type": "start",
+        #         "target": "2f6cf40d-0219-421b-92ff-229fdde15ecb",  # tool
+        #         "target_type": "tool",
+        #     },
+        #     {
+        #         "id": "675fca50-1228-4000-8000-000000000007",
+        #         "source": "2f6cf40d-0219-421b-92ff-229fdde15ecb",  # tool
+        #         "source_type": "tool",
+        #         "target": "860c8411-37ed-4872-b53f-30afa0290211",  # end
+        #         "target_type": "end",
+        #     },
+        # ]
+        #
+        # # 3. Build workflow & invoke
+        # workflow = Workflow(
+        #     workflow_config=WorkflowConfig(
+        #         account_id=current_user.id,
+        #         name="workflow_demo_http_and_tool_parallel",
+        #         description=(
+        #             "Demo workflow with two active parallel paths: "
+        #             "1) http_request -> llm -> code -> template, "
+        #             "2) google_serper tool. "
+        #             "Dataset retrieval is currently commented out."
+        #         ),
+        #         nodes=nodes,
+        #         edges=edges,
+        #     )
+        # )
+        #
+        # result = workflow.invoke(
+        #     {
+        #         "query": "What prompts are there about front-end?",
+        #         "location": "New Jersey",
+        #     }
+        # )
+        #
+        # return success_json(
+        #     {
+        #         **result,
+        #         "info": {
+        #             "name": workflow.name,
+        #             "description": workflow.description,
+        #             "args_schema": workflow.args_schema.schema(),
+        #         },
+        #         "node_results": [node_result.dict() for node_result in result["node_results"]],
+        #     }
+        # )
+        #
 
-        # 1. Define nodes
-        nodes = [
-            # ---------- Start node ----------
-            {
-                "id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
-                "node_type": "start",
-                "title": "Start",
-                "description": "Workflow entry point; defines user inputs.",
-                "inputs": [
-                    {
-                        "name": "query",
-                        "type": "string",
-                        "description": "User input query",
-                        "required": True,
-                        "value": {
-                            "type": "generated",
-                            "content": "",
-                        },
-                    },
-                    {
-                        "name": "location",
-                        "type": "string",
-                        "description": "User location or city (optional)",
-                        "required": False,
-                        "value": {
-                            "type": "generated",
-                            "content": "",
-                        },
-                    },
-                ],
-            },
-
-            # ---------- Dataset retrieval node (TEMPORARILY DISABLED) ----------
-            # {
-            #     "id": "868b5769-1925-4e7b-8aa4-af7c3d444d91",
-            #     "node_type": "dataset_retrieval",
-            #     "title": "Knowledge Base Retrieval",
-            #     "description": "Retrieve relevant documents based on the user query.",
-            #     "inputs": [
-            #         {
-            #             "name": "query",
-            #             "type": "string",
-            #             "value": {
-            #                 "type": "ref",
-            #                 "content": {
-            #                     "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
-            #                     "ref_var_name": "query",
-            #                 },
-            #             },
-            #         }
-            #     ],
-            #     "dataset_ids": [
-            #         "1cbb6449-5463-49a4-b0ef-1b94cdf747d7",
-            #         "798f5324-c82e-44c2-94aa-035afbe88839",
-            #     ],
-            #     "outputs": [
-            #         {
-            #             "name": "combine_documents",
-            #             "type": "string",
-            #             "value": {
-            #                 "type": "generated",
-            #                 "content": "",
-            #             },
-            #         },
-            #     ],
-            # },
-
-            # ---------- HTTP Request Node (Path 1) ----------
-            {
-                "id": "675fca50-1228-8008-82dc-0c714158534c",
-                "node_type": "http_request",
-                "title": "HTTP Request",
-                "description": "Simple GET request to langchain.com",
-                "url": "https://www.langchain.com/",
-                "method": "get",
-                "inputs": [],
-                "outputs": [
-                    {
-                        "name": "response",
-                        "type": "string",
-                        "value": {
-                            "type": "generated",
-                            "content": "",
-                        },
-                    }
-                ],
-            },
-
-            # ---------- LLM node (uses HTTP response as context) ----------
-            {
-                "id": "eba75e0b-21b7-46ed-8d21-791724f0740f",
-                "node_type": "llm",
-                "title": "Large Language Model",
-                "description": "Answer the user query using HTTP response as context.",
-                "inputs": [
-                    {
-                        "name": "query",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
-                                "ref_var_name": "query",
-                            },
-                        },
-                    },
-                    {
-                        "name": "context",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "675fca50-1228-8008-82dc-0c714158534c",  # http_request
-                                "ref_var_name": "response",
-                            },
-                        },
-                    },
-                ],
-                "prompt": (
-                    "You are a helpful AI assistant.\n\n"
-                    "User question:\n"
-                    "{{query}}\n\n"
-                    "Relevant context (may be empty):\n"
-                    "<context>{{context}}</context>\n\n"
-                    "Answer the question as well as you can."
-                ),
-                "model_config": {
-                    "provider": "openai",
-                    "model": "gpt-4o-mini",
-                    "parameters": {
-                        "temperature": 0.3,
-                        "top_p": 0.85,
-                        "frequency_penalty": 0.2,
-                        "presence_penalty": 0.2,
-                        "max_tokens": 512,
-                    },
-                },
-            },
-
-            # ---------- Code node (post-process HTTP + LLM) ----------
-            {
-                "id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
-                "node_type": "code",
-                "title": "Code Post-processing",
-                "description": "Post-process LLM answer and HTTP content with safe defaults.",
-                "inputs": [
-                    {
-                        "name": "combine_documents",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "675fca50-1228-8008-82dc-0c714158534c",  # http_request
-                                "ref_var_name": "response",
-                            },
-                        },
-                    },
-                    {
-                        "name": "llm_output",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "eba75e0b-21b7-46ed-8d21-791724f0740f",
-                                "ref_var_name": "output",
-                            },
-                        },
-                    },
-                ],
-                "code": """def main(params):
-            # Get HTTP content or default text
-            docs = params.get("combine_documents")
-            if not docs:
-                docs = (
-                    "This is default HTTP content for testing. "
-                    "It is used when the HTTP request returns empty. "
-                    "You can modify this to simulate HTTP outputs."
-                )
-    
-            # Get LLM output or default demo text
-            answer = params.get("llm_output")
-            if not answer:
-                answer = "This is a placeholder LLM answer (for testing)."
-    
-            snippet = docs[:200]
-    
-            return {
-                "snippet": snippet,
-                "answer_length": len(answer),
-                "fallback_used": params.get("combine_documents") is None or params.get("combine_documents") == ""
-            }""",
-                "outputs": [
-                    {
-                        "name": "snippet",
-                        "type": "string",
-                        "value": {
-                            "type": "generated",
-                            "content": "",
-                        },
-                    },
-                    {
-                        "name": "answer_length",
-                        "type": "int",
-                        "value": {
-                            "type": "generated",
-                            "content": 0,
-                        },
-                    },
-                    {
-                        "name": "fallback_used",
-                        "type": "boolean",
-                        "value": {
-                            "type": "generated",
-                            "content": False,
-                        },
-                    },
-                ],
-            },
-
-            # ---------- Template transform node (Path 1) ----------
-            {
-                "id": "623b7671-0bc2-446c-bf5e-5e25032a522e",
-                "node_type": "template_transform",
-                "title": "Template Transform",
-                "description": "Combine query, location, LLM answer and snippet into a final message.",
-                "inputs": [
-                    {
-                        "name": "location",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
-                                "ref_var_name": "location",
-                            },
-                        },
-                    },
-                    {
-                        "name": "query",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
-                                "ref_var_name": "query",
-                            },
-                        },
-                    },
-                    {
-                        "name": "llm_output",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "eba75e0b-21b7-46ed-8d21-791724f0740f",
-                                "ref_var_name": "output",
-                            },
-                        },
-                    },
-                    {
-                        "name": "snippet",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
-                                "ref_var_name": "snippet",
-                            },
-                        },
-                    },
-                ],
-                "template": (
-                    "Location: {{location}}\n"
-                    "User question: {{query}}\n\n"
-                    "LLM answer:\n{{llm_output}}\n\n"
-                    "HTTP snippet (or default):\n{{snippet}}\n"
-                ),
-            },
-
-            # ---------- Tool node (google_serper, Path 2) ----------
-            {
-                "id": "2f6cf40d-0219-421b-92ff-229fdde15ecb",
-                "node_type": "tool",
-                "title": "Built-in Tool: Google Serper",
-                "description": "Call google_serper with the user query.",
-                "type": "builtin_tool",
-                "provider_id": "google",
-                "tool_id": "google_serper",
-                "inputs": [
-                    {
-                        "name": "query",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
-                                "ref_var_name": "query",
-                            },
-                        },
-                    }
-                ],
-                "outputs": [
-                    {
-                        "name": "text",
-                        "type": "string",
-                        "value": {
-                            "type": "generated",
-                            "content": "",
-                        },
-                    }
-                ],
-            },
-
-            # ---------- End node ----------
-            {
-                "id": "860c8411-37ed-4872-b53f-30afa0290211",
-                "node_type": "end",
-                "title": "End",
-                "description": "Final output variables of the workflow.",
-                "outputs": [
-                    {
-                        "name": "query",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
-                                "ref_var_name": "query",
-                            },
-                        },
-                    },
-                    {
-                        "name": "location",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "18d938c4-ecd7-4a6b-9403-3625224b96cc",
-                                "ref_var_name": "location",
-                            },
-                        },
-                    },
-                    {
-                        "name": "llm_output",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "eba75e0b-21b7-46ed-8d21-791724f0740f",
-                                "ref_var_name": "output",
-                            },
-                        },
-                    },
-                    {
-                        "name": "template_output",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "623b7671-0bc2-446c-bf5e-5e25032a522e",
-                                "ref_var_name": "output",
-                            },
-                        },
-                    },
-                    {
-                        "name": "snippet",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
-                                "ref_var_name": "snippet",
-                            },
-                        },
-                    },
-                    {
-                        "name": "answer_length",
-                        "type": "int",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
-                                "ref_var_name": "answer_length",
-                            },
-                        },
-                    },
-                    {
-                        "name": "fallback_used",
-                        "type": "boolean",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",
-                                "ref_var_name": "fallback_used",
-                            },
-                        },
-                    },
-                    {
-                        "name": "google_search_result",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "2f6cf40d-0219-421b-92ff-229fdde15ecb",
-                                "ref_var_name": "text",
-                            },
-                        },
-                    },
-                    {
-                        "name": "http_response",
-                        "type": "string",
-                        "value": {
-                            "type": "ref",
-                            "content": {
-                                "ref_node_id": "675fca50-1228-8008-82dc-0c714158534c",
-                                "ref_var_name": "response",
-                            },
-                        },
-                    },
-                ],
-            },
-        ]
-
-        # 2. Edges: two active paths (HTTP/LLM chain + tool), retrieval commented out
-        edges = [
-            # ========= Path 1: HTTP -> LLM -> Code -> Template -> End =========
-            {
-                "id": "675fca50-1228-4000-8000-000000000001",
-                "source": "18d938c4-ecd7-4a6b-9403-3625224b96cc",  # start
-                "source_type": "start",
-                "target": "675fca50-1228-8008-82dc-0c714158534c",  # http_request
-                "target_type": "http_request",
-            },
-            {
-                "id": "675fca50-1228-4000-8000-000000000002",
-                "source": "675fca50-1228-8008-82dc-0c714158534c",  # http_request
-                "source_type": "http_request",
-                "target": "eba75e0b-21b7-46ed-8d21-791724f0740f",  # llm
-                "target_type": "llm",
-            },
-            {
-                "id": "675fca50-1228-4000-8000-000000000003",
-                "source": "eba75e0b-21b7-46ed-8d21-791724f0740f",  # llm
-                "source_type": "llm",
-                "target": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",  # code
-                "target_type": "code",
-            },
-            {
-                "id": "675fca50-1228-4000-8000-000000000004",
-                "source": "4a9ed43d-e886-49f7-af9f-9e85d83b27aa",  # code
-                "source_type": "code",
-                "target": "623b7671-0bc2-446c-bf5e-5e25032a522e",  # template_transform
-                "target_type": "template_transform",
-            },
-            {
-                "id": "675fca50-1228-4000-8000-000000000005",
-                "source": "623b7671-0bc2-446c-bf5e-5e25032a522e",  # template_transform
-                "source_type": "template_transform",
-                "target": "860c8411-37ed-4872-b53f-30afa0290211",  # end
-                "target_type": "end",
-            },
-
-            # ========= Path 2: Tool (google_serper) -> End =========
-            {
-                "id": "675fca50-1228-4000-8000-000000000006",
-                "source": "18d938c4-ecd7-4a6b-9403-3625224b96cc",  # start
-                "source_type": "start",
-                "target": "2f6cf40d-0219-421b-92ff-229fdde15ecb",  # tool
-                "target_type": "tool",
-            },
-            {
-                "id": "675fca50-1228-4000-8000-000000000007",
-                "source": "2f6cf40d-0219-421b-92ff-229fdde15ecb",  # tool
-                "source_type": "tool",
-                "target": "860c8411-37ed-4872-b53f-30afa0290211",  # end
-                "target_type": "end",
-            },
-        ]
-
-        # 3. Build workflow & invoke
-        workflow = Workflow(
-            workflow_config=WorkflowConfig(
-                account_id=current_user.id,
-                name="workflow_demo_http_and_tool_parallel",
-                description=(
-                    "Demo workflow with two active parallel paths: "
-                    "1) http_request -> llm -> code -> template, "
-                    "2) google_serper tool. "
-                    "Dataset retrieval is currently commented out."
-                ),
-                nodes=nodes,
-                edges=edges,
-            )
-        )
-
-        result = workflow.invoke(
-            {
-                "query": "What prompts are there about front-end?",
-                "location": "New Jersey",
-            }
-        )
-
-        return success_json(
-            {
-                **result,
-                "info": {
-                    "name": workflow.name,
-                    "description": workflow.description,
-                    "args_schema": workflow.args_schema.schema(),
-                },
-                "node_results": [node_result.dict() for node_result in result["node_results"]],
-            }
-        )
+        ############# Test Model Managers #############
+        provider = self.language_model_manager.get_provider("openai")
+        model_entity = provider.get_model_entity("gpt-4o-mini")
+        model_class = provider.get_model_class(model_entity.model_type)
+        llm = model_class(**{
+            **model_entity.attributes,
+            "features": model_entity.features,
+            "metadata": model_entity.metadata,
+        })
+        return success_json({
+            "content": llm.invoke("Hello").content,
+            "features": llm.features,
+            "metadata": llm.metadata,
+        })
