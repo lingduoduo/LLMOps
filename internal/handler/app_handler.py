@@ -835,8 +835,10 @@ class AppHandler:
         #
 
         ############# Test Model Managers #############
-        provider = self.language_model_manager.get_provider("openai")
-        model_entity = provider.get_model_entity("gpt-4o-mini")
+        # provider = self.language_model_manager.get_provider("openai")
+        # model_entity = provider.get_model_entity("gpt-4o-mini")
+        provider = self.language_model_manager.get_provider("ollama")
+        model_entity = provider.get_model_entity("deepseek-r1-1.5b")
         model_class = provider.get_model_class(model_entity.model_type)
         llm = model_class(**{
             **model_entity.attributes,
