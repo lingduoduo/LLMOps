@@ -4,9 +4,9 @@
 
 - **Tech Stack:** React + WebSocket
 - **Functions:**
-  - Implements the WebUI (web interface)
-  - Provides identity authentication
-  - Ensures cross-platform compatibility
+    - Implements the WebUI (web interface)
+    - Provides identity authentication
+    - Ensures cross-platform compatibility
 
 ------
 
@@ -14,9 +14,9 @@
 
 - **Tech Stack:** LangChain + Flask + Redis
 - **Functions:**
-  - Orchestrates multi-Agent dialogue flows
-  - Handles coordination and turn-taking
-  - Maintains conversational context (session persistence)
+    - Orchestrates multi-Agent dialogue flows
+    - Handles coordination and turn-taking
+    - Maintains conversational context (session persistence)
 
 ------
 
@@ -24,8 +24,8 @@
 
 - **Tech Stack:** Sklearn + BERT + ONNX
 - **Functions:**
-  - Integrates multiple model types for intent classification
-  - Supports model fusion and hot updates
+    - Integrates multiple model types for intent classification
+    - Supports model fusion and hot updates
 
 ------
 
@@ -33,8 +33,8 @@
 
 - **Tech Stack:** Elasticsearch + Weaviate + Neo4j
 - **Functions:**
-  - Enables multi-source retrieval and hybrid search
-  - Performs graph reasoning and relationship inference
+    - Enables multi-source retrieval and hybrid search
+    - Performs graph reasoning and relationship inference
 
 ------
 
@@ -42,17 +42,17 @@
 
 - **Tech Stack:** Flask + PostgreSQL + Redis
 - **Functions:**
-  - Manages user authentication and access control
-  - Maintains audit and operation logs
+    - Manages user authentication and access control
+    - Maintains audit and operation logs
 
 ------
 
 #### **6. Deployment Platform**
 
-- **Tech Stack:** Docker + Kubernetes 
+- **Tech Stack:** Docker + Kubernetes
 - **Functions:**
-  - Supports multi-environment deployment
-  - Provides elasticity and automatic scaling
+    - Supports multi-environment deployment
+    - Provides elasticity and automatic scaling
 
 ------
 
@@ -60,8 +60,8 @@
 
 - **Tech Stack:** Prometheus + Grafana + Arize
 - **Functions:**
-  - Implements full-chain monitoring and alerting
-  - Enables system-level log aggregation and analysis
+    - Implements full-chain monitoring and alerting
+    - Enables system-level log aggregation and analysis
 
 ### App Framework for Backend Services
 
@@ -404,11 +404,44 @@ Generate JWT_SECRET_KEY
 openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | head -c 32; echo
 ```
 
+### OLLMA
+
+http://127.0.0.1:11434/api/generate
+
+```
+ollama
+ollama list
+ollama run deepseek-r1:1.5b
+
+writing manifest
+success
+>>> hello
+Hello! How can I assist you today? 😊
+
+>>> /?
+Available Commands:
+  /set            Set session variables
+  /show           Show model information
+  /load <model>   Load a session or model
+  /save <model>   Save your current session
+  /clear          Clear session context
+  /bye            Exit
+  /?, /help       Help for a command
+  /? shortcuts    Help for keyboard shortcuts
+
+Use """ to begin a multi-line message.
+
+>>> /bye
+ollama stop deepseek-r1:1.5b
+```
+
 ### Disclaimer
 
 This repository and its contents are collected and shared solely for academic and research purposes.
 All code, data, and related materials are intended to support independent study, experimentation, and learning.
 
-If you believe any part of this repository inadvertently includes content that should not be shared publicly or may cause concern, please contact me immediately. I will review and, if necessary, remove the material without delay.
+If you believe any part of this repository inadvertently includes content that should not be shared publicly or may
+cause concern, please contact me immediately. I will review and, if necessary, remove the material without delay.
 
-I do not claim ownership of any third-party data or content and have made every effort to respect intellectual property and privacy rights.
+I do not claim ownership of any third-party data or content and have made every effort to respect intellectual property
+and privacy rights.
