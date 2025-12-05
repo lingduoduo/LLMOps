@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@Author  : linghypshe@gmail.com
 @File    : __init__.py
 """
 from .account_service import AccountService
@@ -22,6 +21,7 @@ from .indexing_service import IndexingService
 from .jieba_service import JiebaService
 from .jwt_service import JwtService
 from .keyword_table_service import KeywordTableService
+from .language_model_service import LanguageModelService
 from .oauth_service import OAuthService
 from .openapi_service import OpenAPIService
 from .process_rule_service import ProcessRuleService
@@ -56,5 +56,6 @@ __all__ = [
     "ApiKeyService",
     "OpenAPIService",
     "WorkflowService",
-    "BuiltinAppService"
+    "BuiltinAppService",
+    "LanguageModelService"
 ]
