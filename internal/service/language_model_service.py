@@ -10,9 +10,12 @@ from typing import Any
 
 from flask import current_app
 from injector import inject
+from langchain_openai import ChatOpenAI
 
 from internal.core.language_model import LanguageModelManager
+from internal.core.language_model.entities.model_entity import BaseLanguageModel
 from internal.exception import NotFoundException
+from internal.lib.helper import convert_model_to_dict
 from pkg.sqlalchemy import SQLAlchemy
 from .base_service import BaseService
 
@@ -25,11 +28,11 @@ class LanguageModelService(BaseService):
     language_model_manager: LanguageModelManager
 
     def get_language_models(self) -> list[dict[str, Any]]:
-        """Retrieve all model lists configured in the LLMOps project"""
-        # 1. Call the language model manager to get all providers
+        """Retrieve all model configurations defined in the LLMOps project"""
+        # 1. Retrieve provider list from the language model manager
         providers = self.language_model_manager.get_providers()
 
-        # 2. Build the language model list
+        # 2. Build the language model response list
         language_models = []
         for provider in providers:
             # 3. Retrieve provider metadata and model entities
@@ -45,82 +48,37 @@ class LanguageModelService(BaseService):
                 "description": provider_entity.description,
                 "background": provider_entity.background,
                 "support_model_types": provider_entity.supported_model_types,
-                "models": [{
-                    "model": model_entity.model_name,
-                    "label": model_entity.label,
-                    "model_type": model_entity.model_type,
-                    "context_window": model_entity.context_window,
-                    "max_output_tokens": model_entity.max_output_tokens,
-                    "features": model_entity.features,
-                    "attributes": model_entity.attributes,
-                    "metadata": model_entity.metadata,
-                    "parameters": [{
-                        "name": parameter.name,
-                        "label": parameter.label,
-                        "type": parameter.type.value,
-                        "help": parameter.help,
-                        "required": parameter.required,
-                        "default": parameter.default,
-                        "min": parameter.min,
-                        "max": parameter.max,
-                        "precision": parameter.precision,
-                        "options": [{"label": option.label, "value": option.value} for option in parameter.options],
-                    } for parameter in model_entity.parameters],
-                } for model_entity in model_entities]
+                "models": convert_model_to_dict(model_entities),
             }
             language_models.append(language_model)
 
         return language_models
 
     def get_language_model(self, provider_name: str, model_name: str) -> dict[str, Any]:
-        """Retrieve detailed model information based on provider name + model name"""
-        # 1. Get provider and model entity
+        """Retrieve detailed model information using provider name + model name"""
+        # 1. Retrieve provider + model entity
         provider = self.language_model_manager.get_provider(provider_name)
         if not provider:
             raise NotFoundException("The provider does not exist")
 
-        # 2. Get model entity
+        # 2. Retrieve the model entity
         model_entity = provider.get_model_entity(model_name)
         if not model_entity:
             raise NotFoundException("The model does not exist")
 
-        # 3. Build response
-        language_model = {
-            "model": model_entity.model_name,
-            "label": model_entity.label,
-            "model_type": model_entity.model_type,
-            "context_window": model_entity.context_window,
-            "max_output_tokens": model_entity.max_output_tokens,
-            "features": model_entity.features,
-            "attributes": model_entity.attributes,
-            "metadata": model_entity.metadata,
-            "parameters": [{
-                "name": parameter.name,
-                "label": parameter.label,
-                "type": parameter.type.value,
-                "help": parameter.help,
-                "required": parameter.required,
-                "default": parameter.default,
-                "min": parameter.min,
-                "max": parameter.max,
-                "precision": parameter.precision,
-                "options": [{"label": option.label, "value": option.value} for option in parameter.options],
-            } for parameter in model_entity.parameters],
-        }
-
-        return language_model
+        return convert_model_to_dict(model_entity)
 
     def get_language_model_icon(self, provider_name: str) -> tuple[bytes, str]:
-        """Retrieve the icon associated with a provider by provider name"""
-        # 1. Get provider information
+        """Retrieve the icon associated with a provider by name"""
+        # 1. Retrieve provider metadata
         provider = self.language_model_manager.get_provider(provider_name)
         if not provider:
             raise NotFoundException("The provider does not exist")
 
-        # 2. Get project root path
+        # 2. Get the root project path
         root_path = os.path.dirname(os.path.dirname(current_app.root_path))
 
-        # 3. Build provider folder path
+        # 3. Build the provider folder path
         provider_path = os.path.join(
             root_path,
             "internal", "core", "language_model", "providers", provider_name,
@@ -129,11 +87,11 @@ class LanguageModelService(BaseService):
         # 4. Build the icon file path
         icon_path = os.path.join(provider_path, "_asset", provider.provider_entity.icon)
 
-        # 5. Check whether the icon exists
+        # 5. Ensure the icon exists
         if not os.path.exists(icon_path):
-            raise NotFoundException("The provider did not supply an icon under _asset")
+            raise NotFoundException("No icon found under the provider's _asset folder")
 
-        # 6. Determine icon MIME type
+        # 6. Determine MIME type
         mimetype, _ = mimetypes.guess_type(icon_path)
         mimetype = mimetype or "application/octet-stream"
 
@@ -141,3 +99,31 @@ class LanguageModelService(BaseService):
         with open(icon_path, "rb") as f:
             byte_data = f.read()
             return byte_data, mimetype
+
+    def load_language_model(self, model_config: dict[str, Any]) -> BaseLanguageModel:
+        """Load a language model instance based on the given configuration"""
+        try:
+            # 1. Extract provider, model, and parameters from model_config
+            provider_name = model_config.get("provider", "")
+            model_name = model_config.get("model", "")
+            parameters = model_config.get("parameters", {})
+
+            # 2. Retrieve provider, model entity, and model class from manager
+            provider = self.language_model_manager.get_provider(provider_name)
+            model_entity = provider.get_model_entity(model_name)
+            model_class = provider.get_model_class(model_entity.model_type)
+
+            # 3. Instantiate and return the model
+            return model_class(
+                **model_entity.attributes,
+                **parameters,
+                features=model_entity.features,
+                metadata=model_entity.metadata,
+            )
+        except Exception:
+            return self.load_default_language_model()
+
+    @classmethod
+    def load_default_language_model(cls) -> BaseLanguageModel:
+        """Load a fallback default language model when errors occur or no model is found"""
+        return ChatOpenAI(model="gpt-4o-mini", temperature=1, max_tokens=8192)

@@ -31,7 +31,6 @@ from internal.handler import (
 @inject
 @dataclass
 class Router:
-    """路由"""
     app_handler: AppHandler
     builtin_tool_handler: BuiltinToolHandler
     api_tool_handler: ApiToolHandler
