@@ -6,30 +6,30 @@
   supported_model_types:
     - chat
     - completion
-
-- name: huggingface
-  label: HuggingFace
-  description: Models hosted on HuggingFace, including Qwen, Llama, Mistral, Gemma, and other transformer-based open-source models.
-  icon: icon.png
-  background: "#F5F5F5"
-  supported_model_types:
-    - chat
-    - completion
-
-- name: claude
-  label: Anthropic Claude
-  description: Anthropic Claude model family, including Claude 3 Opus, Claude 3 Sonnet, Claude 3 Haiku, and Claude 2.1.
-  icon: icon.png
-  background: "#F0F9FF"
-  supported_model_types:
-    - chat
-    - completion
-
-- name: bedrock
-  label: Amazon Bedrock
-  description: Bedrock provides models from Anthropic Claude, Meta Llama, Cohere Command, Amazon Titan, and Mistral AI.
-  icon: icon.png
-  background: "#F3F4F6"
-  supported_model_types:
-    - chat
-    - completion
+#
+#- name: huggingface
+#  label: HuggingFace
+#  description: Models hosted on HuggingFace, including Qwen, Llama, Mistral, Gemma, and other transformer-based open-source models.
+#  icon: icon.png
+#  background: "#F5F5F5"
+#  supported_model_types:
+#    - chat
+#    - completion
+#
+#- name: claude
+#  label: Anthropic Claude
+#  description: Anthropic Claude model family, including Claude 3 Opus, Claude 3 Sonnet, Claude 3 Haiku, and Claude 2.1.
+#  icon: icon.png
+#  background: "#F0F9FF"
+#  supported_model_types:
+#    - chat
+#    - completion
+#
+#- name: bedrock
+#  label: Amazon Bedrock
+#  description: Bedrock provides models from Anthropic Claude, Meta Llama, Cohere Command, Amazon Titan, and Mistral AI.
+#  icon: icon.png
+#  background: "#F3F4F6"
+#  supported_model_types:
+#    - chat
+#    - completion
