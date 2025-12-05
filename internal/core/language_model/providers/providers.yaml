@@ -6,7 +6,14 @@
   supported_model_types:
     - chat
     - completion
-#
+- name: ollama
+  label: Ollama
+  description: Ollama provided local models, such as Deep Seek R1.
+  icon: icon.svg
+  background: "#F9F9FB"
+  supported_model_types:
+    - chat
+
 #- name: huggingface
 #  label: HuggingFace
 #  description: Models hosted on HuggingFace, including Qwen, Llama, Mistral, Gemma, and other transformer-based open-source models.
