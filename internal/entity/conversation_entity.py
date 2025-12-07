@@ -114,6 +114,7 @@ class SuggestedQuestions(BaseModel):
 
 class InvokeFrom(str, Enum):
     """Source of conversation invocation."""
+    ASSISTANT_AGENT = None
     SERVICE_API = "service_api"  # External API call
     WEB_APP = "web_app"  # Web application
     DEBUGGER = "debugger"  # Debugging interface
