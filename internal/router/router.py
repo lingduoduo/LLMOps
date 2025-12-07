@@ -25,12 +25,14 @@ from internal.handler import (
     BuiltinAppHandler,
     WorkflowHandler,
     LanguageModelHandler,
+    AssistantAgentHandler,
 )
 
 
 @inject
 @dataclass
 class Router:
+    """Router"""
     app_handler: AppHandler
     builtin_tool_handler: BuiltinToolHandler
     api_tool_handler: ApiToolHandler
@@ -47,6 +49,7 @@ class Router:
     builtin_app_handler: BuiltinAppHandler
     workflow_handler: WorkflowHandler
     language_model_handler: LanguageModelHandler
+    assistant_agent_handler: AssistantAgentHandler
 
     def register_router(self, app: Flask):
         """Register routes"""
@@ -54,7 +57,7 @@ class Router:
         bp = Blueprint("llmops", __name__, url_prefix="")
         openapi_bp = Blueprint("openapi", __name__, url_prefix="")
 
-        # 2. Bind URLs to controller methods (Apps)
+        # 2. Bind URLs to controller methods
         bp.add_url_rule("/ping", view_func=self.app_handler.ping)
         bp.add_url_rule("/apps", view_func=self.app_handler.get_apps_with_page)
         bp.add_url_rule("/apps", methods=["POST"], view_func=self.app_handler.create_app)
@@ -116,7 +119,7 @@ class Router:
             view_func=self.app_handler.get_debug_conversation_messages_with_page,
         )
 
-        # 3. Built-in tools module
+        # 3. Built-in tools marketplace module
         bp.add_url_rule("/builtin-tools", view_func=self.builtin_tool_handler.get_builtin_tools)
         bp.add_url_rule(
             "/builtin-tools/<string:provider_name>/tools/<string:tool_name>",
@@ -131,7 +134,7 @@ class Router:
             view_func=self.builtin_tool_handler.get_categories,
         )
 
-        # 4. Custom API tools module
+        # 4. Custom API tool module
         bp.add_url_rule(
             "/api-tools",
             view_func=self.api_tool_handler.get_api_tool_providers_with_page,
@@ -169,7 +172,7 @@ class Router:
         bp.add_url_rule("/upload-files/file", methods=["POST"], view_func=self.upload_file_handler.upload_file)
         bp.add_url_rule("/upload-files/image", methods=["POST"], view_func=self.upload_file_handler.upload_image)
 
-        # 5. Dataset / knowledge base module
+        # 5. Knowledge base module
         bp.add_url_rule("/datasets", view_func=self.dataset_handler.get_datasets_with_page)
         bp.add_url_rule("/datasets", methods=["POST"], view_func=self.dataset_handler.create_dataset)
         bp.add_url_rule("/datasets/<uuid:dataset_id>", view_func=self.dataset_handler.get_dataset)
@@ -246,7 +249,7 @@ class Router:
             view_func=self.dataset_handler.hit,
         )
 
-        # 6. OAuth & auth module
+        # 6. OAuth & authentication module
         bp.add_url_rule(
             "/oauth/<string:provider_name>",
             view_func=self.oauth_handler.provider,
@@ -273,7 +276,7 @@ class Router:
         bp.add_url_rule("/account/name", methods=["POST"], view_func=self.account_handler.update_name)
         bp.add_url_rule("/account/avatar", methods=["POST"], view_func=self.account_handler.update_avatar)
 
-        # 8. AI assistant module
+        # 8. AI assistance module
         bp.add_url_rule("/ai/optimize-prompt", methods=["POST"], view_func=self.ai_handler.optimize_prompt)
         bp.add_url_rule(
             "/ai/suggested-questions",
@@ -309,7 +312,7 @@ class Router:
             view_func=self.openapi_handler.chat,
         )
 
-        # 10. Built-in apps module
+        # 10. Built-in app module
         bp.add_url_rule("/builtin-apps/categories", view_func=self.builtin_app_handler.get_builtin_app_categories)
         bp.add_url_rule("/builtin-apps", view_func=self.builtin_app_handler.get_builtin_apps)
         bp.add_url_rule(
@@ -357,7 +360,7 @@ class Router:
             view_func=self.workflow_handler.cancel_publish_workflow,
         )
 
-        # 12. Language Models
+        # 12. Language model module
         bp.add_url_rule("/language-models", view_func=self.language_model_handler.get_language_models)
         bp.add_url_rule(
             "/language-models/<string:provider_name>/icon",
@@ -368,6 +371,27 @@ class Router:
             view_func=self.language_model_handler.get_language_model,
         )
 
-        # 13. Register blueprints on the Flask app
+        # 13. Assistant Agent module
+        bp.add_url_rule(
+            "/assistant-agent/chat",
+            methods=["POST"],
+            view_func=self.assistant_agent_handler.assistant_agent_chat,
+        )
+        bp.add_url_rule(
+            "/assistant-agent/chat/<uuid:task_id>/stop",
+            methods=["POST"],
+            view_func=self.assistant_agent_handler.stop_assistant_agent_chat,
+        )
+        bp.add_url_rule(
+            "/assistant-agent/messages",
+            view_func=self.assistant_agent_handler.get_assistant_agent_messages_with_page,
+        )
+        bp.add_url_rule(
+            "/assistant-agent/delete-conversation",
+            methods=["POST"],
+            view_func=self.assistant_agent_handler.delete_assistant_agent_conversation,
+        )
+
+        # 14. Register blueprints on the app
         app.register_blueprint(bp)
         app.register_blueprint(openapi_bp)
