@@ -8,6 +8,7 @@ from .ai_service import AIService
 from .api_key_service import ApiKeyService
 from .api_tool_service import ApiToolService
 from .app_service import AppService
+from .assistant_agent_service import AssistantAgentService
 from .aws_service import S3Service
 from .base_service import BaseService
 from .base_service import BaseService
@@ -57,5 +58,6 @@ __all__ = [
     "OpenAPIService",
     "WorkflowService",
     "BuiltinAppService",
-    "LanguageModelService"
+    "LanguageModelService",
+    "AssistantAgentService"
 ]
