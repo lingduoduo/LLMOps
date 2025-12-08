@@ -1,4 +1,6 @@
 arize.pem
+storage/
+internal/core/vector_store/
 
 app/http/storage/
 .vscode/

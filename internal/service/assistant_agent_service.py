@@ -14,7 +14,7 @@ from flask import current_app
 from injector import inject
 from langchain_core.messages import HumanMessage
 from langchain_core.pydantic_v1 import BaseModel, Field
-from langchain_core.tools import BaseTool
+from langchain_core.tools import BaseTool, tool
 from sqlalchemy import desc
 
 from internal.core.agent.agents import AgentQueueManager, FunctionCallAgent
@@ -26,14 +26,12 @@ from internal.core.memory import TokenBufferMemory
 from internal.entity.conversation_entity import InvokeFrom, MessageStatus
 from internal.model import Account, Message
 from internal.schema.assistant_agent_schema import GetAssistantAgentMessagesWithPageReq
-# from internal.task.app_task import auto_create_app
+from internal.task.app_task import auto_create_app
 from pkg.paginator import Paginator
 from pkg.sqlalchemy import SQLAlchemy
 from .base_service import BaseService
 from .conversation_service import ConversationService
-
-
-# from .faiss_service import FaissService
+from .faiss_service import FaissService
 
 
 @inject
@@ -41,7 +39,7 @@ from .conversation_service import ConversationService
 class AssistantAgentService(BaseService):
     """Assistant Agent service"""
     db: SQLAlchemy
-    # faiss_service: FaissService
+    faiss_service: FaissService
     conversation_service: ConversationService
 
     def chat(self, query, account: Account) -> Generator:
@@ -70,6 +68,7 @@ class AssistantAgentService(BaseService):
             features=[ModelFeature.TOOL_CALL, ModelFeature.AGENT_THOUGHT],
             metadata={},
         )
+        # llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.8)
 
         # 5. TokenBufferMemory extracts short-term memory
         token_buffer_memory = TokenBufferMemory(
@@ -81,9 +80,11 @@ class AssistantAgentService(BaseService):
 
         # 6. Convert tools defined in draft config to LangChain tools
         tools = [
-            # self.faiss_service.convert_faiss_to_tool(),
-            # self.convert_create_app_to_tool(account.id),
+            self.faiss_service.convert_faiss_to_tool(),
+            self.convert_create_app_to_tool(account.id),
         ]
+
+        print("TOOLS:", tools, "TYPES:", [type(t) for t in tools])
 
         # 7. Build the Agent using FunctionCallAgent
         agent = FunctionCallAgent(
@@ -122,7 +123,6 @@ class AssistantAgentService(BaseService):
                 else:
                     # 13. Process other event types (overwrite)
                     agent_thoughts[event_id] = agent_thought
-
             data = {
                 **agent_thought.model_dump(include={
                     "event", "thought", "observation", "tool", "tool_input", "answer", "latency",
@@ -193,21 +193,24 @@ class AssistantAgentService(BaseService):
 
         class CreateAppInput(BaseModel):
             """Input schema for creating an Agent/Application"""
-            name: str = Field(description="Name of the Agent/Application (max 50 chars)")
+            name: str = Field(description="Name of the Agent/Application (maximum 50 characters)")
             description: str = Field(
-                description="Description of the Agent/Application; summarize its functionality clearly")
+                description="Description of the Agent/Application; clearly summarize its functionality")
 
-        # @tool("create_app", args_schema=CreateAppInput)
-        # def create_app(name: str, description: str) -> str:
-        #     """If the user wants to create an Agent/Application, call this tool with name + description. Returns a success message."""
-        #     # 1. Trigger Celery async task to create app in backend
-        #     auto_create_app.delay(name, description, account_id)
+        @tool("create_app", args_schema=CreateAppInput)
+        def create_app(name: str, description: str) -> str:
+            """When the user requests to create an Agent/Application, you may call this tool.
+            The input parameters are: application name + description.
+            The returned result is a success message after creation.
+            """
+            # 1. Trigger a Celery asynchronous task to create the application in the backend
+            auto_create_app.delay(name, description, account_id)
 
-        #     # 2. Return success message
-        #     return (
-        #         f"Backend async task has been triggered to create the Agent application.\n"
-        #         f"Name: {name}\n"
-        #         f"Description: {description}"
-        #     )
-        #
-        # return create_app
+            # 2. Return a success message
+            return (
+                f"Successfully invoked the backend async task to create the Agent application.\n"
+                f"Application Name: {name}\n"
+                f"Application Description: {description}"
+            )
+
+        return create_app
