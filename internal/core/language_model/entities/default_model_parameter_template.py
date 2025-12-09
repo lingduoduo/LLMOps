@@ -61,7 +61,7 @@ DEFAULT_MODEL_PARAMETER_TEMPLATE = {
         "options": [],
     },
     # Maximum number of tokens to generate
-    DefaultModelParameterName.MAX_COMPLETION_TOKENS: {
+    DefaultModelParameterName.MAX_TOKENS: {
         "label": "Max Tokens",
         "type": ModelParameterType.INT,
         "help": "The maximum number of tokens to generate (integer).",
