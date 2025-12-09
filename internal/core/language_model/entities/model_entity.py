@@ -17,7 +17,7 @@ class DefaultModelParameterName(str, Enum):
     TOP_P = "top_p"  # Nucleus sampling rate
     PRESENCE_PENALTY = "presence_penalty"  # Presence penalty
     FREQUENCY_PENALTY = "frequency_penalty"  # Frequency penalty
-    MAX_COMPLETION_TOKENS = "max_completion_tokens"  # Max number of tokens to generate
+    MAX_TOKENS = "max_tokens"  # Max number of tokens to generate
 
 
 class ModelType(str, Enum):

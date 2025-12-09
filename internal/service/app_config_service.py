@@ -10,13 +10,16 @@ from flask import request
 from injector import inject
 from langchain_core.tools import BaseTool
 
+from internal.core.language_model import LanguageModelManager
 from internal.core.tools.api_tools.entities import ToolEntity
 from internal.core.tools.api_tools.providers import ApiProviderManager
 from internal.core.tools.builtin_tools.providers import BuiltinProviderManager
-from internal.lib.helper import datetime_to_timestamp
+from internal.entity.app_entity import DEFAULT_APP_CONFIG
+from internal.lib.helper import datetime_to_timestamp, get_value_type
 from internal.model import App, ApiTool, Dataset, AppConfig, AppConfigVersion, AppDatasetJoin
 from pkg.sqlalchemy import SQLAlchemy
 from .base_service import BaseService
+from ..core.language_model.entities.model_entity import ModelParameterType
 
 
 @inject
@@ -26,13 +29,16 @@ class AppConfigService(BaseService):
     db: SQLAlchemy
     api_provider_manager: ApiProviderManager
     builtin_provider_manager: BuiltinProviderManager
+    language_model_manager: LanguageModelManager
 
     def get_draft_app_config(self, app: App) -> dict[str, Any]:
         """Get the draft configuration for the given app"""
         # 1. Get draft configuration of the app
         draft_app_config = app.draft_app_config
 
-        # TODO: 2. Validate model_config; to be completed when multi-LLM support is added
+        validate_model_config = self._process_and_validate_model_config(draft_app_config.model_config)
+        if draft_app_config.model_config != validate_model_config:
+            self.update(draft_app_config, model_config=validate_model_config)
 
         # 3. Iterate over tools and remove those that no longer exist
         tools, validate_tools = self._process_and_validate_tools(draft_app_config.tools)
@@ -61,7 +67,10 @@ class AppConfigService(BaseService):
         # 1. Get runtime app configuration
         app_config = app.app_config
 
-        # TODO: 2. Validate model_config; to be completed when multi-LLM support is added
+        # 2. Validate Model Config
+        validate_model_config = self._process_and_validate_model_config(app_config.model_config)
+        if app_config.model_config != validate_model_config:
+            self.update(app_config, model_config=validate_model_config)
 
         # 3. Iterate over tools and remove those that no longer exist
         tools, validate_tools = self._process_and_validate_tools(app_config.tools)
@@ -258,3 +267,77 @@ class AppConfigService(BaseService):
             })
 
         return datasets, validate_datasets
+
+    def _process_and_validate_model_config(self, origin_model_config: dict[str, Any]) -> dict[str, Any]:
+        """Process and validate the given model configuration, then return the validated config."""
+        # 1. Check whether origin_model_config is a dict; if not, return the default config
+        if not isinstance(origin_model_config, dict):
+            return DEFAULT_APP_CONFIG["model_config"]
+
+        # 2. Extract provider, model, and parameters from origin_model_config
+        model_config = {
+            "provider": origin_model_config.get("provider", ""),
+            "model": origin_model_config.get("model", ""),
+            "parameters": origin_model_config.get("parameters", {}),
+        }
+
+        # 3. Validate provider existence and type; if invalid, return default config
+        if not model_config["provider"] or not isinstance(model_config["provider"], str):
+            return DEFAULT_APP_CONFIG["model_config"]
+        provider = self.language_model_manager.get_provider(model_config["provider"])
+        if not provider:
+            return DEFAULT_APP_CONFIG["model_config"]
+
+        # 4. Validate model existence and type; if invalid, return default config
+        if not model_config["model"] or not isinstance(model_config["model"], str):
+            return DEFAULT_APP_CONFIG["model_config"]
+        model_entity = provider.get_model_entity(model_config["model"])
+        if not model_entity:
+            return DEFAULT_APP_CONFIG["model_config"]
+
+        # 5. Validate parameters type; if invalid, initialize with default values
+        if not isinstance(model_config["parameters"], dict):
+            model_config["parameters"] = {
+                parameter.name: parameter.default for parameter in model_entity.parameters
+            }
+
+        # 6. Remove extra parameters and fill in missing ones with defaults
+        parameters = {}
+        for parameter in model_entity.parameters:
+            # 7. Get parameter value from model_config; if not present, use default
+            parameter_value = model_config["parameters"].get(parameter.name, parameter.default)
+
+            # 8. Check whether the parameter is required
+            if parameter.required:
+                # 9. Required parameters must not be None; if None, use default value
+                if parameter_value is None:
+                    parameter_value = parameter.default
+                else:
+                    # 10. If non-None, validate type; if type is incorrect, use default value
+                    if get_value_type(parameter_value) != parameter.type.value:
+                        parameter_value = parameter.default
+            else:
+                # 11. For optional parameters, validate type only when non-None
+                if parameter_value is not None:
+                    if get_value_type(parameter_value) != parameter.type.value:
+                        parameter_value = parameter.default
+
+            # 12. If the parameter has options, the value must be one of them
+            if parameter.options and parameter_value not in parameter.options:
+                parameter_value = parameter.default
+
+            # 13. For int/float parameters with min/max, validate numeric range
+            if parameter.type in [ModelParameterType.INT, ModelParameterType.FLOAT] and parameter_value is not None:
+                # 14. Validate min/max bounds
+                if (
+                        (parameter.min and parameter_value < parameter.min)
+                        or (parameter.max and parameter_value > parameter.max)
+                ):
+                    parameter_value = parameter.default
+
+            parameters[parameter.name] = parameter_value
+
+        # 15. After validation, assign the normalized parameters back
+        model_config["parameters"] = parameters
+
+        return model_config
