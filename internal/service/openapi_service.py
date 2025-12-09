@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@Time    : 2024/11/19 22:21
-@Author  : thezehui@gmail.com
 @File    : openapi_service.py
 """
 import json
@@ -13,9 +11,8 @@ from typing import Generator
 from flask import current_app
 from injector import inject
 from langchain_core.messages import HumanMessage
-from langchain_openai import ChatOpenAI
 
-from internal.core.agent.agents import FunctionCallAgent
+from internal.core.agent.agents import FunctionCallAgent, ReACTAgent
 from internal.core.agent.entities.agent_entity import AgentConfig
 from internal.core.agent.entities.queue_entity import QueueEvent
 from internal.core.memory import TokenBufferMemory
@@ -31,45 +28,47 @@ from .app_config_service import AppConfigService
 from .app_service import AppService
 from .base_service import BaseService
 from .conversation_service import ConversationService
+from .language_model_service import LanguageModelService
 from .retrieval_service import RetrievalService
+from ..core.language_model.entities.model_entity import ModelFeature
 
 
 @inject
 @dataclass
 class OpenAPIService(BaseService):
-    """OpenAPI Service"""
+    """Open API service."""
     db: SQLAlchemy
     app_service: AppService
     retrieval_service: RetrievalService
     app_config_service: AppConfigService
     conversation_service: ConversationService
+    language_model_service: LanguageModelService
 
     def chat(self, req: OpenAPIChatReq, account: Account):
         """
-        Initiate a chat conversation based on the request and account info.
-        Returns either a streaming generator or chunked data response.
+        Start a chat conversation based on the incoming request and account information.
+        The return value is either a chunked response or a generator for streaming.
         """
-
         # 1. Check whether the app belongs to the current account
         app = self.app_service.get_app(req.app_id.data, account)
 
-        # 2. Check whether the app is published
+        # 2. Check whether the app has been published
         if app.status != AppStatus.PUBLISHED:
-            raise NotFoundException("The application does not exist or is not published.")
+            raise NotFoundException("The application does not exist or is not published. Please check and try again.")
 
-        # 3. If an end_user_id is provided, validate that the user belongs to this app
+        # 3. If an end_user_id is provided, verify that the end user belongs to the app
         if req.end_user_id.data:
             end_user = self.get(EndUser, req.end_user_id.data)
             if not end_user or end_user.app_id != app.id:
-                raise ForbiddenException("End user does not exist or does not belong to this application.")
+                raise ForbiddenException("The end user does not exist or does not belong to this application.")
         else:
-            # 4. Otherwise create a new end user
+            # 4. If no end user exists, create a new end user
             end_user = self.create(
                 EndUser,
                 **{"tenant_id": account.id, "app_id": app.id},
             )
 
-        # 5. If a conversation_id is provided, verify ownership
+        # 5. If a conversation_id is provided, verify that the conversation belongs to the app and end user
         if req.conversation_id.data:
             conversation = self.get(Conversation, req.conversation_id.data)
             if (
@@ -78,9 +77,11 @@ class OpenAPIService(BaseService):
                     or conversation.invoke_from != InvokeFrom.SERVICE_API
                     or conversation.created_by != end_user.id
             ):
-                raise ForbiddenException("Conversation does not exist or does not belong to this app/end user/API.")
+                raise ForbiddenException(
+                    "The conversation does not exist, or it does not belong to the application/end user/invoke type."
+                )
         else:
-            # 6. Otherwise create a new conversation
+            # 6. If no conversation exists, create a new one
             conversation = self.create(Conversation, **{
                 "app_id": app.id,
                 "name": "New Conversation",
@@ -88,7 +89,7 @@ class OpenAPIService(BaseService):
                 "created_by": end_user.id,
             })
 
-        # 7. Retrieve validated runtime configuration
+        # 7. Get validated runtime configuration
         app_config = self.app_config_service.get_app_config(app)
 
         # 8. Create a new message record
@@ -101,14 +102,10 @@ class OpenAPIService(BaseService):
             "status": MessageStatus.NORMAL,
         })
 
-        # TODO: 9. Instantiate the LLM according to model_config;
-        #       this will be modified when supporting multiple LLM providers.
-        llm = ChatOpenAI(
-            model=app_config["model_config"]["model"],
-            **app_config["model_config"]["parameters"],
-        )
+        # 9. Load language model instance based on model configuration
+        llm = self.language_model_service.load_language_model(app_config.get("model_config", {}))
 
-        # 10. TokenBufferMemory extracts short-term conversational memory
+        # 10. Instantiate TokenBufferMemory to extract short-term memory
         token_buffer_memory = TokenBufferMemory(
             db=self.db,
             conversation=conversation,
@@ -118,12 +115,12 @@ class OpenAPIService(BaseService):
             message_limit=app_config["dialog_round"],
         )
 
-        # 11. Convert tool configuration into LangChain tools
+        # 11. Convert tool configurations in the draft config into LangChain tools
         tools = self.app_config_service.get_langchain_tools_by_tools_config(app_config["tools"])
 
-        # 12. If the app is linked with datasets
+        # 12. Check whether a knowledge base is associated
         if app_config["datasets"]:
-            # 13. Construct a LangChain retriever tool
+            # 13. Build a LangChain retrieval tool from the knowledge base
             dataset_retrieval = self.retrieval_service.create_langchain_tool_from_search(
                 flask_app=current_app._get_current_object(),
                 dataset_ids=[dataset["id"] for dataset in app_config["datasets"]],
@@ -133,47 +130,56 @@ class OpenAPIService(BaseService):
             )
             tools.append(dataset_retrieval)
 
-        # TODO: 14. Construct an intelligent agent (currently using FunctionCallAgent)
-        agent = FunctionCallAgent(
+        # 14. Choose different Agents depending on whether the LLM supports tool calls
+        agent_class = FunctionCallAgent if ModelFeature.TOOL_CALL in llm.features else ReACTAgent
+        agent = agent_class(
             llm=llm,
             agent_config=AgentConfig(
                 user_id=account.id,
                 invoke_from=InvokeFrom.DEBUGGER,
+                preset_prompt=app_config["preset_prompt"],
                 enable_long_term_memory=app_config["long_term_memory"]["enable"],
                 tools=tools,
                 review_config=app_config["review_config"],
             ),
         )
 
-        # 15. Define initial agent state
+        # 15. Define base state for the agent
         agent_state = {
             "messages": [HumanMessage(req.query.data)],
             "history": history,
             "long_term_memory": conversation.summary,
         }
 
-        # 16. Stream mode
+        # 16. Execute different logic depending on whether streaming is requested
         if req.stream.data is True:
             agent_thoughts_dict = {}
 
             def handle_stream() -> Generator:
-                """Streaming event handler. Any function using yield returns a generator."""
+                """
+                Streaming event handler.
+                In Python, any function that uses `yield` returns a generator.
+                """
                 for agent_thought in agent.stream(agent_state):
+                    # Extract thought and answer
                     event_id = str(agent_thought.id)
 
-                    # Aggregate thought and answer content for AGENT_MESSAGE events
+                    # Fill agent_thought into agent_thoughts_dict for later persistence
                     if agent_thought.event != QueueEvent.PING:
+                        # For AGENT_MESSAGE, we append/accumulate content; for others, we overwrite.
                         if agent_thought.event == QueueEvent.AGENT_MESSAGE:
                             if event_id not in agent_thoughts_dict:
+                                # Initialize agent message event
                                 agent_thoughts_dict[event_id] = agent_thought
                             else:
-                                # Append incremental thoughts & answers
+                                # Accumulate agent message content
                                 agent_thoughts_dict[event_id] = agent_thoughts_dict[event_id].model_copy(update={
                                     "thought": agent_thoughts_dict[event_id].thought + agent_thought.thought,
                                     "answer": agent_thoughts_dict[event_id].answer + agent_thought.answer,
                                     "latency": agent_thought.latency,
                                 })
                         else:
+                            # Handle other types of events
                             agent_thoughts_dict[event_id] = agent_thought
 
                     data = {
@@ -188,7 +194,7 @@ class OpenAPIService(BaseService):
                     }
                     yield f"event: {agent_thought.event}\ndata:{json.dumps(data)}\n\n"
 
-                # 22. Save thoughts to the DB in an async thread
+                # 22. Persist the message and reasoning process to the database
                 thread = Thread(
                     target=self.conversation_service.save_agent_thoughts,
                     kwargs={
@@ -205,10 +211,10 @@ class OpenAPIService(BaseService):
 
             return handle_stream()
 
-        # 17. Non-stream mode → get agent result directly
+        # 17. Non-streaming (single-block) output
         agent_result = agent.invoke(agent_state)
 
-        # 18. Save result to database in a background thread
+        # 18. Persist the message and reasoning process to the database
         thread = Thread(
             target=self.conversation_service.save_agent_thoughts,
             kwargs={

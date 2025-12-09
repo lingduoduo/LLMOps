@@ -77,7 +77,7 @@ class TestApiToolHandler:
     def test_create_api_tool_provider(self, client, db):
         data = {
             "name": "Ling Learning Toolkit",
-            "icon": "https://cdn.imooc.com/icon.png",
+            "icon": "https://cdn.test.com/icon.png",
             "openapi_schema": "{\"description\":\"Query IP location, weather forecast, route planning, etc. via Gaode toolkit\",\"server\":\"https://gaode.example.com\",\"paths\":{\"/weather\":{\"get\":{\"description\":\"Get weather forecast for a specified city, e.g., Guangzhou\",\"operationId\":\"GetCurrentWeather\",\"parameters\":[{\"name\":\"location\",\"in\":\"query\",\"description\":\"City name to query weather for\",\"required\":true,\"type\":\"str\"}]}},\"/ip\":{\"post\":{\"description\":\"Query IP location based on given IP\",\"operationId\":\"GetCurrentIp\",\"parameters\":[{\"name\":\"ip\",\"in\":\"request_body\",\"description\":\"Standard IP address to query, e.g., 201.52.14.23\",\"required\":true,\"type\":\"str\"}]}}}}",
             "headers": [{"key": "Authorization", "value": "Bearer access_token"}]
         }
@@ -92,7 +92,7 @@ class TestApiToolHandler:
         provider_id = "ed3d0910-93d9-4cfe-95a0-f29c09c02974"
         data = {
             "name": "test_update_api_tool_provider",
-            "icon": "https://cdn.imooc.com/icon.png",
+            "icon": "https://cdn.test.com/icon.png",
             "openapi_schema": "{\"description\":\"Query IP location, weather forecast, route planning, etc. via Gaode toolkit\",\"server\":\"https://gaode.example.com\",\"paths\":{\"/weather\":{\"get\":{\"description\":\"Get weather forecast for a specified city, e.g., Guangzhou\",\"operationId\":\"GetCurrentWeather\",\"parameters\":[{\"name\":\"location\",\"in\":\"query\",\"description\":\"City name to query weather for\",\"required\":true,\"type\":\"str\"}]}},\"/ip\":{\"post\":{\"description\":\"Query IP location based on given IP\",\"operationId\":\"GetLocationForIp\",\"parameters\":[{\"name\":\"ip\",\"in\":\"request_body\",\"description\":\"Standard IP address to query, e.g., 201.52.14.23\",\"required\":true,\"type\":\"str\"}]}}}}",
             "headers": [{"key": "Authorization", "value": "Bearer access_token"}]
         }
