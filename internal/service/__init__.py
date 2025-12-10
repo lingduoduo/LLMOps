@@ -5,6 +5,7 @@
 """
 from .account_service import AccountService
 from .ai_service import AIService
+from .analysis_service import AnalysisService
 from .api_key_service import ApiKeyService
 from .api_tool_service import ApiToolService
 from .app_service import AppService
@@ -62,4 +63,5 @@ __all__ = [
     "LanguageModelService",
     "AssistantAgentService",
     "FaissService",
+    "AnalysisService",
 ]
