@@ -21,9 +21,9 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableParallel
 from langchain_openai import ChatOpenAI
 from redis import Redis
-from sqlalchemy import func, desc
+from sqlalchemy import desc, func
 
-from internal.core.agent.agents import FunctionCallAgent, AgentQueueManager, ReACTAgent
+from internal.core.agent.agents import AgentQueueManager, FunctionCallAgent, ReACTAgent
 from internal.core.agent.entities.agent_entity import AgentConfig
 from internal.core.agent.entities.queue_entity import QueueEvent
 from internal.core.language_model import LanguageModelManager
@@ -31,28 +31,27 @@ from internal.core.memory import TokenBufferMemory
 from internal.core.tools.api_tools.providers import ApiProviderManager
 from internal.core.tools.builtin_tools.providers import BuiltinProviderManager
 from internal.entity.ai_entity import OPTIMIZE_PROMPT_TEMPLATE
-from internal.entity.app_entity import AppStatus, AppConfigType, DEFAULT_APP_CONFIG
-from internal.entity.app_entity import GENERATE_ICON_PROMPT_TEMPLATE
+from internal.entity.app_entity import AppConfigType, AppStatus, DEFAULT_APP_CONFIG, GENERATE_ICON_PROMPT_TEMPLATE
 from internal.entity.conversation_entity import InvokeFrom, MessageStatus
 from internal.entity.dataset_entity import RetrievalSource
-from internal.exception import NotFoundException, ForbiddenException, ValidateErrorException, FailException
-from internal.lib.helper import remove_fields, get_value_type
+from internal.exception import FailException, ForbiddenException, NotFoundException, ValidateErrorException
+from internal.lib.helper import get_value_type, remove_fields
 from internal.model import (
-    App,
     Account,
-    AppConfigVersion,
     ApiTool,
-    Dataset,
+    App,
     AppConfig,
+    AppConfigVersion,
     AppDatasetJoin,
     Conversation,
+    Dataset,
     Message,
 )
 from internal.schema.app_schema import (
     CreateAppReq,
     GetAppsWithPageReq,
-    GetPublishHistoriesWithPageReq,
     GetDebugConversationMessagesWithPageReq,
+    GetPublishHistoriesWithPageReq,
 )
 from pkg.paginator import Paginator
 from pkg.sqlalchemy import SQLAlchemy
@@ -61,7 +60,7 @@ from .base_service import BaseService
 from .conversation_service import ConversationService
 from .language_model_service import LanguageModelService
 from .retrieval_service import RetrievalService
-from ..core.language_model.entities.model_entity import ModelParameterType, ModelFeature
+from ..core.language_model.entities.model_entity import ModelFeature, ModelParameterType
 
 
 @inject
@@ -488,11 +487,11 @@ class AppService(BaseService):
         return app
 
     def debug_chat(self, app_id: UUID, query: str, account: Account) -> Generator:
-        """Start a debug chat with a given app using the provided query."""
-        # 1. Validate app permissions
+        """Send a debug query to the specified app and stream back agent events."""
+        # 1. Get app and verify permissions
         app = self.get_app(app_id, account)
 
-        # 2. Get the latest draft config for this app
+        # 2. Get the latest draft config for the app
         draft_app_config = self.get_draft_app_config(app_id, account)
 
         # 3. Get the app's debug conversation
@@ -509,7 +508,7 @@ class AppService(BaseService):
             status=MessageStatus.NORMAL,
         )
 
-        # 5. Load LLM from language model service based on draft model config
+        # 5. Load the LLM from the language model manager
         llm = self.language_model_service.load_language_model(draft_app_config.get("model_config", {}))
 
         # 6. Instantiate TokenBufferMemory to extract short-term memory
@@ -522,12 +521,12 @@ class AppService(BaseService):
             message_limit=draft_app_config["dialog_round"],
         )
 
-        # 7. Convert tools from draft config into LangChain tools
+        # 7. Convert tools in the draft config into LangChain tools
         tools = self.app_config_service.get_langchain_tools_by_tools_config(draft_app_config["tools"])
 
-        # 8. Check whether a dataset (knowledge base) is configured
+        # 8. Check whether any datasets are associated
         if draft_app_config["datasets"]:
-            # 9. Build a LangChain retrieval tool
+            # 9. Build a LangChain retrieval tool for datasets
             dataset_retrieval = self.retrieval_service.create_langchain_tool_from_search(
                 flask_app=current_app._get_current_object(),
                 dataset_ids=[dataset["id"] for dataset in draft_app_config["datasets"]],
@@ -537,7 +536,7 @@ class AppService(BaseService):
             )
             tools.append(dataset_retrieval)
 
-        # 10. Decide which Agent implementation to use based on tool_call support
+        # 10. Choose agent class based on whether the LLM supports tool_call
         agent_class = FunctionCallAgent if ModelFeature.TOOL_CALL in llm.features else ReACTAgent
         agent = agent_class(
             llm=llm,
@@ -552,35 +551,62 @@ class AppService(BaseService):
         )
 
         agent_thoughts = {}
-        for agent_thought in agent.stream({
-            "messages": [HumanMessage(query)],
-            "history": history,
-            "long_term_memory": debug_conversation.summary,
-        }):
+        for agent_thought in agent.stream(
+                {
+                    "messages": [HumanMessage(query)],
+                    "history": history,
+                    "long_term_memory": debug_conversation.summary,
+                }
+        ):
             # 11. Extract thought and answer
             event_id = str(agent_thought.id)
 
-            # 12. Store agent_thought for persistence
+            # 12. Fill agent_thought data, ready to persist into DB later
             if agent_thought.event != QueueEvent.PING:
-                # 13. Only AGENT_MESSAGE events are accumulated; others overwrite
+                # 13. For AGENT_MESSAGE events, we accumulate content; others overwrite
                 if agent_thought.event == QueueEvent.AGENT_MESSAGE:
                     if event_id not in agent_thoughts:
                         # 14. Initialize agent message event
                         agent_thoughts[event_id] = agent_thought
                     else:
-                        # 15. Accumulate agent message
-                        agent_thoughts[event_id] = agent_thoughts[event_id].model_copy(update={
-                            "thought": agent_thoughts[event_id].thought + agent_thought.thought,
-                            "answer": agent_thoughts[event_id].answer + agent_thought.answer,
-                            "latency": agent_thought.latency,
-                        })
+                        # 15. Accumulate incremental content for agent message
+                        agent_thoughts[event_id] = agent_thoughts[event_id].model_copy(
+                            update={
+                                "thought": agent_thoughts[event_id].thought + agent_thought.thought,
+                                # Message-related data
+                                "message": agent_thought.message,
+                                "message_token_count": agent_thought.message_token_count,
+                                "message_unit_price": agent_thought.message_unit_price,
+                                "message_price_unit": agent_thought.message_price_unit,
+                                # Answer-related data
+                                "answer": agent_thoughts[event_id].answer + agent_thought.answer,
+                                "answer_token_count": agent_thought.answer_token_count,
+                                "answer_unit_price": agent_thought.answer_unit_price,
+                                "answer_price_unit": agent_thought.answer_price_unit,
+                                # Agent stats
+                                "total_token_count": agent_thought.total_token_count,
+                                "total_price": agent_thought.total_price,
+                                "latency": agent_thought.latency,
+                            }
+                        )
                 else:
-                    # 16. Handle other event types
+                    # 16. Handle other event types by direct overwrite
                     agent_thoughts[event_id] = agent_thought
+
             data = {
-                **agent_thought.model_dump(include={
-                    "event", "thought", "observation", "tool", "tool_input", "answer", "latency",
-                }),
+                **agent_thought.model_dump(
+                    include={
+                        "event",
+                        "thought",
+                        "observation",
+                        "tool",
+                        "tool_input",
+                        "answer",
+                        "total_token_count",
+                        "total_price",
+                        "latency",
+                    }
+                ),
                 "id": event_id,
                 "conversation_id": str(debug_conversation.id),
                 "message_id": str(message.id),
@@ -588,7 +614,7 @@ class AppService(BaseService):
             }
             yield f"event: {agent_thought.event}\ndata:{json.dumps(data)}\n\n"
 
-        # 22. Save message and reasoning process to DB
+        # 22. Persist the message and reasoning trace into the database in a separate thread
         thread = Thread(
             target=self.conversation_service.save_agent_thoughts,
             kwargs={
@@ -599,7 +625,7 @@ class AppService(BaseService):
                 "conversation_id": debug_conversation.id,
                 "message_id": message.id,
                 "agent_thoughts": [agent_thought for agent_thought in agent_thoughts.values()],
-            }
+            },
         )
         thread.start()
 

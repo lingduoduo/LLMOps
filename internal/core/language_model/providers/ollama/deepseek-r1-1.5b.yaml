@@ -2,7 +2,7 @@ model: deepseek-r1-1.5b
 label: Deep Seek R1
 model_type: chat
 features:
-  #  - tool_call
+  - tool_call
   - agent_thought
 context_window: 32768
 max_output_tokens: 4096
@@ -19,3 +19,9 @@ parameters:
     use_template: max_tokens
     default: 2048
     max: 4096
+metadata:
+  pricing:
+    input: 0.0025
+    output: 0.0100
+    unit: 0.001
+    currency: USD
