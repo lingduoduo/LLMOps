@@ -15,7 +15,8 @@ from langchain_core.tools import render_text_description_and_args
 from internal.core.agent.entities.agent_entity import (
     AgentState,
     AGENT_SYSTEM_PROMPT_TEMPLATE,
-    REACT_AGENT_SYSTEM_PROMPT_TEMPLATE, MAX_ITERATION_RESPONSE,
+    REACT_AGENT_SYSTEM_PROMPT_TEMPLATE,
+    MAX_ITERATION_RESPONSE,
 )
 from internal.core.agent.entities.queue_entity import QueueEvent, AgentThought
 from internal.core.language_model.entities.model_entity import ModelFeature
@@ -24,26 +25,20 @@ from .function_call_agent import FunctionCallAgent
 
 
 class ReACTAgent(FunctionCallAgent):
-    """
-    ReACT-based reasoning agent.
-
-    Inherits from FunctionCallAgent and overrides the long_term_memory_node and
-    llm_node to implement ReACT-style reasoning when the LLM does not support native tool calls.
+    """Agent based on ReACT-style reasoning, inheriting from FunctionCallAgent and
+    overriding the long_term_memory_node and llm_node nodes.
     """
 
     def _long_term_memory_recall_node(self, state: AgentState) -> AgentState:
+        """Override long-term memory recall node; use prompts to simulate tool calls
+        and enforce structured output.
         """
-        Override: long-term memory recall node.
-
-        If the model supports tool calls, delegate to the parent implementation.
-        Otherwise, use prompt engineering (with or without tool description) to
-        recall long-term memory and construct the final message list.
-        """
-        # 1. If LLM supports tool_call, directly use the FunctionCallAgent's implementation
+        # 1. Check whether tool calling is supported; if so, reuse the
+        #    long-term memory recall node from the function-call agent.
         if ModelFeature.TOOL_CALL in self.llm.features:
             return super()._long_term_memory_recall_node(state)
 
-        # 2. Decide whether to recall long-term memory according to agent_config
+        # 2. Determine whether we need to recall long-term memory based on agent config
         long_term_memory = ""
         if self.agent_config.enable_long_term_memory:
             long_term_memory = state["long_term_memory"]
@@ -57,7 +52,7 @@ class ReACTAgent(FunctionCallAgent):
                 ),
             )
 
-        # 3. If AGENT_THOUGHT is not supported, use a prompt without tool descriptions
+        # 3. If AGENT_THOUGHT is not supported, use the basic prompt without tool descriptions
         if ModelFeature.AGENT_THOUGHT not in self.llm.features:
             preset_messages = [
                 SystemMessage(
@@ -68,7 +63,8 @@ class ReACTAgent(FunctionCallAgent):
                 )
             ]
         else:
-            # 4. If agent reasoning is supported, use REACT_AGENT_SYSTEM_PROMPT_TEMPLATE and include tool descriptions
+            # 4. If reasoning is supported, use REACT_AGENT_SYSTEM_PROMPT_TEMPLATE
+            #    and include tool descriptions
             preset_messages = [
                 SystemMessage(
                     REACT_AGENT_SYSTEM_PROMPT_TEMPLATE.format(
@@ -79,43 +75,40 @@ class ReACTAgent(FunctionCallAgent):
                 )
             ]
 
-        # 5. Append short-term history messages
+        # 5. Append short-term history to the message list
         history = state["history"]
         if isinstance(history, list) and len(history) > 0:
-            # 6. Ensure history is in pairs: [Human, AI, Human, AI, ...]
+            # 6. Validate that the history is in alternating format:
+            #    [human, ai, human, ai, ...]
             if len(history) % 2 != 0:
-                error_msg = "Agent history message list format is invalid."
-                self.agent_queue_manager.publish_error(state["task_id"], error_msg)
-                logging.exception(
-                    f"{error_msg}, len(history)={len(history)}, history={json.dumps(messages_to_dict(history))}"
+                self.agent_queue_manager.publish_error(
+                    state["task_id"], "Invalid agent message history format"
                 )
-                raise FailException(error_msg)
-
-            # 7. Extend preset_messages with history
+                logging.exception(
+                    f"Invalid agent message history format, "
+                    f"len(history)={len(history)}, "
+                    f"history={json.dumps(messages_to_dict(history))}"
+                )
+                raise FailException("Invalid agent message history format")
+            # 7. Append history to preset messages
             preset_messages.extend(history)
 
-        # 8. Append the current user message
+        # 8. Append the current user query
         human_message = state["messages"][-1]
         preset_messages.append(HumanMessage(human_message.content))
 
-        # 9. Replace the original user message with the composed preset + history + user messages
+        # 9. Replace the original user message with the constructed preset messages
         return {
             "messages": [RemoveMessage(id=human_message.id), *preset_messages],
         }
 
     def _llm_node(self, state: AgentState) -> AgentState:
-        """
-        Override: LLM node for the tool-calling agent.
-
-        If the model supports tool_call, use the parent implementation.
-        Otherwise, use streaming text to detect whether the model is emitting
-        ReACT-style JSON thoughts or direct messages.
-        """
-        # 1. If LLM supports tool_call, delegate to FunctionCallAgent
+        """Override LLM node for an agent that simulates tool calls via ReACT."""
+        # 1. If the current LLM supports tool_call, delegate to FunctionCallAgent._llm_node
         if ModelFeature.TOOL_CALL in self.llm.features:
             return super()._llm_node(state)
 
-        # 2. Check whether current agent iteration count exceeds limit
+        # 2. Check whether the current iteration count exceeds the configured maximum
         if state["iteration_count"] > self.agent_config.max_iteration_count:
             self.agent_queue_manager.publish(
                 state["task_id"],
@@ -139,28 +132,29 @@ class ReACTAgent(FunctionCallAgent):
             )
             return {"messages": [AIMessage(MAX_ITERATION_RESPONSE)]}
 
-        # 3. Extract LLM instance from agent config
+        # 3. Get the LLM from agent config
         id = uuid.uuid4()
         start_at = time.perf_counter()
         llm = self.llm
 
-        # 4. Variables to store streaming content
+        # 4. Variables to store streamed output
         gathered = None
         is_first_chunk = True
-        generation_type = ""  # "message" or "thought"
+        generation_type = ""
 
-        # 5. Stream from the LLM and decide whether it's JSON (tool call) or plain text
+        # 5. Stream from the LLM and detect whether the output starts with ```json
+        #    to distinguish between tool calls and plain text.
         for chunk in llm.stream(state["messages"]):
-            # 6. Accumulate streaming chunks
+            # 6. Accumulate streamed chunks
             if is_first_chunk:
                 gathered = chunk
                 is_first_chunk = False
             else:
                 gathered += chunk
 
-            # 7. If we've already decided it's a message, publish streaming events
+            # 7. If generation type is plain message, publish agent message events
             if generation_type == "message":
-                # 8. Extract chunk content and perform output moderation if needed
+                # 8. Extract chunk content and apply output review if enabled
                 review_config = self.agent_config.review_config
                 content = chunk.content
                 if review_config["enable"] and review_config["outputs_config"]["enable"]:
@@ -180,15 +174,17 @@ class ReACTAgent(FunctionCallAgent):
                     ),
                 )
 
-            # 9. If we still haven't determined the generation type, infer it from the accumulated content
+            # 9. If generation type is not yet determined, figure out whether this
+            #    is a tool call or a plain message
             if not generation_type:
-                # 10. Only infer the type if length is at least 7 (length of "```json")
+                # 10. Only determine type when the content length is at least 7,
+                #     which is the length of "```json"
                 if len(gathered.content.strip()) >= 7:
                     if gathered.content.strip().startswith("```json"):
                         generation_type = "thought"
                     else:
                         generation_type = "message"
-                        # 11. Publish an event including the initial part of the message
+                        # 11. Publish an event immediately so no initial characters are lost
                         self.agent_queue_manager.publish(
                             state["task_id"],
                             AgentThought(
@@ -202,27 +198,52 @@ class ReACTAgent(FunctionCallAgent):
                             ),
                         )
 
-        # 12. If generation_type is "thought", parse JSON and add an agent thought message
+        # 8. Compute total input + output token counts
+        input_token_count = self.llm.get_num_tokens_from_messages(state["messages"])
+        output_token_count = self.llm.get_num_tokens_from_messages([gathered])
+
+        # 9. Get input/output prices and pricing unit
+        input_price, output_price, unit = self.llm.get_pricing()
+
+        # 10. Compute total tokens and total cost
+        total_token_count = input_token_count + output_token_count
+        total_price = (input_token_count * input_price + output_token_count * output_price) * unit
+
+        # 12. If the type is "thought", parse the JSON and construct a tool-call message
         if generation_type == "thought":
             try:
-                # 13. Use regex to extract JSON; if parsing fails, treat it as a normal message
+                # 13. Parse the JSON content via regex; if it fails, treat as normal text
                 pattern = r"^```json(.*?)```$"
                 matches = re.findall(pattern, gathered.content, re.DOTALL)
                 match_json = json.loads(matches[0])
-                tool_calls = [{
-                    "id": str(uuid.uuid4()),
-                    "type": "tool_call",
-                    "name": match_json.get("name", ""),
-                    "args": match_json.get("args", {}),
-                }]
+                tool_calls = [
+                    {
+                        "id": str(uuid.uuid4()),
+                        "type": "tool_call",
+                        "name": match_json.get("name", ""),
+                        "args": match_json.get("args", {}),
+                    }
+                ]
                 self.agent_queue_manager.publish(
                     state["task_id"],
                     AgentThought(
                         id=id,
                         task_id=state["task_id"],
                         event=QueueEvent.AGENT_THOUGHT,
-                        thought=json.dumps(tool_calls),
+                        thought=json.dumps(gathered.tool_calls),
+                        # Message-related fields
                         message=messages_to_dict(state["messages"]),
+                        message_token_count=input_token_count,
+                        message_unit_price=input_price,
+                        message_price_unit=unit,
+                        # Answer-related fields
+                        answer="",
+                        answer_token_count=output_token_count,
+                        answer_unit_price=output_price,
+                        answer_price_unit=unit,
+                        # Agent reasoning statistics
+                        total_token_count=total_token_count,
+                        total_price=total_price,
                         latency=(time.perf_counter() - start_at),
                     ),
                 )
@@ -230,7 +251,7 @@ class ReACTAgent(FunctionCallAgent):
                     "messages": [AIMessage(content="", tool_calls=tool_calls)],
                     "iteration_count": state["iteration_count"] + 1,
                 }
-            except Exception as _:
+            except Exception:
                 generation_type = "message"
                 self.agent_queue_manager.publish(
                     state["task_id"],
@@ -245,8 +266,32 @@ class ReACTAgent(FunctionCallAgent):
                     ),
                 )
 
-        # 14. If the final type is "message", we treat it as the final answer and stop
+        # 14. If the final type is "message", we already have the final answer.
+        #     Publish an empty message to record token/cost stats and end the agent.
         if generation_type == "message":
+            self.agent_queue_manager.publish(
+                state["task_id"],
+                AgentThought(
+                    id=id,
+                    task_id=state["task_id"],
+                    event=QueueEvent.AGENT_MESSAGE,
+                    thought="",
+                    # Message-related fields
+                    message=messages_to_dict(state["messages"]),
+                    message_token_count=input_token_count,
+                    message_unit_price=input_price,
+                    message_price_unit=unit,
+                    # Answer-related fields
+                    answer="",
+                    answer_token_count=output_token_count,
+                    answer_unit_price=output_price,
+                    answer_price_unit=unit,
+                    # Agent reasoning statistics
+                    total_token_count=total_token_count,
+                    total_price=total_price,
+                    latency=(time.perf_counter() - start_at),
+                ),
+            )
             self.agent_queue_manager.publish(
                 state["task_id"],
                 AgentThought(

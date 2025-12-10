@@ -21,3 +21,9 @@ parameters:
   - name: max_tokens
     use_template: max_tokens
     default: 4096
+metadata:
+  pricing:
+    input: 0.00015   # USD per 1K input tokens
+    output: 0.00060  # USD per 1K output tokens
+    unit: 0.001
+    currency: USD

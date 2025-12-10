@@ -32,39 +32,37 @@ class FunctionCallAgent(BaseAgent):
     """Agent that supports function/tool calls."""
 
     def _build_agent(self) -> CompiledStateGraph:
-        """Build the LangGraph state graph."""
-        # 1. Create graph
+        """Build and compile the LangGraph state machine."""
+        # 1. Create the graph
         graph = StateGraph(AgentState)
 
-        # 2. Add nodes
+        # 2. Add graph nodes
         graph.add_node("preset_operation", self._preset_operation_node)
         graph.add_node("long_term_memory_recall", self._long_term_memory_recall_node)
         graph.add_node("llm", self._llm_node)
         graph.add_node("tools", self._tools_node)
 
-        # 3. Add edges and set entry/exit
+        # 3. Configure edges and entry/exit flow
         graph.set_entry_point("preset_operation")
         graph.add_conditional_edges("preset_operation", self._preset_operation_condition)
         graph.add_edge("long_term_memory_recall", "llm")
         graph.add_conditional_edges("llm", self._tools_condition)
         graph.add_edge("tools", "llm")
 
-        # 4. Compile and return the agent graph
-        agent = graph.compile()
-
-        return agent
+        # 4. Compile graph
+        return graph.compile()
 
     def _preset_operation_node(self, state: AgentState) -> AgentState:
-        """Preset operations such as input auditing, preprocessing, and conditional routing."""
-        # 1. Get review config and user query
+        """Preset operations: input review, preprocessing, and conditional routing."""
+        # 1. Read review configuration and user query
         review_config = self.agent_config.review_config
         query = state["messages"][-1].content
 
-        # 2. Input auditing
+        # 2. Check if input review is enabled
         if review_config["enable"] and review_config["inputs_config"]["enable"]:
             contains_keyword = any(keyword in query for keyword in review_config["keywords"])
 
-            # 3. If query contains sensitive keywords, send preset response
+            # 3. If sensitive keywords detected, return preset response
             if contains_keyword:
                 preset_response = review_config["inputs_config"]["preset_response"]
 
@@ -78,11 +76,15 @@ class FunctionCallAgent(BaseAgent):
                         message=messages_to_dict(state["messages"]),
                         answer=preset_response,
                         latency=0,
-                    )
+                    ),
                 )
                 self.agent_queue_manager.publish(
                     state["task_id"],
-                    AgentThought(id=uuid.uuid4(), task_id=state["task_id"], event=QueueEvent.AGENT_END)
+                    AgentThought(
+                        id=uuid.uuid4(),
+                        task_id=state["task_id"],
+                        event=QueueEvent.AGENT_END,
+                    ),
                 )
 
                 return {"messages": [AIMessage(preset_response)]}
@@ -90,8 +92,8 @@ class FunctionCallAgent(BaseAgent):
         return {"messages": []}
 
     def _long_term_memory_recall_node(self, state: AgentState) -> AgentState:
-        """Recall long-term memory if enabled, and prepare the prompt."""
-        # 1. Determine if long-term memory recall is needed
+        """Node for recalling long-term memory."""
+        # 1. Determine whether long-term memory recall is required
         long_term_memory = ""
         if self.agent_config.enable_long_term_memory:
             long_term_memory = state["long_term_memory"]
@@ -103,10 +105,10 @@ class FunctionCallAgent(BaseAgent):
                     task_id=state["task_id"],
                     event=QueueEvent.LONG_TERM_MEMORY_RECALL,
                     observation=long_term_memory,
-                )
+                ),
             )
 
-        # 2. Build preset system message
+        # 2. Build the system prompt with preset prompt + long-term memory
         preset_messages = [
             SystemMessage(
                 AGENT_SYSTEM_PROMPT_TEMPLATE.format(
@@ -116,32 +118,32 @@ class FunctionCallAgent(BaseAgent):
             )
         ]
 
-        # 3. Append short-term conversation history
+        # 3. Append short-term dialogue history
         history = state["history"]
         if isinstance(history, list) and len(history) > 0:
-            # 4. Validate alternating history: [human, ai, human, ai, ...]
+            # 4. Validate alternating history format: [human, ai, human, ai, ...]
             if len(history) % 2 != 0:
-                self.agent_queue_manager.publish_error(state["task_id"], "Invalid message history format")
-                logging.exception(
-                    f"Invalid agent message history, len(history)={len(history)}, history={json.dumps(messages_to_dict(history))}"
+                self.agent_queue_manager.publish_error(
+                    state["task_id"], "Invalid agent message history format"
                 )
-                raise FailException("Invalid agent message history")
+                logging.exception(
+                    f"Invalid message history, len(history)={len(history)}, history={json.dumps(messages_to_dict(history))}"
+                )
+                raise FailException("Invalid agent message history format")
 
             # 5. Append history
             preset_messages.extend(history)
 
-        # 6. Append user query
+        # 6. Append the current user message
         human_message = state["messages"][-1]
         preset_messages.append(HumanMessage(human_message.content))
 
-        # 7. Replace original user message with preset prompt + history
-        return {
-            "messages": [RemoveMessage(id=human_message.id), *preset_messages],
-        }
+        # 7. Remove the original user message and replace with updated prompt sequence
+        return {"messages": [RemoveMessage(id=human_message.id), *preset_messages]}
 
     def _llm_node(self, state: AgentState) -> AgentState:
-        """LLM node: generate messages or function calls."""
-        # 1. Enforce max iteration limit
+        """Node that performs LLM generation."""
+        # 1. Check if iteration exceeds limit
         if state["iteration_count"] > self.agent_config.max_iteration_count:
             self.agent_queue_manager.publish(
                 state["task_id"],
@@ -153,24 +155,24 @@ class FunctionCallAgent(BaseAgent):
                     message=messages_to_dict(state["messages"]),
                     answer=MAX_ITERATION_RESPONSE,
                     latency=0,
-                )
+                ),
             )
             self.agent_queue_manager.publish(
                 state["task_id"],
-                AgentThought(id=uuid.uuid4(), task_id=state["task_id"], event=QueueEvent.AGENT_END)
+                AgentThought(id=uuid.uuid4(), task_id=state["task_id"], event=QueueEvent.AGENT_END),
             )
             return {"messages": [AIMessage(MAX_ITERATION_RESPONSE)]}
 
-        # 2. Prepare LLM instance
+        # 2. Prepare LLM
         id = uuid.uuid4()
         start_at = time.perf_counter()
         llm = self.llm
 
-        # 3. Bind tools if the model supports function calls
+        # 3. Bind tools if supported and available
         if (
                 ModelFeature.TOOL_CALL in llm.features
                 and hasattr(llm, "bind_tools")
-                and callable(llm.bind_tools)
+                and callable(getattr(llm, "bind_tools"))
                 and len(self.agent_config.tools) > 0
         ):
             llm = llm.bind_tools(self.agent_config.tools)
@@ -182,26 +184,25 @@ class FunctionCallAgent(BaseAgent):
 
         try:
             for chunk in llm.stream(state["messages"]):
-                # gather streamed chunks
                 if is_first_chunk:
                     gathered = chunk
                     is_first_chunk = False
                 else:
                     gathered += chunk
 
-                # determine output type (message vs tool call)
+                # Determine generation type (tool call vs message text)
                 if not generation_type:
                     if chunk.tool_calls:
                         generation_type = "thought"
                     elif chunk.content:
                         generation_type = "message"
 
-                # If LLM is generating a message, publish incremental output
+                # If message text is being generated, publish agent message events
                 if generation_type == "message":
                     review_config = self.agent_config.review_config
                     content = chunk.content
 
-                    # simple output filtering
+                    # Output review filter
                     if review_config["enable"] and review_config["outputs_config"]["enable"]:
                         for keyword in review_config["keywords"]:
                             content = re.sub(re.escape(keyword), "**", content, flags=re.IGNORECASE)
@@ -216,7 +217,7 @@ class FunctionCallAgent(BaseAgent):
                             message=messages_to_dict(state["messages"]),
                             answer=content,
                             latency=(time.perf_counter() - start_at),
-                        )
+                        ),
                     )
 
         except Exception as e:
@@ -224,7 +225,18 @@ class FunctionCallAgent(BaseAgent):
             self.agent_queue_manager.publish_error(state["task_id"], f"LLM node error: {str(e)}")
             raise e
 
-        # 6. Publish tool-call thoughts
+        # 8. Compute LLM input/output token counts
+        input_token_count = self.llm.get_num_tokens_from_messages(state["messages"])
+        output_token_count = self.llm.get_num_tokens_from_messages([gathered])
+
+        # 9. Retrieve pricing info (input_price, output_price, unit)
+        input_price, output_price, unit = self.llm.get_pricing()
+
+        # 10. Compute total tokens and total cost
+        total_token_count = input_token_count + output_token_count
+        total_price = (input_token_count * input_price + output_token_count * output_price) * unit
+
+        # 11. Publish agent-thought / final-message events with pricing metadata
         if generation_type == "thought":
             self.agent_queue_manager.publish(
                 state["task_id"],
@@ -234,28 +246,57 @@ class FunctionCallAgent(BaseAgent):
                     event=QueueEvent.AGENT_THOUGHT,
                     thought=json.dumps(gathered.tool_calls),
                     message=messages_to_dict(state["messages"]),
+                    message_token_count=input_token_count,
+                    message_unit_price=input_price,
+                    message_price_unit=unit,
+                    answer="",
+                    answer_token_count=output_token_count,
+                    answer_unit_price=output_price,
+                    answer_price_unit=unit,
+                    total_token_count=total_token_count,
+                    total_price=total_price,
                     latency=(time.perf_counter() - start_at),
-                )
+                ),
             )
 
-        # If final answer is generated without tool calls — end the agent
         elif generation_type == "message":
+            # Emit a final message event (empty content), used to record token/cost metadata
             self.agent_queue_manager.publish(
                 state["task_id"],
-                AgentThought(id=uuid.uuid4(), task_id=state["task_id"], event=QueueEvent.AGENT_END)
+                AgentThought(
+                    id=id,
+                    task_id=state["task_id"],
+                    event=QueueEvent.AGENT_MESSAGE,
+                    thought="",
+                    message=messages_to_dict(state["messages"]),
+                    message_token_count=input_token_count,
+                    message_unit_price=input_price,
+                    message_price_unit=unit,
+                    answer="",
+                    answer_token_count=output_token_count,
+                    answer_unit_price=output_price,
+                    answer_price_unit=unit,
+                    total_token_count=total_token_count,
+                    total_price=total_price,
+                    latency=(time.perf_counter() - start_at),
+                ),
+            )
+            self.agent_queue_manager.publish(
+                state["task_id"],
+                AgentThought(id=uuid.uuid4(), task_id=state["task_id"], event=QueueEvent.AGENT_END),
             )
 
         return {"messages": [gathered], "iteration_count": state["iteration_count"] + 1}
 
     def _tools_node(self, state: AgentState) -> AgentState:
-        """Tool execution node."""
-        # 1. Map tools by name
+        """Tool-execution node."""
+        # 1. Convert tool list to dictionary for quick lookup
         tools_by_name = {tool.name: tool for tool in self.agent_config.tools}
 
-        # 2. Extract tool call parameters
+        # 2. Extract tool call arguments from AI message
         tool_calls = state["messages"][-1].tool_calls
 
-        # 3. Execute tools and build responses
+        # 3. Execute tools
         messages = []
         for tool_call in tool_calls:
             id = uuid.uuid4()
@@ -267,7 +308,7 @@ class FunctionCallAgent(BaseAgent):
             except Exception as e:
                 tool_result = f"Tool execution error: {str(e)}"
 
-            # create tool message
+            # Append tool result message
             messages.append(
                 ToolMessage(
                     tool_call_id=tool_call["id"],
@@ -276,13 +317,14 @@ class FunctionCallAgent(BaseAgent):
                 )
             )
 
-            # determine event type
+            # Determine event type (agent action vs dataset retrieval)
             event = (
                 QueueEvent.AGENT_ACTION
                 if tool_call["name"] != DATASET_RETRIEVAL_TOOL_NAME
                 else QueueEvent.DATASET_RETRIEVAL
             )
 
+            # Publish tool execution event
             self.agent_queue_manager.publish(
                 state["task_id"],
                 AgentThought(
@@ -293,16 +335,17 @@ class FunctionCallAgent(BaseAgent):
                     tool=tool_call["name"],
                     tool_input=tool_call["args"],
                     latency=(time.perf_counter() - start_at),
-                )
+                ),
             )
 
         return {"messages": messages}
 
     @classmethod
     def _tools_condition(cls, state: AgentState) -> Literal["tools", "__end__"]:
-        """Determine whether to enter the tools node or end."""
+        """Determine whether to execute the tools node or end."""
         ai_message = state["messages"][-1]
 
+        # If tool calls exist, go to tools node
         if hasattr(ai_message, "tool_calls") and len(ai_message.tool_calls) > 0:
             return "tools"
 
@@ -310,10 +353,10 @@ class FunctionCallAgent(BaseAgent):
 
     @classmethod
     def _preset_operation_condition(cls, state: AgentState) -> Literal["long_term_memory_recall", "__end__"]:
-        """Determine whether the preset step triggered a response."""
+        """Condition edge for determining whether preset response was triggered."""
         message = state["messages"][-1]
 
-        # If message is AI type, auditing triggered → end
+        # If message is AI type, preset response was triggered → end
         if message.type == "ai":
             return END
 
