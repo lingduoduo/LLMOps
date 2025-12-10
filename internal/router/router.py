@@ -26,13 +26,14 @@ from internal.handler import (
     WorkflowHandler,
     LanguageModelHandler,
     AssistantAgentHandler,
+    AnalysisHandler,
 )
 
 
 @inject
 @dataclass
 class Router:
-    """Router"""
+    """Routing configuration"""
     app_handler: AppHandler
     builtin_tool_handler: BuiltinToolHandler
     api_tool_handler: ApiToolHandler
@@ -50,14 +51,17 @@ class Router:
     workflow_handler: WorkflowHandler
     language_model_handler: LanguageModelHandler
     assistant_agent_handler: AssistantAgentHandler
+    analysis_handler: AnalysisHandler
 
     def register_router(self, app: Flask):
-        """Register routes"""
+        """Register all routes"""
         # 1. Create blueprints
         bp = Blueprint("llmops", __name__, url_prefix="")
         openapi_bp = Blueprint("openapi", __name__, url_prefix="")
 
-        # 2. Bind URLs to controller methods
+        # ---------------------------
+        # 2. Application management
+        # ---------------------------
         bp.add_url_rule("/ping", view_func=self.app_handler.ping)
         bp.add_url_rule("/apps", view_func=self.app_handler.get_apps_with_page)
         bp.add_url_rule("/apps", methods=["POST"], view_func=self.app_handler.create_app)
@@ -65,22 +69,18 @@ class Router:
         bp.add_url_rule("/apps/<uuid:app_id>", methods=["POST"], view_func=self.app_handler.update_app)
         bp.add_url_rule("/apps/<uuid:app_id>/delete", methods=["POST"], view_func=self.app_handler.delete_app)
         bp.add_url_rule("/apps/<uuid:app_id>/copy", methods=["POST"], view_func=self.app_handler.copy_app)
+
         bp.add_url_rule("/apps/<uuid:app_id>/draft-app-config", view_func=self.app_handler.get_draft_app_config)
         bp.add_url_rule(
             "/apps/<uuid:app_id>/draft-app-config",
             methods=["POST"],
             view_func=self.app_handler.update_draft_app_config,
         )
-        bp.add_url_rule(
-            "/apps/<uuid:app_id>/publish",
-            methods=["POST"],
-            view_func=self.app_handler.publish,
-        )
-        bp.add_url_rule(
-            "/apps/<uuid:app_id>/cancel-publish",
-            methods=["POST"],
-            view_func=self.app_handler.cancel_publish,
-        )
+
+        bp.add_url_rule("/apps/<uuid:app_id>/publish", methods=["POST"], view_func=self.app_handler.publish)
+        bp.add_url_rule("/apps/<uuid:app_id>/cancel-publish", methods=["POST"],
+                        view_func=self.app_handler.cancel_publish)
+
         bp.add_url_rule(
             "/apps/<uuid:app_id>/publish-histories",
             view_func=self.app_handler.get_publish_histories_with_page,
@@ -90,25 +90,19 @@ class Router:
             methods=["POST"],
             view_func=self.app_handler.fallback_history_to_draft,
         )
-        bp.add_url_rule(
-            "/apps/<uuid:app_id>/summary",
-            view_func=self.app_handler.get_debug_conversation_summary,
-        )
-        bp.add_url_rule(
-            "/apps/<uuid:app_id>/summary",
-            methods=["POST"],
-            view_func=self.app_handler.update_debug_conversation_summary,
-        )
+
+        # Debug conversation summary
+        bp.add_url_rule("/apps/<uuid:app_id>/summary", view_func=self.app_handler.get_debug_conversation_summary)
+        bp.add_url_rule("/apps/<uuid:app_id>/summary", methods=["POST"],
+                        view_func=self.app_handler.update_debug_conversation_summary)
         bp.add_url_rule(
             "/apps/<uuid:app_id>/conversations/delete-debug-conversation",
             methods=["POST"],
             view_func=self.app_handler.delete_debug_conversation,
         )
-        bp.add_url_rule(
-            "/apps/<uuid:app_id>/conversations",
-            methods=["POST"],
-            view_func=self.app_handler.debug_chat,
-        )
+
+        # Debug chat
+        bp.add_url_rule("/apps/<uuid:app_id>/conversations", methods=["POST"], view_func=self.app_handler.debug_chat)
         bp.add_url_rule(
             "/apps/<uuid:app_id>/conversations/tasks/<uuid:task_id>/stop",
             methods=["POST"],
@@ -119,7 +113,9 @@ class Router:
             view_func=self.app_handler.get_debug_conversation_messages_with_page,
         )
 
-        # 3. Built-in tools marketplace module
+        # ---------------------------
+        # 3. Built-in tool marketplace
+        # ---------------------------
         bp.add_url_rule("/builtin-tools", view_func=self.builtin_tool_handler.get_builtin_tools)
         bp.add_url_rule(
             "/builtin-tools/<string:provider_name>/tools/<string:tool_name>",
@@ -129,30 +125,19 @@ class Router:
             "/builtin-tools/<string:provider_name>/icon",
             view_func=self.builtin_tool_handler.get_provider_icon,
         )
-        bp.add_url_rule(
-            "/builtin-tools/categories",
-            view_func=self.builtin_tool_handler.get_categories,
-        )
+        bp.add_url_rule("/builtin-tools/categories", view_func=self.builtin_tool_handler.get_categories)
 
-        # 4. Custom API tool module
-        bp.add_url_rule(
-            "/api-tools",
-            view_func=self.api_tool_handler.get_api_tool_providers_with_page,
-        )
+        # ---------------------------
+        # 4. Custom API tools
+        # ---------------------------
+        bp.add_url_rule("/api-tools", view_func=self.api_tool_handler.get_api_tool_providers_with_page)
         bp.add_url_rule(
             "/api-tools/validate-openapi-schema",
             methods=["POST"],
             view_func=self.api_tool_handler.validate_openapi_schema,
         )
-        bp.add_url_rule(
-            "/api-tools",
-            methods=["POST"],
-            view_func=self.api_tool_handler.create_api_tool_provider,
-        )
-        bp.add_url_rule(
-            "/api-tools/<uuid:provider_id>",
-            view_func=self.api_tool_handler.get_api_tool_provider,
-        )
+        bp.add_url_rule("/api-tools", methods=["POST"], view_func=self.api_tool_handler.create_api_tool_provider)
+        bp.add_url_rule("/api-tools/<uuid:provider_id>", view_func=self.api_tool_handler.get_api_tool_provider)
         bp.add_url_rule(
             "/api-tools/<uuid:provider_id>",
             methods=["POST"],
@@ -168,30 +153,30 @@ class Router:
             view_func=self.api_tool_handler.delete_api_tool_provider,
         )
 
-        # 4. File upload module
+        # ---------------------------
+        # 5. File upload
+        # ---------------------------
         bp.add_url_rule("/upload-files/file", methods=["POST"], view_func=self.upload_file_handler.upload_file)
         bp.add_url_rule("/upload-files/image", methods=["POST"], view_func=self.upload_file_handler.upload_image)
 
-        # 5. Knowledge base module
+        # ---------------------------
+        # 6. Knowledge base (datasets)
+        # ---------------------------
         bp.add_url_rule("/datasets", view_func=self.dataset_handler.get_datasets_with_page)
         bp.add_url_rule("/datasets", methods=["POST"], view_func=self.dataset_handler.create_dataset)
         bp.add_url_rule("/datasets/<uuid:dataset_id>", view_func=self.dataset_handler.get_dataset)
         bp.add_url_rule("/datasets/<uuid:dataset_id>", methods=["POST"], view_func=self.dataset_handler.update_dataset)
+
         bp.add_url_rule("/datasets/<uuid:dataset_id>/queries", view_func=self.dataset_handler.get_dataset_queries)
-        bp.add_url_rule(
-            "/datasets/<uuid:dataset_id>/delete",
-            methods=["POST"],
-            view_func=self.dataset_handler.delete_dataset,
-        )
-        bp.add_url_rule(
-            "/datasets/<uuid:dataset_id>/documents",
-            view_func=self.document_handler.get_documents_with_page,
-        )
-        bp.add_url_rule(
-            "/datasets/<uuid:dataset_id>/documents",
-            methods=["POST"],
-            view_func=self.document_handler.create_documents,
-        )
+
+        bp.add_url_rule("/datasets/<uuid:dataset_id>/delete", methods=["POST"],
+                        view_func=self.dataset_handler.delete_dataset)
+
+        # Documents
+        bp.add_url_rule("/datasets/<uuid:dataset_id>/documents",
+                        view_func=self.document_handler.get_documents_with_page)
+        bp.add_url_rule("/datasets/<uuid:dataset_id>/documents", methods=["POST"],
+                        view_func=self.document_handler.create_documents)
         bp.add_url_rule(
             "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>",
             view_func=self.document_handler.get_document,
@@ -215,6 +200,8 @@ class Router:
             "/datasets/<uuid:dataset_id>/documents/batch/<string:batch>",
             view_func=self.document_handler.get_documents_status,
         )
+
+        # Segments
         bp.add_url_rule(
             "/datasets/<uuid:dataset_id>/documents/<uuid:document_id>/segments",
             view_func=self.segment_handler.get_segments_with_page,
@@ -243,59 +230,42 @@ class Router:
             methods=["POST"],
             view_func=self.segment_handler.delete_segment,
         )
-        bp.add_url_rule(
-            "/datasets/<uuid:dataset_id>/hit",
-            methods=["POST"],
-            view_func=self.dataset_handler.hit,
-        )
 
-        # 6. OAuth & authentication module
-        bp.add_url_rule(
-            "/oauth/<string:provider_name>",
-            view_func=self.oauth_handler.provider,
-        )
-        bp.add_url_rule(
-            "/oauth/authorize/<string:provider_name>",
-            methods=["POST"],
-            view_func=self.oauth_handler.authorize,
-        )
-        bp.add_url_rule(
-            "/auth/password-login",
-            methods=["POST"],
-            view_func=self.auth_handler.password_login,
-        )
-        bp.add_url_rule(
-            "/auth/logout",
-            methods=["POST"],
-            view_func=self.auth_handler.logout,
-        )
+        # Record hits
+        bp.add_url_rule("/datasets/<uuid:dataset_id>/hit", methods=["POST"], view_func=self.dataset_handler.hit)
 
-        # 7. Account settings module
+        # ---------------------------
+        # 7. OAuth & Authentication
+        # ---------------------------
+        bp.add_url_rule("/oauth/<string:provider_name>", view_func=self.oauth_handler.provider)
+        bp.add_url_rule("/oauth/authorize/<string:provider_name>", methods=["POST"],
+                        view_func=self.oauth_handler.authorize)
+
+        bp.add_url_rule("/auth/password-login", methods=["POST"], view_func=self.auth_handler.password_login)
+        bp.add_url_rule("/auth/logout", methods=["POST"], view_func=self.auth_handler.logout)
+
+        # ---------------------------
+        # 8. Account Settings
+        # ---------------------------
         bp.add_url_rule("/account", view_func=self.account_handler.get_current_user)
         bp.add_url_rule("/account/password", methods=["POST"], view_func=self.account_handler.update_password)
         bp.add_url_rule("/account/name", methods=["POST"], view_func=self.account_handler.update_name)
         bp.add_url_rule("/account/avatar", methods=["POST"], view_func=self.account_handler.update_avatar)
 
-        # 8. AI assistance module
+        # ---------------------------
+        # 9. AI Utilities
+        # ---------------------------
         bp.add_url_rule("/ai/optimize-prompt", methods=["POST"], view_func=self.ai_handler.optimize_prompt)
-        bp.add_url_rule(
-            "/ai/suggested-questions",
-            methods=["POST"],
-            view_func=self.ai_handler.generate_suggested_questions,
-        )
+        bp.add_url_rule("/ai/suggested-questions", methods=["POST"],
+                        view_func=self.ai_handler.generate_suggested_questions)
 
-        # 9. API key module
+        # ---------------------------
+        # 10. API Keys
+        # ---------------------------
         bp.add_url_rule("/openapi/api-keys", view_func=self.api_key_handler.get_api_keys_with_page)
-        bp.add_url_rule(
-            "/openapi/api-keys",
-            methods=["POST"],
-            view_func=self.api_key_handler.create_api_key,
-        )
-        bp.add_url_rule(
-            "/openapi/api-keys/<uuid:api_key_id>",
-            methods=["POST"],
-            view_func=self.api_key_handler.update_api_key,
-        )
+        bp.add_url_rule("/openapi/api-keys", methods=["POST"], view_func=self.api_key_handler.create_api_key)
+        bp.add_url_rule("/openapi/api-keys/<uuid:api_key_id>", methods=["POST"],
+                        view_func=self.api_key_handler.update_api_key)
         bp.add_url_rule(
             "/openapi/api-keys/<uuid:api_key_id>/is-active",
             methods=["POST"],
@@ -306,13 +276,11 @@ class Router:
             methods=["POST"],
             view_func=self.api_key_handler.delete_api_key,
         )
-        openapi_bp.add_url_rule(
-            "/openapi/chat",
-            methods=["POST"],
-            view_func=self.openapi_handler.chat,
-        )
+        openapi_bp.add_url_rule("/openapi/chat", methods=["POST"], view_func=self.openapi_handler.chat)
 
-        # 10. Built-in app module
+        # ---------------------------
+        # 11. Built-in Apps
+        # ---------------------------
         bp.add_url_rule("/builtin-apps/categories", view_func=self.builtin_app_handler.get_builtin_app_categories)
         bp.add_url_rule("/builtin-apps", view_func=self.builtin_app_handler.get_builtin_apps)
         bp.add_url_rule(
@@ -321,46 +289,29 @@ class Router:
             view_func=self.builtin_app_handler.add_builtin_app_to_space,
         )
 
-        # 11. Workflow module
+        # ---------------------------
+        # 12. Workflow Engine
+        # ---------------------------
         bp.add_url_rule("/workflows", view_func=self.workflow_handler.get_workflows_with_page)
         bp.add_url_rule("/workflows", methods=["POST"], view_func=self.workflow_handler.create_workflow)
         bp.add_url_rule("/workflows/<uuid:workflow_id>", view_func=self.workflow_handler.get_workflow)
-        bp.add_url_rule(
-            "/workflows/<uuid:workflow_id>",
-            methods=["POST"],
-            view_func=self.workflow_handler.update_workflow,
-        )
-        bp.add_url_rule(
-            "/workflows/<uuid:workflow_id>/delete",
-            methods=["POST"],
-            view_func=self.workflow_handler.delete_workflow,
-        )
-        bp.add_url_rule(
-            "/workflows/<uuid:workflow_id>/draft-graph",
-            methods=["POST"],
-            view_func=self.workflow_handler.update_draft_graph,
-        )
-        bp.add_url_rule(
-            "/workflows/<uuid:workflow_id>/draft-graph",
-            view_func=self.workflow_handler.get_draft_graph,
-        )
-        bp.add_url_rule(
-            "/workflows/<uuid:workflow_id>/debug",
-            methods=["POST"],
-            view_func=self.workflow_handler.debug_workflow,
-        )
-        bp.add_url_rule(
-            "/workflows/<uuid:workflow_id>/publish",
-            methods=["POST"],
-            view_func=self.workflow_handler.publish_workflow,
-        )
-        bp.add_url_rule(
-            "/workflows/<uuid:workflow_id>/cancel-publish",
-            methods=["POST"],
-            view_func=self.workflow_handler.cancel_publish_workflow,
-        )
+        bp.add_url_rule("/workflows/<uuid:workflow_id>", methods=["POST"],
+                        view_func=self.workflow_handler.update_workflow)
+        bp.add_url_rule("/workflows/<uuid:workflow_id>/delete", methods=["POST"],
+                        view_func=self.workflow_handler.delete_workflow)
+        bp.add_url_rule("/workflows/<uuid:workflow_id>/draft-graph", methods=["POST"],
+                        view_func=self.workflow_handler.update_draft_graph)
+        bp.add_url_rule("/workflows/<uuid:workflow_id>/draft-graph", view_func=self.workflow_handler.get_draft_graph)
+        bp.add_url_rule("/workflows/<uuid:workflow_id>/debug", methods=["POST"],
+                        view_func=self.workflow_handler.debug_workflow)
+        bp.add_url_rule("/workflows/<uuid:workflow_id>/publish", methods=["POST"],
+                        view_func=self.workflow_handler.publish_workflow)
+        bp.add_url_rule("/workflows/<uuid:workflow_id>/cancel-publish", methods=["POST"],
+                        view_func=self.workflow_handler.cancel_publish_workflow)
 
-        # 12. Language model module
+        # ---------------------------
+        # 13. Language models
+        # ---------------------------
         bp.add_url_rule("/language-models", view_func=self.language_model_handler.get_language_models)
         bp.add_url_rule(
             "/language-models/<string:provider_name>/icon",
@@ -371,12 +322,11 @@ class Router:
             view_func=self.language_model_handler.get_language_model,
         )
 
-        # 13. Assistant Agent module
-        bp.add_url_rule(
-            "/assistant-agent/chat",
-            methods=["POST"],
-            view_func=self.assistant_agent_handler.assistant_agent_chat,
-        )
+        # ---------------------------
+        # 14. Assistant Agent
+        # ---------------------------
+        bp.add_url_rule("/assistant-agent/chat", methods=["POST"],
+                        view_func=self.assistant_agent_handler.assistant_agent_chat)
         bp.add_url_rule(
             "/assistant-agent/chat/<uuid:task_id>/stop",
             methods=["POST"],
@@ -392,6 +342,13 @@ class Router:
             view_func=self.assistant_agent_handler.delete_assistant_agent_conversation,
         )
 
-        # 14. Register blueprints on the app
+        # ---------------------------
+        # 15. App analysis
+        # ---------------------------
+        bp.add_url_rule("/analysis/<uuid:app_id>", view_func=self.analysis_handler.get_app_analysis)
+
+        # ---------------------------
+        # 16. Register blueprints
+        # ---------------------------
         app.register_blueprint(bp)
         app.register_blueprint(openapi_bp)
