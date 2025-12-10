@@ -83,3 +83,19 @@ class BaseLanguageModel(LCBaseLanguageModel, ABC):
     """Base language model"""
     features: list[ModelFeature] = Field(default_factory=list)  # Supported features
     metadata: dict[str, Any] = Field(default_factory=dict)  # Model metadata
+
+    def get_pricing(self) -> tuple[float, float, float]:
+        """
+        Retrieve the pricing information for the LLM.
+
+        Returns:
+            A tuple in the format (input_price, output_price, unit),
+            where unit is usually the per-token pricing unit (e.g., per 1K tokens).
+        """
+        # 1. Extract input price, output price, and unit from metadata
+        input_price = self.metadata.get("pricing", {}).get("input", 0.0)
+        output_price = self.metadata.get("pricing", {}).get("output", 0.0)
+        unit = self.metadata.get("pricing", {}).get("unit", 0.0)
+
+        # 2. Return pricing tuple
+        return input_price, output_price, unit
