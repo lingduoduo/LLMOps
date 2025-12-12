@@ -223,6 +223,18 @@ class AppHandler:
         return success_json(PageModel(list=resp.dump(messages), paginator=paginator))
 
     @login_required
+    def get_published_config(self, app_id: UUID):
+        """Get the published configuration for the app specified by app_id."""
+        published_config = self.app_service.get_published_config(app_id, current_user)
+        return success_json(published_config)
+
+    @login_required
+    def regenerate_web_app_token(self, app_id: UUID):
+        """Regenerate the WebApp credential token for the app specified by app_id."""
+        token = self.app_service.regenerate_web_app_token(app_id, current_user)
+        return success_json({"token": token})
+
+    @login_required
     def ping(self):
         # """Health check endpoint"""
         # return {"ping": "pong"}

@@ -112,6 +112,15 @@ class Router:
             "/apps/<uuid:app_id>/conversations/messages",
             view_func=self.app_handler.get_debug_conversation_messages_with_page,
         )
+        bp.add_url_rule(
+            "/apps/<uuid:app_id>/published-config",
+            view_func=self.app_handler.get_published_config,
+        )
+        bp.add_url_rule(
+            "/apps/<uuid:app_id>/published-config/regenerate-web-app-token",
+            methods=["POST"],
+            view_func=self.app_handler.regenerate_web_app_token,
+        )
 
         # ---------------------------
         # 3. Built-in tool marketplace

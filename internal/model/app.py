@@ -15,10 +15,11 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import JSONB
 
-from internal.entity.app_entity import AppConfigType, DEFAULT_APP_CONFIG
+from internal.entity.app_entity import AppConfigType, DEFAULT_APP_CONFIG, AppStatus
 from internal.entity.conversation_entity import InvokeFrom
 from internal.extension.database_extension import db
 from .conversation import Conversation
+from ..lib.helper import generate_random_string
 
 
 class App(db.Model):
@@ -36,6 +37,7 @@ class App(db.Model):
     name = Column(String(255), nullable=False, server_default=text("''::character varying"))  # App name
     icon = Column(String(255), nullable=False, server_default=text("''::character varying"))  # App icon
     description = Column(Text, nullable=False, server_default=text("''::text"))  # App description
+    token = Column(String(255), nullable=True, server_default=text("''::character varying"))
     status = Column(String(255), nullable=False, server_default=text("''::character varying"))  # App status
     updated_at = Column(
         DateTime,
@@ -103,6 +105,24 @@ class App(db.Model):
                 self.debug_conversation_id = debug_conversation.id
 
         return debug_conversation
+
+    @property
+    def token_with_default(self) -> str:
+        """Get the token with a default value if needed."""
+        # 1. Check whether the status is PUBLISHED
+        if self.status != AppStatus.PUBLISHED:
+            # 2. If not published, clear the token and commit the update
+            if self.token is not None or self.token != "":
+                self.token = None
+                db.session.commit()
+            return ""
+
+        # 3. If published, check whether the token exists; if not, generate one
+        if self.token is None or self.token == "":
+            self.token = generate_random_string(16)
+            db.session.commit()
+
+        return self.token
 
 
 class AppConfig(db.Model):
