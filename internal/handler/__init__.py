@@ -21,6 +21,7 @@ from .oauth_handler import OAuthHandler
 from .openapi_handler import OpenAPIHandler
 from .segment_handler import SegmentHandler
 from .upload_file_handler import UploadFileHandler
+from .web_app_handler import WebAppHandler
 from .workflow_handler import WorkflowHandler
 
 __all__ = ["AppHandler",
@@ -39,5 +40,7 @@ __all__ = ["AppHandler",
            "WorkflowHandler",
            "BuiltinAppHandler",
            "LanguageModelHandler",
-           "AssistantAgentHandler"
+           "AssistantAgentHandler",
+           "AnalysisHandler",
+           "WebAppHandler",
            ]
