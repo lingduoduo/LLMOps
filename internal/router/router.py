@@ -27,6 +27,7 @@ from internal.handler import (
     LanguageModelHandler,
     AssistantAgentHandler,
     AnalysisHandler,
+    WebAppHandler
 )
 
 
@@ -52,6 +53,7 @@ class Router:
     language_model_handler: LanguageModelHandler
     assistant_agent_handler: AssistantAgentHandler
     analysis_handler: AnalysisHandler
+    web_app_handler: WebAppHandler
 
     def register_router(self, app: Flask):
         """Register all routes"""
@@ -357,7 +359,61 @@ class Router:
         bp.add_url_rule("/analysis/<uuid:app_id>", view_func=self.analysis_handler.get_app_analysis)
 
         # ---------------------------
-        # 16. Register blueprints
+        # 16. WebApp Module
+        # ---------------------------
+        bp.add_url_rule(
+            "/web-apps/<string:token>",
+            view_func=self.web_app_handler.get_web_app
+        )
+        bp.add_url_rule(
+            "/web-apps/<string:token>/chat",
+            methods=["POST"],
+            view_func=self.web_app_handler.web_app_chat,
+        )
+        bp.add_url_rule(
+            "/web-apps/<string:token>/chat/<uuid:task_id>/stop",
+            methods=["POST"],
+            view_func=self.web_app_handler.stop_web_app_chat,
+        )
+        bp.add_url_rule(
+            "/web-apps/<string:token>/conversations",
+            view_func=self.web_app_handler.get_conversations
+        )
+
+        # ---------------------------
+        # 17. Conversation Module
+        # ---------------------------
+        # bp.add_url_rule(
+        #     "/conversations/<uuid:conversation_id>/messages",
+        #     view_func=self.conversation_handler.get_conversation_messages_with_page,
+        # )
+        # bp.add_url_rule(
+        #     "/conversations/<uuid:conversation_id>/delete",
+        #     methods=["POST"],
+        #     view_func=self.conversation_handler.delete_conversation,
+        # )
+        # bp.add_url_rule(
+        #     "/conversations/<uuid:conversation_id>/messages/<uuid:message_id>/delete",
+        #     methods=["POST"],
+        #     view_func=self.conversation_handler.delete_message,
+        # )
+        # bp.add_url_rule(
+        #     "/conversations/<uuid:conversation_id>/name",
+        #     view_func=self.conversation_handler.get_conversation_name,
+        # )
+        # bp.add_url_rule(
+        #     "/conversations/<uuid:conversation_id>/name",
+        #     methods=["POST"],
+        #     view_func=self.conversation_handler.update_conversation_name,
+        # )
+        # bp.add_url_rule(
+        #     "/conversations/<uuid:conversation_id>/is-pinned",
+        #     methods=["POST"],
+        #     view_func=self.conversation_handler.update_conversation_is_pinned,
+        # )
+
+        # ---------------------------
+        # 18. Register Blueprints
         # ---------------------------
         app.register_blueprint(bp)
         app.register_blueprint(openapi_bp)
