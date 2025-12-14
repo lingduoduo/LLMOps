@@ -27,7 +27,8 @@ from internal.handler import (
     LanguageModelHandler,
     AssistantAgentHandler,
     AnalysisHandler,
-    WebAppHandler
+    WebAppHandler,
+    ConversationHandler,
 )
 
 
@@ -54,6 +55,7 @@ class Router:
     assistant_agent_handler: AssistantAgentHandler
     analysis_handler: AnalysisHandler
     web_app_handler: WebAppHandler
+    conversation_handler: ConversationHandler
 
     def register_router(self, app: Flask):
         """Register all routes"""
@@ -383,10 +385,10 @@ class Router:
         # ---------------------------
         # 17. Conversation Module
         # ---------------------------
-        # bp.add_url_rule(
-        #     "/conversations/<uuid:conversation_id>/messages",
-        #     view_func=self.conversation_handler.get_conversation_messages_with_page,
-        # )
+        bp.add_url_rule(
+            "/conversations/<uuid:conversation_id>/messages",
+            view_func=self.conversation_handler.get_conversation_messages_with_page,
+        )
         # bp.add_url_rule(
         #     "/conversations/<uuid:conversation_id>/delete",
         #     methods=["POST"],

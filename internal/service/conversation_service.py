@@ -5,6 +5,7 @@
 """
 import logging
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 from uuid import UUID
 
@@ -13,19 +14,22 @@ from injector import inject
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
+from sqlalchemy import desc
 
+from internal.core.agent.entities.queue_entity import AgentThought, QueueEvent
 from internal.entity.conversation_entity import (
     SUMMARIZER_TEMPLATE,
     CONVERSATION_NAME_TEMPLATE,
     ConversationInfo,
     SUGGESTED_QUESTIONS_TEMPLATE,
-    SuggestedQuestions,
-    InvokeFrom,
+    SuggestedQuestions, InvokeFrom, MessageStatus,
 )
+from internal.exception import NotFoundException
+from internal.model import Conversation, Message, MessageAgentThought, Account
+from internal.schema.conversation_schema import GetConversationMessagesWithPageReq
+from pkg.paginator import Paginator
 from pkg.sqlalchemy import SQLAlchemy
 from .base_service import BaseService
-from ..core.agent.entities.queue_entity import AgentThought, QueueEvent
-from ..model import Conversation, Message, MessageAgentThought
 
 
 @inject
@@ -197,3 +201,105 @@ class ConversationService(BaseService):
                         error=agent_thought.observation,
                     )
                     break
+
+    def get_conversation(self, conversation_id: UUID, account: Account) -> Conversation:
+        """Retrieve a specific conversation using conversation ID and account"""
+        # 1. Query the conversation record by conversation_id
+        conversation = self.get(Conversation, conversation_id)
+        if (
+                not conversation
+                or conversation.created_by != account.id
+                or conversation.is_deleted
+        ):
+            raise NotFoundException(
+                "The conversation does not exist or has been deleted. Please verify and try again."
+            )
+
+        # 2. Validation passed, return the conversation
+        return conversation
+
+    def get_message(self, message_id: UUID, account: Account) -> Message:
+        """Retrieve a specific message using message ID and account"""
+        # 1. Query the message record by message_id
+        message = self.get(Message, message_id)
+        if (
+                not message
+                or message.created_by != account.id
+                or message.is_deleted
+        ):
+            raise NotFoundException(
+                "The message does not exist or has been deleted. Please verify and try again."
+            )
+
+        # 2. Validation passed, return the message
+        return message
+
+    def get_conversation_messages_with_page(
+            self,
+            conversation_id: UUID,
+            req: GetConversationMessagesWithPageReq,
+            account: Account,
+    ) -> tuple[list[Message], Paginator]:
+        """Retrieve a paginated list of messages for the given conversation ID under the current account"""
+        # 1. Retrieve the conversation and validate permissions
+        conversation = self.get_conversation(conversation_id, account)
+
+        # 2. Build paginator and set cursor filters
+        paginator = Paginator(db=self.db, req=req)
+        filters = []
+        if req.created_at.data:
+            # 3. Convert timestamp to datetime
+            created_at_datetime = datetime.fromtimestamp(req.created_at.data)
+            filters.append(Message.created_at <= created_at_datetime)
+
+        # 4. Execute paginated query
+        messages = paginator.paginate(
+            self.db.session.query(Message).filter(
+                Message.conversation_id == conversation.id,
+                Message.status.in_([MessageStatus.STOP, MessageStatus.NORMAL]),
+                Message.answer != "",
+                ~Message.is_deleted,
+                *filters,
+            ).order_by(desc("created_at"))
+        )
+
+        return messages, paginator
+
+    def delete_conversation(self, conversation_id: UUID, account: Account) -> Conversation:
+        """Delete a conversation record for the given conversation ID and account"""
+        # 1. Retrieve the conversation record and validate permissions
+        conversation = self.get_conversation(conversation_id, account)
+
+        # 2. Mark the conversation as deleted
+        self.update(conversation, is_deleted=True)
+
+        return conversation
+
+    def delete_message(self, conversation_id: UUID, message_id: UUID, account: Account) -> Message:
+        """Delete a message record for the given conversation ID and message ID"""
+        # 1. Retrieve the conversation record and validate permissions
+        conversation = self.get_conversation(conversation_id, account)
+
+        # 2. Retrieve the message and validate permissions
+        message = self.get_message(message_id, account)
+
+        # 3. Verify that the message belongs to the conversation
+        if conversation.id != message.conversation_id:
+            raise NotFoundException(
+                "The specified message does not belong to this conversation. Please verify and try again."
+            )
+
+        # 4. Mark the message as deleted
+        self.update(message, is_deleted=True)
+
+        return message
+
+    def update_conversation(self, conversation_id: UUID, account: Account, **kwargs) -> Conversation:
+        """Update conversation information using conversation ID, account, and keyword arguments"""
+        # 1. Retrieve the conversation record and validate permissions
+        conversation = self.get_conversation(conversation_id, account)
+
+        # 2. Update conversation fields
+        self.update(conversation, **kwargs)
+
+        return conversation
