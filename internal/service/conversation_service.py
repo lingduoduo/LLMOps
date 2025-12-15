@@ -6,15 +6,17 @@
 import logging
 from dataclasses import dataclass
 from datetime import datetime
+from threading import Thread
 from typing import Any
 from uuid import UUID
 
-from flask import Flask
+from flask import Flask, current_app
 from injector import inject
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from sqlalchemy import desc
+from sqlalchemy.orm import joinedload
 
 from internal.core.agent.entities.queue_entity import AgentThought, QueueEvent
 from internal.entity.conversation_entity import (
@@ -22,7 +24,9 @@ from internal.entity.conversation_entity import (
     CONVERSATION_NAME_TEMPLATE,
     ConversationInfo,
     SUGGESTED_QUESTIONS_TEMPLATE,
-    SuggestedQuestions, InvokeFrom, MessageStatus,
+    SuggestedQuestions,
+    InvokeFrom,
+    MessageStatus,
 )
 from internal.exception import NotFoundException
 from internal.model import Conversation, Message, MessageAgentThought, Account
@@ -35,48 +39,63 @@ from .base_service import BaseService
 @inject
 @dataclass
 class ConversationService(BaseService):
-    """Service for handling conversations."""
+    """Conversation service"""
     db: SQLAlchemy
 
     @classmethod
     def summary(cls, human_message: str, ai_message: str, old_summary: str = "") -> str:
-        """Generate a new summary based on the human message, AI message, and previous summary."""
+        """Generate a new summary based on the human message, AI message, and the existing summary."""
+        # 1. Create prompt
         prompt = ChatPromptTemplate.from_template(SUMMARIZER_TEMPLATE)
+
+        # 2. Initialize the LLM with lower temperature to reduce hallucinations
         llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.5)
+
+        # 3. Build the chain
         summary_chain = prompt | llm | StrOutputParser()
 
+        # 4. Invoke the chain to generate a new summary
         new_summary = summary_chain.invoke({
             "summary": old_summary,
             "new_lines": f"Human: {human_message}\nAI: {ai_message}",
         })
+
         return new_summary
 
     @classmethod
     def generate_conversation_name(cls, query: str) -> str:
-        """Generate a conversation name based on the user query. Output language matches the user input."""
+        """Generate a conversation name based on the query, keeping the same language as user input."""
+        # 1. Create prompt
         prompt = ChatPromptTemplate.from_messages([
             ("system", CONVERSATION_NAME_TEMPLATE),
             ("human", "{query}")
         ])
 
+        # 2. Initialize the LLM with zero temperature for deterministic output
         llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
         structured_llm = llm.with_structured_output(ConversationInfo)
 
+        # 3. Build the chain
         chain = prompt | structured_llm
 
-        # Truncate excessively long input text
+        # 4. Normalize and truncate overly long queries
         if len(query) > 2000:
             query = query[:300] + "...[TRUNCATED]..." + query[-300:]
         query = query.replace("\n", " ")
 
+        # 5. Invoke the chain to generate conversation info
         conversation_info = chain.invoke({"query": query})
 
+        # 6. Extract conversation name
         name = "New Conversation"
         try:
             if conversation_info and hasattr(conversation_info, "subject"):
                 name = conversation_info.subject
         except Exception as e:
-            logging.exception(f"Failed to extract conversation name. Info: {conversation_info}, Error: {e}")
+            logging.exception(
+                "Failed to extract conversation name, conversation_info: %(conversation_info)s, error: %(error)s",
+                {"conversation_info": conversation_info, "error": e},
+            )
 
         if len(name) > 75:
             name = name[:75] + "..."
@@ -85,30 +104,41 @@ class ConversationService(BaseService):
 
     @classmethod
     def generate_suggested_questions(cls, histories: str) -> list[str]:
-        """Generate up to 3 suggested follow-up questions based on the conversation history."""
+        """Generate up to three suggested follow-up questions based on conversation history."""
+        # 1. Create prompt
         prompt = ChatPromptTemplate.from_messages([
             ("system", SUGGESTED_QUESTIONS_TEMPLATE),
             ("human", "{histories}")
         ])
 
+        # 2. Initialize the LLM with zero temperature
         llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
         structured_llm = llm.with_structured_output(SuggestedQuestions)
 
+        # 3. Build the chain
         chain = prompt | structured_llm
+
+        # 4. Invoke the chain to generate suggested questions
         suggested_questions = chain.invoke({"histories": histories})
 
+        # 5. Extract questions
         questions = []
         try:
             if suggested_questions and hasattr(suggested_questions, "questions"):
                 questions = suggested_questions.questions
         except Exception as e:
-            logging.exception(f"Failed to generate suggested questions: {suggested_questions}, Error: {e}")
+            logging.exception(
+                "Failed to generate suggested questions, suggested_questions: %(suggested_questions)s, error: %(error)s",
+                {"suggested_questions": suggested_questions, "error": e},
+            )
 
-        return questions[:3]
+        if len(questions) > 3:
+            questions = questions[:3]
+
+        return questions
 
     def save_agent_thoughts(
             self,
-            flask_app: Flask,
             account_id: UUID,
             app_id: UUID,
             app_config: dict[str, Any],
@@ -116,122 +146,167 @@ class ConversationService(BaseService):
             message_id: UUID,
             agent_thoughts: list[AgentThought],
     ):
-        """Store all reasoning steps and events generated by the agent."""
+        """Persist agent reasoning steps."""
+        # 1. Initialize position index and total latency
+        position = 0
+        latency = 0
+
+        # 2. Re-fetch conversation and message to ensure they are managed by the current session
+        conversation = self.get(Conversation, conversation_id)
+        message = self.get(Message, message_id)
+
+        # 3. Iterate through all agent reasoning steps
+        for agent_thought in agent_thoughts:
+            # 4. Store reasoning steps such as memory recall, thoughts, messages, actions, and retrievals
+            if agent_thought.event in [
+                QueueEvent.LONG_TERM_MEMORY_RECALL,
+                QueueEvent.AGENT_THOUGHT,
+                QueueEvent.AGENT_MESSAGE,
+                QueueEvent.AGENT_ACTION,
+                QueueEvent.DATASET_RETRIEVAL,
+            ]:
+                # 5. Update position and latency
+                position += 1
+                latency += agent_thought.latency
+
+                # 6. Persist agent reasoning step
+                self.create(
+                    MessageAgentThought,
+                    app_id=app_id,
+                    conversation_id=conversation.id,
+                    message_id=message.id,
+                    invoke_from=InvokeFrom.DEBUGGER,
+                    created_by=account_id,
+                    position=position,
+                    event=agent_thought.event,
+                    thought=agent_thought.thought,
+                    observation=agent_thought.observation,
+                    tool=agent_thought.tool,
+                    tool_input=agent_thought.tool_input,
+                    # Message-related fields
+                    message=agent_thought.message,
+                    message_token_count=agent_thought.message_token_count,
+                    message_unit_price=agent_thought.message_unit_price,
+                    message_price_unit=agent_thought.message_price_unit,
+                    # Answer-related fields
+                    answer=agent_thought.answer,
+                    answer_token_count=agent_thought.answer_token_count,
+                    answer_unit_price=agent_thought.answer_unit_price,
+                    answer_price_unit=agent_thought.answer_price_unit,
+                    # Agent statistics
+                    total_token_count=agent_thought.total_token_count,
+                    total_price=agent_thought.total_price,
+                    latency=agent_thought.latency,
+                )
+
+            # 7. If the event is an agent message
+            if agent_thought.event == QueueEvent.AGENT_MESSAGE:
+                # 8. Update message content
+                self.update(
+                    message,
+                    message=agent_thought.message,
+                    message_token_count=agent_thought.message_token_count,
+                    message_unit_price=agent_thought.message_unit_price,
+                    message_price_unit=agent_thought.message_price_unit,
+                    answer=agent_thought.answer,
+                    answer_token_count=agent_thought.answer_token_count,
+                    answer_unit_price=agent_thought.answer_unit_price,
+                    answer_price_unit=agent_thought.answer_price_unit,
+                    total_token_count=agent_thought.total_token_count,
+                    total_price=agent_thought.total_price,
+                    latency=latency,
+                )
+
+                # 9. Generate conversation summary if long-term memory is enabled
+                if app_config["long_term_memory"]["enable"]:
+                    Thread(
+                        target=self._generate_summary_and_update,
+                        kwargs={
+                            "flask_app": current_app._get_current_object(),
+                            "conversation_id": conversation.id,
+                            "query": message.query,
+                            "answer": agent_thought.answer,
+                        },
+                    ).start()
+
+                # 10. Generate conversation name for new conversations
+                if conversation.is_new:
+                    Thread(
+                        target=self._generate_conversation_name_and_update,
+                        kwargs={
+                            "flask_app": current_app._get_current_object(),
+                            "conversation_id": conversation.id,
+                            "query": message.query,
+                        }
+                    ).start()
+
+            # 11. If timeout, stop, or error occurs, update message status
+            if agent_thought.event in [QueueEvent.TIMEOUT, QueueEvent.STOP, QueueEvent.ERROR]:
+                self.update(
+                    message,
+                    status=agent_thought.event,
+                    error=agent_thought.observation,
+                )
+                break
+
+    def _generate_summary_and_update(
+            self,
+            flask_app: Flask,
+            conversation_id: UUID,
+            query: str,
+            answer: str,
+    ):
         with flask_app.app_context():
-            position = 0
-            latency = 0
-
+            # 1. Retrieve conversation
             conversation = self.get(Conversation, conversation_id)
-            message = self.get(Message, message_id)
 
-            for agent_thought in agent_thoughts:
-                # Save LTM recall, reasoning, message output, action execution, or dataset retrieval
-                if agent_thought.event in [
-                    QueueEvent.LONG_TERM_MEMORY_RECALL,
-                    QueueEvent.AGENT_THOUGHT,
-                    QueueEvent.AGENT_MESSAGE,
-                    QueueEvent.AGENT_ACTION,
-                    QueueEvent.DATASET_RETRIEVAL,
-                ]:
-                    position += 1
-                    latency += agent_thought.latency
+            # 2. Generate updated summary
+            new_summary = self.summary(query, answer, conversation.summary)
 
-                    self.create(
-                        MessageAgentThought,
-                        app_id=app_id,
-                        conversation_id=conversation.id,
-                        message_id=message.id,
-                        invoke_from=InvokeFrom.DEBUGGER,
-                        created_by=account_id,
-                        position=position,
-                        event=agent_thought.event,
-                        thought=agent_thought.thought,
-                        observation=agent_thought.observation,
-                        tool=agent_thought.tool,
-                        tool_input=agent_thought.tool_input,
-                        message=agent_thought.message,
-                        message_token_count=agent_thought.message_token_count,
-                        message_unit_price=agent_thought.message_unit_price,
-                        message_price_unit=agent_thought.message_price_unit,
-                        answer=agent_thought.answer,
-                        answer_token_count=agent_thought.answer_token_count,
-                        answer_unit_price=agent_thought.answer_unit_price,
-                        answer_price_unit=agent_thought.answer_price_unit,
-                        total_token_count=agent_thought.total_token_count,
-                        total_price=agent_thought.total_price,
-                        latency=agent_thought.latency,
-                    )
+            # 3. Update conversation summary
+            self.update(conversation, summary=new_summary)
 
-                # Handle final message event from the agent
-                if agent_thought.event == QueueEvent.AGENT_MESSAGE:
-                    self.update(
-                        message,
-                        message=agent_thought.message,
-                        message_token_count=agent_thought.message_token_count,
-                        message_unit_price=agent_thought.message_unit_price,
-                        message_price_unit=agent_thought.message_price_unit,
-                        answer=agent_thought.answer,
-                        answer_token_count=agent_thought.answer_token_count,
-                        answer_unit_price=agent_thought.answer_unit_price,
-                        answer_price_unit=agent_thought.answer_price_unit,
-                        total_token_count=agent_thought.total_token_count,
-                        total_price=agent_thought.total_price,
-                        latency=latency,
-                    )
+    def _generate_conversation_name_and_update(
+            self,
+            flask_app: Flask,
+            conversation_id: UUID,
+            query: str
+    ) -> None:
+        """Generate and update conversation name."""
+        with flask_app.app_context():
+            # 1. Retrieve conversation
+            conversation = self.get(Conversation, conversation_id)
 
-                    # Update LTM summary
-                    if app_config["long_term_memory"]["enable"]:
-                        new_summary = self.summary(
-                            message.query,
-                            agent_thought.answer,
-                            conversation.summary,
-                        )
-                        self.update(conversation, summary=new_summary)
+            # 2. Generate new conversation name
+            new_conversation_name = self.generate_conversation_name(query)
 
-                    # Generate a new conversation name if this is the first message
-                    if conversation.is_new:
-                        new_name = self.generate_conversation_name(message.query)
-                        self.update(conversation, name=new_name)
-
-                # Stop or error event
-                if agent_thought.event in [QueueEvent.TIMEOUT, QueueEvent.STOP, QueueEvent.ERROR]:
-                    self.update(
-                        message,
-                        status=agent_thought.event,
-                        error=agent_thought.observation,
-                    )
-                    break
+            # 3. Update conversation name
+            self.update(conversation, name=new_conversation_name)
 
     def get_conversation(self, conversation_id: UUID, account: Account) -> Conversation:
-        """Retrieve a specific conversation using conversation ID and account"""
-        # 1. Query the conversation record by conversation_id
+        """Retrieve a conversation by ID and account."""
+        # 1. Fetch conversation
         conversation = self.get(Conversation, conversation_id)
         if (
                 not conversation
                 or conversation.created_by != account.id
                 or conversation.is_deleted
         ):
-            raise NotFoundException(
-                "The conversation does not exist or has been deleted. Please verify and try again."
-            )
+            raise NotFoundException("The conversation does not exist or has been deleted.")
 
-        # 2. Validation passed, return the conversation
         return conversation
 
     def get_message(self, message_id: UUID, account: Account) -> Message:
-        """Retrieve a specific message using message ID and account"""
-        # 1. Query the message record by message_id
+        """Retrieve a message by ID and account."""
+        # 1. Fetch message
         message = self.get(Message, message_id)
         if (
                 not message
                 or message.created_by != account.id
                 or message.is_deleted
         ):
-            raise NotFoundException(
-                "The message does not exist or has been deleted. Please verify and try again."
-            )
+            raise NotFoundException("The message does not exist or has been deleted.")
 
-        # 2. Validation passed, return the message
         return message
 
     def get_conversation_messages_with_page(
@@ -240,11 +315,11 @@ class ConversationService(BaseService):
             req: GetConversationMessagesWithPageReq,
             account: Account,
     ) -> tuple[list[Message], Paginator]:
-        """Retrieve a paginated list of messages for the given conversation ID under the current account"""
-        # 1. Retrieve the conversation and validate permissions
+        """Retrieve paginated messages for a conversation."""
+        # 1. Validate conversation and permissions
         conversation = self.get_conversation(conversation_id, account)
 
-        # 2. Build paginator and set cursor filters
+        # 2. Build paginator
         paginator = Paginator(db=self.db, req=req)
         filters = []
         if req.created_at.data:
@@ -254,52 +329,53 @@ class ConversationService(BaseService):
 
         # 4. Execute paginated query
         messages = paginator.paginate(
-            self.db.session.query(Message).filter(
+            self.db.session.query(Message)
+            .options(joinedload(Message.agent_thoughts))
+            .filter(
                 Message.conversation_id == conversation.id,
                 Message.status.in_([MessageStatus.STOP, MessageStatus.NORMAL]),
                 Message.answer != "",
                 ~Message.is_deleted,
                 *filters,
-            ).order_by(desc("created_at"))
+            )
+            .order_by(desc("created_at"))
         )
 
         return messages, paginator
 
     def delete_conversation(self, conversation_id: UUID, account: Account) -> Conversation:
-        """Delete a conversation record for the given conversation ID and account"""
-        # 1. Retrieve the conversation record and validate permissions
+        """Delete a conversation by ID."""
+        # 1. Retrieve conversation
         conversation = self.get_conversation(conversation_id, account)
 
-        # 2. Mark the conversation as deleted
+        # 2. Mark conversation as deleted
         self.update(conversation, is_deleted=True)
 
         return conversation
 
     def delete_message(self, conversation_id: UUID, message_id: UUID, account: Account) -> Message:
-        """Delete a message record for the given conversation ID and message ID"""
-        # 1. Retrieve the conversation record and validate permissions
+        """Delete a message by ID."""
+        # 1. Validate conversation
         conversation = self.get_conversation(conversation_id, account)
 
-        # 2. Retrieve the message and validate permissions
+        # 2. Validate message
         message = self.get_message(message_id, account)
 
-        # 3. Verify that the message belongs to the conversation
+        # 3. Ensure message belongs to conversation
         if conversation.id != message.conversation_id:
-            raise NotFoundException(
-                "The specified message does not belong to this conversation. Please verify and try again."
-            )
+            raise NotFoundException("The message does not belong to this conversation.")
 
-        # 4. Mark the message as deleted
+        # 4. Mark message as deleted
         self.update(message, is_deleted=True)
 
         return message
 
     def update_conversation(self, conversation_id: UUID, account: Account, **kwargs) -> Conversation:
-        """Update conversation information using conversation ID, account, and keyword arguments"""
-        # 1. Retrieve the conversation record and validate permissions
+        """Update conversation fields."""
+        # 1. Validate conversation
         conversation = self.get_conversation(conversation_id, account)
 
-        # 2. Update conversation fields
+        # 2. Update conversation
         self.update(conversation, **kwargs)
 
         return conversation

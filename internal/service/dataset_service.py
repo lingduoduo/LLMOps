@@ -30,23 +30,25 @@ from .retrieval_service import RetrievalService
 @inject
 @dataclass
 class DatasetService(BaseService):
-    """Dataset (Knowledge Base) Service"""
+    """Knowledge base service"""
     db: SQLAlchemy
     retrieval_service: RetrievalService
 
     def create_dataset(self, req: CreateDatasetReq, account: Account) -> Dataset:
-        """Create a dataset using the provided request information."""
-        # 1. Check if a dataset with the same name already exists under the same account
+        """Create a knowledge base using the provided request data."""
+        # 1. Check whether a dataset with the same name already exists under this account
         dataset = self.db.session.query(Dataset).filter_by(
             account_id=account.id,
             name=req.name.data,
         ).one_or_none()
         if dataset:
-            raise ValidateErrorException(f"Dataset '{req.name.data}' already exists.")
+            raise ValidateErrorException(f"The dataset '{req.name.data}' already exists.")
 
-        # 2. If description is not provided, fill in a default description
+        # 2. Populate default description if none is provided
         if req.description.data is None or req.description.data.strip() == "":
-            req.description.data = DEFAULT_DATASET_DESCRIPTION_FORMATTER.format(name=req.name.data)
+            req.description.data = DEFAULT_DATASET_DESCRIPTION_FORMATTER.format(
+                name=req.name.data
+            )
 
         # 3. Create and return the dataset record
         return self.create(
@@ -58,46 +60,54 @@ class DatasetService(BaseService):
         )
 
     def get_dataset_queries(self, dataset_id: UUID, account: Account) -> list[DatasetQuery]:
-        """Retrieve the latest 10 query records for a given dataset ID."""
-        # 1. Fetch dataset and verify access permission
+        """Retrieve the most recent 10 query records for a dataset."""
+        # 1. Retrieve dataset and validate ownership
         dataset = self.get(Dataset, dataset_id)
         if dataset is None or dataset.account_id != account.id:
-            raise NotFoundException("The specified dataset does not exist.")
+            raise NotFoundException("The dataset does not exist.")
 
-        # 2. Retrieve the latest 10 query logs related to this dataset
-        dataset_queries = self.db.session.query(DatasetQuery).filter(
-            DatasetQuery.dataset_id == dataset_id,
-        ).order_by(desc("created_at")).limit(10).all()
+        # 2. Query the latest 10 dataset queries
+        dataset_queries = (
+            self.db.session.query(DatasetQuery)
+            .filter(DatasetQuery.dataset_id == dataset_id)
+            .order_by(desc("created_at"))
+            .limit(10)
+            .all()
+        )
 
         return dataset_queries
 
     def get_dataset(self, dataset_id: UUID, account: Account) -> Dataset:
-        """Retrieve dataset details by its ID."""
+        """Retrieve a dataset by ID."""
         dataset = self.get(Dataset, dataset_id)
         if dataset is None or dataset.account_id != account.id:
-            raise NotFoundException("The specified dataset does not exist.")
+            raise NotFoundException("The dataset does not exist.")
 
         return dataset
 
     def update_dataset(self, dataset_id: UUID, req: UpdateDatasetReq, account: Account) -> Dataset:
-        """Update dataset details using the given dataset ID and new data."""
-        # 1. Verify dataset existence and access permissions
+        """Update dataset information."""
+        # 1. Retrieve dataset and validate ownership
         dataset = self.get(Dataset, dataset_id)
         if dataset is None or dataset.account_id != account.id:
-            raise NotFoundException("The specified dataset does not exist.")
+            raise NotFoundException("The dataset does not exist.")
 
-        # 2. Check if the new dataset name already exists
+        # 2. Check for name conflicts after update
         check_dataset = self.db.session.query(Dataset).filter(
             Dataset.account_id == account.id,
             Dataset.name == req.name.data,
             Dataset.id != dataset_id,
         ).one_or_none()
         if check_dataset:
-            raise ValidateErrorException(f"Dataset name '{req.name.data}' already exists. Please choose another name.")
+            raise ValidateErrorException(
+                f"The dataset name '{req.name.data}' already exists. Please choose another name."
+            )
 
         # 3. Ensure description is not empty
         if req.description.data is None or req.description.data.strip() == "":
-            req.description.data = DEFAULT_DATASET_DESCRIPTION_FORMATTER.format(name=req.name.data)
+            req.description.data = DEFAULT_DATASET_DESCRIPTION_FORMATTER.format(
+                name=req.name.data
+            )
 
         # 4. Update dataset fields
         self.update(
@@ -109,52 +119,62 @@ class DatasetService(BaseService):
 
         return dataset
 
-    def get_datasets_with_page(self, req: GetDatasetsWithPageReq, account: Account) -> tuple[list[Dataset], Paginator]:
-        """Retrieve a paginated list of datasets based on query filters."""
+    def get_datasets_with_page(
+            self,
+            req: GetDatasetsWithPageReq,
+            account: Account
+    ) -> tuple[list[Dataset], Paginator]:
+        """Retrieve paginated dataset list."""
         # 1. Initialize paginator
         paginator = Paginator(db=self.db, req=req)
 
-        # 2. Apply filters
+        # 2. Build query filters
         filters = [Dataset.account_id == account.id]
         if req.search_word.data:
             filters.append(Dataset.name.ilike(f"%{req.search_word.data}%"))
 
-        # 3. Execute query and paginate results
+        # 3. Execute paginated query
         datasets = paginator.paginate(
-            self.db.session.query(Dataset).filter(*filters).order_by(desc("created_at"))
+            self.db.session.query(Dataset)
+            .filter(*filters)
+            .order_by(desc("created_at"))
         )
 
         return datasets, paginator
 
     def hit(self, dataset_id: UUID, req: HitReq, account: Account) -> list[dict]:
-        """Perform a recall (retrieval) test for a given dataset ID and request."""
-        # 1. Verify dataset existence and permission
+        """Run a retrieval test against the dataset."""
+        # 1. Retrieve dataset and validate ownership
         dataset = self.get(Dataset, dataset_id)
         if dataset is None or dataset.account_id != account.id:
-            raise NotFoundException("The specified dataset does not exist.")
+            raise NotFoundException("The dataset does not exist.")
 
-        # 2. Perform retrieval using the retrieval service
+        # 2. Perform retrieval via retrieval service
         lc_documents = self.retrieval_service.search_in_datasets(
             dataset_ids=[dataset_id],
-            account=account,
+            account_id=account.id,
             **req.data,
         )
-        lc_document_dict = {str(lc_document.metadata["segment_id"]): lc_document for lc_document in lc_documents}
+        lc_document_dict = {
+            str(doc.metadata["segment_id"]): doc for doc in lc_documents
+        }
 
-        # 3. Query related segments for retrieved results
+        # 3. Query corresponding segments
         segments = self.db.session.query(Segment).filter(
-            Segment.id.in_([str(lc_document.metadata["segment_id"]) for lc_document in lc_documents])
+            Segment.id.in_([
+                str(doc.metadata["segment_id"]) for doc in lc_documents
+            ])
         ).all()
         segment_dict = {str(segment.id): segment for segment in segments}
 
-        # 4. Sort the retrieved segments in the same order as recall results
+        # 4. Sort segments according to retrieval order
         sorted_segments = [
-            segment_dict[str(lc_document.metadata["segment_id"])]
-            for lc_document in lc_documents
-            if str(lc_document.metadata["segment_id"]) in segment_dict
+            segment_dict[str(doc.metadata["segment_id"])]
+            for doc in lc_documents
+            if str(doc.metadata["segment_id"]) in segment_dict
         ]
 
-        # 5. Build response data
+        # 5. Assemble response payload
         hit_result = []
         for segment in sorted_segments:
             document = segment.document
@@ -186,22 +206,29 @@ class DatasetService(BaseService):
         return hit_result
 
     def delete_dataset(self, dataset_id: UUID, account: Account) -> Dataset:
-        """Delete a dataset by its ID, including all associated documents, segments, keywords, and vector data."""
-        # 1. Verify dataset existence and access permission
+        """
+        Delete a dataset and all associated data, including documents, segments,
+        keywords, and vector database records.
+        """
+        # 1. Retrieve dataset and validate ownership
         dataset = self.get(Dataset, dataset_id)
         if dataset is None or dataset.account_id != account.id:
-            raise NotFoundException("The specified dataset does not exist.")
+            raise NotFoundException("The dataset does not exist.")
 
         try:
-            # 2. Delete dataset record and related app-dataset associations
+            # 2. Delete dataset record and application associations
             self.delete(dataset)
             with self.db.auto_commit():
                 self.db.session.query(AppDatasetJoin).filter(
                     AppDatasetJoin.dataset_id == dataset_id,
                 ).delete()
 
-            # 3. Trigger asynchronous cleanup task
+            # 3. Trigger async cleanup task
             delete_dataset.delay(dataset_id)
+
         except Exception as e:
-            logging.exception(f"Failed to delete dataset, dataset_id: {dataset_id}, error: {str(e)}")
+            logging.exception(
+                "Failed to delete dataset, dataset_id: %(dataset_id)s, error: %(error)s",
+                {"dataset_id": dataset_id, "error": e},
+            )
             raise FailException("Failed to delete dataset. Please try again later.")
