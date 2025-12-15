@@ -10,6 +10,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_login import LoginManager
 from flask_migrate import Migrate
+from flask_weaviate import FlaskWeaviate
 
 from config import Config
 from internal.exception import CustomException
@@ -28,6 +29,7 @@ class Http(Flask):
             *args,
             conf: Config,
             db: SQLAlchemy,
+            weaviate: FlaskWeaviate,
             migrate: Migrate,
             login_manager: LoginManager,
             middleware: Middleware,
@@ -45,6 +47,7 @@ class Http(Flask):
 
         # 4) Initialize Flask extensions
         db.init_app(self)
+        weaviate.init_app(self)
         migrate.init_app(self, db, directory="internal/migration")
         redis_extension.init_app(self)
         celery_extension.init_app(self)
