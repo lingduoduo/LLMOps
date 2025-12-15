@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@Author  : linghypshe@gmail.com
 @File    : __init__.py
 """
 from .account import Account, AccountOAuth
@@ -15,26 +14,12 @@ from .upload_file import UploadFile
 from .workflow import Workflow, WorkflowResult
 
 __all__ = [
-    "App",
-    "AppDatasetJoin",
-    "AppConfig",
-    "AppConfigVersion",
-    "ApiTool",
-    "ApiToolProvider",
+    "App", "AppDatasetJoin", "AppConfig", "AppConfigVersion",
+    "ApiTool", "ApiToolProvider",
     "UploadFile",
-    "Dataset",
-    "Document",
-    "Segment",
-    "KeywordTable",
-    "DatasetQuery",
-    "ProcessRule",
-    "Conversation",
-    "Message",
-    "MessageAgentThought",
-    "Account",
-    "AccountOAuth",
-    "ApiKey",
-    "EndUser",
-    "Workflow",
-    "WorkflowResult"
+    "Dataset", "Document", "Segment", "KeywordTable", "DatasetQuery", "ProcessRule",
+    "Conversation", "Message", "MessageAgentThought",
+    "Account", "AccountOAuth",
+    "ApiKey", "EndUser",
+    "Workflow", "WorkflowResult",
 ]
