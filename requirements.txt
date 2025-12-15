@@ -52,3 +52,4 @@ jieba==0.42.1
 uv==0.9.4
 
 pyJWT
+concurrent-log-handler==0.9.28
