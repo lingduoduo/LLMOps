@@ -3,8 +3,17 @@
 """
 @File    : api_tool.py
 """
+from datetime import datetime
+
 from sqlalchemy import (
-    Column, UUID, String, Text, DateTime, PrimaryKeyConstraint, text
+    Column,
+    UUID,
+    String,
+    Text,
+    DateTime,
+    text,
+    PrimaryKeyConstraint,
+    Index,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -16,9 +25,11 @@ class ApiToolProvider(db.Model):
     __tablename__ = "api_tool_provider"
     __table_args__ = (
         PrimaryKeyConstraint("id", name="pk_api_tool_provider_id"),
+        Index("api_tool_provider_account_id_idx", "account_id"),
+        Index("api_tool_name_idx", "name"),
     )
 
-    id = Column(UUID, nullable=False, server_default=text('uuid_generate_v4()'))
+    id = Column(UUID, nullable=False, server_default=text("uuid_generate_v4()"))
     account_id = Column(UUID, nullable=False)
     name = Column(String(255), nullable=False, server_default=text("''::character varying"))
     icon = Column(String(255), nullable=False, server_default=text("''::character varying"))
@@ -28,24 +39,27 @@ class ApiToolProvider(db.Model):
     updated_at = Column(
         DateTime,
         nullable=False,
-        server_default=text('CURRENT_TIMESTAMP(0)'),
-        server_onupdate=text('CURRENT_TIMESTAMP(0)')
+        server_default=text("CURRENT_TIMESTAMP(0)"),
+        onupdate=datetime.now,
     )
-    created_at = Column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP(0)'))
+    created_at = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP(0)"))
 
     @property
     def tools(self) -> list["ApiTool"]:
+        """Read-only property: return all tools under this provider."""
         return db.session.query(ApiTool).filter_by(provider_id=self.id).all()
 
 
 class ApiTool(db.Model):
-    """API tool table"""
+    """API tool model"""
     __tablename__ = "api_tool"
     __table_args__ = (
         PrimaryKeyConstraint("id", name="pk_api_tool_id"),
+        Index("api_tool_account_id_idx", "account_id"),
+        Index("api_tool_provider_id_name_idx", "provider_id", "name"),
     )
 
-    id = Column(UUID, nullable=False, server_default=text('uuid_generate_v4()'))
+    id = Column(UUID, nullable=False, server_default=text("uuid_generate_v4()"))
     account_id = Column(UUID, nullable=False)
     provider_id = Column(UUID, nullable=False)
     name = Column(String(255), nullable=False, server_default=text("''::character varying"))
@@ -56,12 +70,12 @@ class ApiTool(db.Model):
     updated_at = Column(
         DateTime,
         nullable=False,
-        server_default=text('CURRENT_TIMESTAMP(0)'),
-        server_onupdate=text('CURRENT_TIMESTAMP(0)')
+        server_default=text("CURRENT_TIMESTAMP(0)"),
+        onupdate=datetime.now,
     )
-    created_at = Column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP(0)'))
+    created_at = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP(0)"))
 
     @property
     def provider(self) -> "ApiToolProvider":
-        """Read-only: returns the provider associated with this tool"""
+        """Read-only property: return the tool provider this API tool belongs to."""
         return db.session.query(ApiToolProvider).get(self.provider_id)

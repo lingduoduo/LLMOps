@@ -3,6 +3,8 @@
 """
 @File    : dataset.py
 """
+from datetime import datetime
+
 from sqlalchemy import (
     Column,
     UUID,
@@ -11,9 +13,10 @@ from sqlalchemy import (
     Integer,
     Boolean,
     DateTime,
-    PrimaryKeyConstraint,
     text,
     func,
+    PrimaryKeyConstraint,
+    Index,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -23,10 +26,11 @@ from .upload_file import UploadFile
 
 
 class Dataset(db.Model):
-    """Knowledge base table"""
+    """Dataset (knowledge base) model"""
     __tablename__ = "dataset"
     __table_args__ = (
         PrimaryKeyConstraint("id", name="pk_dataset_id"),
+        Index("dataset_account_id_name_idx", "account_id", "name"),
     )
 
     id = Column(UUID, nullable=False, server_default=text("uuid_generate_v4()"))
@@ -37,57 +41,60 @@ class Dataset(db.Model):
     updated_at = Column(
         DateTime,
         nullable=False,
-        server_default=text('CURRENT_TIMESTAMP(0)'),
-        server_onupdate=text('CURRENT_TIMESTAMP(0)'),
+        server_default=text("CURRENT_TIMESTAMP(0)"),
+        onupdate=datetime.now,
     )
-    created_at = Column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP(0)'))
+    created_at = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP(0)"))
 
     @property
     def document_count(self) -> int:
-        """Read-only: number of documents under this knowledge base"""
+        """Read-only property: number of documents in this dataset."""
         return (
-            db.session.
-            query(func.count(Document.id)).
-            filter(Document.dataset_id == self.id).
-            scalar()
+            db.session
+            .query(func.count(Document.id))
+            .filter(Document.dataset_id == self.id)
+            .scalar()
         )
 
     @property
     def hit_count(self) -> int:
-        """Read-only: total hit count for this knowledge base"""
+        """Read-only property: total hit count of this dataset."""
         return (
-            db.session.
-            query(func.coalesce(func.sum(Segment.hit_count), 0)).
-            filter(Segment.dataset_id == self.id).
-            scalar()
+            db.session
+            .query(func.coalesce(func.sum(Segment.hit_count), 0))
+            .filter(Segment.dataset_id == self.id)
+            .scalar()
         )
 
     @property
     def related_app_count(self) -> int:
-        """Read-only: number of applications associated with this knowledge base"""
+        """Read-only property: number of apps associated with this dataset."""
         return (
-            db.session.
-            query(func.count(AppDatasetJoin.id)).
-            filter(AppDatasetJoin.dataset_id == self.id).
-            scalar()
+            db.session
+            .query(func.count(AppDatasetJoin.id))
+            .filter(AppDatasetJoin.dataset_id == self.id)
+            .scalar()
         )
 
     @property
     def character_count(self) -> int:
-        """Read-only: total character count under this knowledge base"""
+        """Read-only property: total character count of all documents in this dataset."""
         return (
-            db.session.
-            query(func.coalesce(func.sum(Document.character_count), 0)).
-            filter(Document.dataset_id == self.id).
-            scalar()
+            db.session
+            .query(func.coalesce(func.sum(Document.character_count), 0))
+            .filter(Document.dataset_id == self.id)
+            .scalar()
         )
 
 
 class Document(db.Model):
-    """Document table model"""
+    """Document model"""
     __tablename__ = "document"
     __table_args__ = (
         PrimaryKeyConstraint("id", name="pk_document_id"),
+        Index("document_account_id_idx", "account_id"),
+        Index("document_dataset_id_idx", "dataset_id"),
+        Index("document_batch_idx", "batch"),
     )
 
     id = Column(UUID, nullable=False, server_default=text("uuid_generate_v4()"))
@@ -113,41 +120,53 @@ class Document(db.Model):
     updated_at = Column(
         DateTime,
         nullable=False,
-        server_default=text('CURRENT_TIMESTAMP(0)'),
-        server_onupdate=text('CURRENT_TIMESTAMP(0)'),
+        server_default=text("CURRENT_TIMESTAMP(0)"),
+        onupdate=datetime.now,
     )
-    created_at = Column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP(0)'))
+    created_at = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP(0)"))
 
     @property
     def upload_file(self) -> "UploadFile":
+        """Read-only property: associated uploaded file."""
         return db.session.query(UploadFile).filter(
             UploadFile.id == self.upload_file_id,
         ).one_or_none()
 
     @property
     def process_rule(self) -> "ProcessRule":
+        """Read-only property: processing rule applied to this document."""
         return db.session.query(ProcessRule).filter(
             ProcessRule.id == self.process_rule_id,
         ).one_or_none()
 
     @property
     def segment_count(self) -> int:
-        return db.session.query(func.count(Segment.id)).filter(
-            Segment.document_id == self.id,
-        ).scalar()
+        """Read-only property: number of segments in this document."""
+        return (
+            db.session.query(func.count(Segment.id))
+            .filter(Segment.document_id == self.id)
+            .scalar()
+        )
 
     @property
     def hit_count(self) -> int:
-        return db.session.query(func.coalesce(func.sum(Segment.hit_count), 0)).filter(
-            Segment.document_id == self.id,
-        ).scalar()
+        """Read-only property: total hit count of this document."""
+        return (
+            db.session
+            .query(func.coalesce(func.sum(Segment.hit_count), 0))
+            .filter(Segment.document_id == self.id)
+            .scalar()
+        )
 
 
 class Segment(db.Model):
-    """Segment table model"""
+    """Segment (document chunk) model"""
     __tablename__ = "segment"
     __table_args__ = (
         PrimaryKeyConstraint("id", name="pk_segment_id"),
+        Index("segment_account_id_idx", "account_id"),
+        Index("segment_dataset_id_idx", "dataset_id"),
+        Index("segment_document_id_idx", "document_id"),
     )
 
     id = Column(UUID, nullable=False, server_default=text("uuid_generate_v4()"))
@@ -173,13 +192,14 @@ class Segment(db.Model):
     updated_at = Column(
         DateTime,
         nullable=False,
-        server_default=text('CURRENT_TIMESTAMP(0)'),
-        server_onupdate=text('CURRENT_TIMESTAMP(0)'),
+        server_default=text("CURRENT_TIMESTAMP(0)"),
+        onupdate=datetime.now,
     )
-    created_at = Column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP(0)'))
+    created_at = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP(0)"))
 
     @property
     def document(self) -> "Document":
+        """Read-only property: parent document of this segment."""
         return db.session.query(Document).get(self.document_id)
 
 
@@ -188,6 +208,7 @@ class KeywordTable(db.Model):
     __tablename__ = "keyword_table"
     __table_args__ = (
         PrimaryKeyConstraint("id", name="pk_keyword_table_id"),
+        Index("keyword_table_dataset_id_idx", "dataset_id"),
     )
 
     id = Column(UUID, nullable=False, server_default=text("uuid_generate_v4()"))
@@ -196,39 +217,48 @@ class KeywordTable(db.Model):
     updated_at = Column(
         DateTime,
         nullable=False,
-        server_default=text('CURRENT_TIMESTAMP(0)'),
-        server_onupdate=text('CURRENT_TIMESTAMP(0)'),
+        server_default=text("CURRENT_TIMESTAMP(0)"),
+        onupdate=datetime.now,
     )
-    created_at = Column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP(0)'))
+    created_at = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP(0)"))
 
 
 class DatasetQuery(db.Model):
-    """Dataset query table model"""
+    """Dataset query log model"""
     __tablename__ = "dataset_query"
     __table_args__ = (
         PrimaryKeyConstraint("id", name="pk_dataset_query_id"),
+        Index("dataset_query_dataset_id_idx", "dataset_id"),
+        Index("dataset_created_by_idx", "created_by"),
+        Index("dataset_source_app_id_idx", "source_app_id"),
     )
 
     id = Column(UUID, nullable=False, server_default=text("uuid_generate_v4()"))
     dataset_id = Column(UUID, nullable=False)
     query = Column(Text, nullable=False, server_default=text("''::text"))
-    source = Column(String(255), nullable=False, server_default=text("'HitTesting'::character varying"))
+    source = Column(
+        String(255),
+        nullable=False,
+        server_default=text("'HitTesting'::character varying"),
+    )
     source_app_id = Column(UUID, nullable=True)
     created_by = Column(UUID, nullable=True)
     updated_at = Column(
         DateTime,
         nullable=False,
-        server_default=text('CURRENT_TIMESTAMP(0)'),
-        server_onupdate=text('CURRENT_TIMESTAMP(0)'),
+        server_default=text("CURRENT_TIMESTAMP(0)"),
+        onupdate=datetime.now,
     )
-    created_at = Column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP(0)'))
+    created_at = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP(0)"))
 
 
 class ProcessRule(db.Model):
-    """Document processing rule table model"""
+    """Document processing rule model"""
     __tablename__ = "process_rule"
     __table_args__ = (
         PrimaryKeyConstraint("id", name="pk_process_rule_id"),
+        Index("process_rule_account_id_idx", "account_id"),
+        Index("process_rule_dataset_id_idx", "dataset_id"),
     )
 
     id = Column(UUID, nullable=False, server_default=text("uuid_generate_v4()"))
@@ -239,7 +269,7 @@ class ProcessRule(db.Model):
     updated_at = Column(
         DateTime,
         nullable=False,
-        server_default=text('CURRENT_TIMESTAMP(0)'),
-        server_onupdate=text('CURRENT_TIMESTAMP(0)'),
+        server_default=text("CURRENT_TIMESTAMP(0)"),
+        onupdate=datetime.now,
     )
-    created_at = Column(DateTime, nullable=False, server_default=text('CURRENT_TIMESTAMP(0)'))
+    created_at = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP(0)"))
