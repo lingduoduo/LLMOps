@@ -4,56 +4,68 @@
 @Author  : linghypshen@gmail.com
 @File    : vector_database_service.py
 """
-import os
+from dataclasses import dataclass
+from typing import Any
 
-import dotenv
-import weaviate
+from flask import Flask
+from flask_weaviate import FlaskWeaviate
 from injector import inject
 from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStoreRetriever
-from langchain_openai import OpenAIEmbeddings
 from langchain_weaviate import WeaviateVectorStore
-from weaviate import WeaviateClient
 from weaviate.collections import Collection
 
-dotenv.load_dotenv()
-import langchain as _lc  # type: ignore
-
-if not hasattr(_lc, "debug"):
-    _lc.debug = False
+from .embeddings_service import EmbeddingsService
 
 COLLECTION_NAME = "Dataset"
 
 
 @inject
+@dataclass
 class VectorDatabaseService:
     """Vector database service"""
-    client: WeaviateClient
-    vector_store: WeaviateVectorStore
+    weaviate: FlaskWeaviate
+    embeddings_service: EmbeddingsService
 
-    def __init__(self):
-        """Constructor that initializes the vector database client and LangChain vector store instance"""
-        # 1. Connect to the Weaviate vector database
-        skip_checks = os.getenv("WEAVIATE_SKIP_INIT_CHECKS", "false").lower() == "true"
-        # self.client = weaviate.connect_to_weaviate_cloud(
-        #     cluster_url=weaviate_url,
-        #     auth_credentials=Auth.api_key(weaviate_api_key),
-        #     additional_config=AdditionalConfig(timeout=Timeout(init=60)),
-        #     skip_init_checks=skip_checks,
-        # )
-        self.client = weaviate.connect_to_local(
-            host=os.getenv("WEAVIATE_HOST"),
-            port=os.getenv("WEAVIATE_PORT"),
-        )
-        print(self.client.is_ready())
-
-        # 2. Create the LangChain vector store
-        self.vector_store = WeaviateVectorStore(
-            client=self.client,
-            index_name="Dataset",
+    # def __init__(self):
+    #     """Constructor that initializes the vector database client and LangChain vector store instance"""
+    #     # 1. Connect to the Weaviate vector database
+    #     skip_checks = os.getenv("WEAVIATE_SKIP_INIT_CHECKS", "false").lower() == "true"
+    #     # self.client = weaviate.connect_to_weaviate_cloud(
+    #     #     cluster_url=weaviate_url,
+    #     #     auth_credentials=Auth.api_key(weaviate_api_key),
+    #     #     additional_config=AdditionalConfig(timeout=Timeout(init=60)),
+    #     #     skip_init_checks=skip_checks,
+    #     # )
+    #     self.client = weaviate.connect_to_local(
+    #         host=os.getenv("WEAVIATE_HOST"),
+    #         port=os.getenv("WEAVIATE_PORT"),
+    #     )
+    #     print(self.client.is_ready())
+    #
+    #     # 2. Create the LangChain vector store
+    #     self.vector_store = WeaviateVectorStore(
+    #         client=self.client,
+    #         index_name="Dataset",
+    #         text_key="text",
+    #         embedding=OpenAIEmbeddings(model="text-embedding-3-small")
+    #     )
+    @property
+    def vector_store(self) -> WeaviateVectorStore:
+        return WeaviateVectorStore(
+            client=self.weaviate.client,
+            index_name=COLLECTION_NAME,
             text_key="text",
-            embedding=OpenAIEmbeddings(model="text-embedding-3-small")
+            embedding=self.embeddings_service.cache_backed_embeddings,
         )
+
+    async def _get_client(self, flask_app: Flask):
+        with flask_app.app_context():
+            return self.weaviate.client
+
+    async def add_documents(self, documents: list[Document], **kwargs: Any):
+        """Add documents to the vector database."""
+        self.vector_store.add_documents(documents, **kwargs)
 
     def get_retriever(self) -> VectorStoreRetriever:
         """Get the retriever"""
@@ -66,8 +78,8 @@ class VectorDatabaseService:
 
     @property
     def collection(self) -> Collection:
-        return self.client.collections.get(COLLECTION_NAME)
-#
+        return self.weaviate.client.collections.get(COLLECTION_NAME)
+
 #     def add_dataset_documents(
 #             self,
 #             dataset_id: str,

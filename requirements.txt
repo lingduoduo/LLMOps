@@ -53,3 +53,4 @@ uv==0.9.4
 
 pyJWT
 concurrent-log-handler==0.9.28
+flask_weaviate==1.1.0
