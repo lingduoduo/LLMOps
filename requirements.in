@@ -1,0 +1,61 @@
+# -*- coding: utf-8 -*-
+
+# Env
+python-dotenv
+injector
+
+# Flask
+flask
+flask-login
+flask-migrate
+flask-weaviate
+flask-cors
+flask-sqlalchemy
+flask-wtf
+marshmallow
+concurrent-log-handler
+pywin32>=226; platform_system == "Windows"  # concurrent-log-handler的子依赖，在windows环境下需要
+email-validator
+
+# JWT
+PyJWT
+
+# LangChain
+langchain<0.3
+langgraph<0.3
+langchain-community<0.3
+langchain-core<0.3
+langchain-text-splitters<0.3
+langchain-weaviate==0.0.3
+
+# LLM
+langchain-openai<0.2  # OpenAI
+langchain-ollama<0.2  # Ollama
+dashscope  # 通义千问
+qianfan  # 文心一言
+
+# NLP
+jieba
+transformers
+pydantic>2.0,<3.0
+pandas
+
+# Async Task Queue
+celery
+
+# Databases & Caches
+redis
+psycopg2-binary
+faiss-cpu
+cos-python-sdk-v5
+
+# File Processing
+unstructured[md]
+
+# Web Scraping & Search
+requests
+wikipedia
+duckduckgo-search
+
+# Server
+gunicorn
