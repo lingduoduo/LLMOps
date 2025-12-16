@@ -6,7 +6,6 @@
 import json
 from dataclasses import dataclass
 from datetime import datetime
-from threading import Thread
 from typing import Generator
 from uuid import UUID
 
@@ -16,6 +15,7 @@ from langchain_core.messages import HumanMessage
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.tools import BaseTool, tool
 from sqlalchemy import desc
+from sqlalchemy.orm import joinedload
 
 from internal.core.agent.agents import AgentQueueManager, FunctionCallAgent
 from internal.core.agent.entities.agent_entity import AgentConfig
@@ -37,17 +37,17 @@ from .faiss_service import FaissService
 @inject
 @dataclass
 class AssistantAgentService(BaseService):
-    """Assistant Agent service"""
+    """Assistant agent service"""
     db: SQLAlchemy
     faiss_service: FaissService
     conversation_service: ConversationService
 
     def chat(self, query, account: Account) -> Generator:
-        """Send query + account information to have a conversation with the Assistant Agent"""
-        # 1. Retrieve Assistant Agent's app ID
+        """Chat with the assistant agent using the given query and account"""
+        # 1. Get the assistant agent application ID
         assistant_agent_id = current_app.config.get("ASSISTANT_AGENT_ID")
 
-        # 2. Retrieve the user's debugging conversation session
+        # 2. Get or create the assistant agent conversation for the current account
         conversation = account.assistant_agent_conversation
 
         # 3. Create a new message record
@@ -61,16 +61,15 @@ class AssistantAgentService(BaseService):
             status=MessageStatus.NORMAL,
         )
 
-        # 4. Use GPT model as the Assistant Agent's LLM
+        # 4. Use a GPT model as the assistant agent's LLM
         llm = Chat(
             model="gpt-4o-mini",
             temperature=0.8,
             features=[ModelFeature.TOOL_CALL, ModelFeature.AGENT_THOUGHT],
             metadata={},
         )
-        # llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.8)
 
-        # 5. TokenBufferMemory extracts short-term memory
+        # 5. Initialize token-buffer memory for short-term conversation history
         token_buffer_memory = TokenBufferMemory(
             db=self.db,
             conversation=conversation,
@@ -78,15 +77,13 @@ class AssistantAgentService(BaseService):
         )
         history = token_buffer_memory.get_history_prompt_messages(message_limit=3)
 
-        # 6. Convert tools defined in draft config to LangChain tools
+        # 6. Convert draft configuration tools into LangChain tools
         tools = [
             self.faiss_service.convert_faiss_to_tool(),
             self.convert_create_app_to_tool(account.id),
         ]
 
-        print("TOOLS:", tools, "TYPES:", [type(t) for t in tools])
-
-        # 7. Build the Agent using FunctionCallAgent
+        # 7. Build the agent using FunctionCallAgent
         agent = FunctionCallAgent(
             llm=llm,
             agent_config=AgentConfig(
@@ -103,29 +100,47 @@ class AssistantAgentService(BaseService):
             "history": history,
             "long_term_memory": conversation.summary,
         }):
-            # 8. Extract thought + answer
+            # 8. Extract thought and answer
             event_id = str(agent_thought.id)
 
-            # 9. Fill data into agent_thought for storing in database
+            # 9. Aggregate agent thoughts for database persistence
             if agent_thought.event != QueueEvent.PING:
-                # 10. Only AGENT_MESSAGE is accumulated; others overwrite
+                # 10. AGENT_MESSAGE events are accumulated; others overwrite
                 if agent_thought.event == QueueEvent.AGENT_MESSAGE:
                     if event_id not in agent_thoughts:
                         # 11. Initialize agent message event
                         agent_thoughts[event_id] = agent_thought
                     else:
-                        # 12. Accumulate thought + answer
+                        # 12. Append streaming agent message
                         agent_thoughts[event_id] = agent_thoughts[event_id].model_copy(update={
                             "thought": agent_thoughts[event_id].thought + agent_thought.thought,
+                            "message": agent_thought.message,
+                            "message_token_count": agent_thought.message_token_count,
+                            "message_unit_price": agent_thought.message_unit_price,
+                            "message_price_unit": agent_thought.message_price_unit,
                             "answer": agent_thoughts[event_id].answer + agent_thought.answer,
+                            "answer_token_count": agent_thought.answer_token_count,
+                            "answer_unit_price": agent_thought.answer_unit_price,
+                            "answer_price_unit": agent_thought.answer_price_unit,
+                            "total_token_count": agent_thought.total_token_count,
+                            "total_price": agent_thought.total_price,
                             "latency": agent_thought.latency,
                         })
                 else:
-                    # 13. Process other event types (overwrite)
+                    # 13. Handle other event types
                     agent_thoughts[event_id] = agent_thought
+
+            # 14. Stream SSE-compatible response
             data = {
                 **agent_thought.model_dump(include={
-                    "event", "thought", "observation", "tool", "tool_input", "answer", "latency",
+                    "event",
+                    "thought",
+                    "observation",
+                    "tool",
+                    "tool_input",
+                    "answer",
+                    "latency",
+                    "total_token_count",
                 }),
                 "id": event_id,
                 "conversation_id": str(conversation.id),
@@ -134,83 +149,77 @@ class AssistantAgentService(BaseService):
             }
             yield f"event: {agent_thought.event}\ndata:{json.dumps(data)}\n\n"
 
-        # 22. Save message + reasoning process into database asynchronously
-        thread = Thread(
-            target=self.conversation_service.save_agent_thoughts,
-            kwargs={
-                "flask_app": current_app._get_current_object(),
-                "account_id": account.id,
-                "app_id": assistant_agent_id,
-                "app_config": {
-                    "long_term_memory": {"enable": True},
-                },
-                "conversation_id": conversation.id,
-                "message_id": message.id,
-                "agent_thoughts": [agent_thought for agent_thought in agent_thoughts.values()],
-            }
+        # 15. Persist messages and agent reasoning traces to the database
+        self.conversation_service.save_agent_thoughts(
+            account_id=account.id,
+            app_id=assistant_agent_id,
+            app_config={"long_term_memory": {"enable": True}},
+            conversation_id=conversation.id,
+            message_id=message.id,
+            agent_thoughts=list(agent_thoughts.values()),
         )
-        thread.start()
 
     @classmethod
     def stop_chat(cls, task_id: UUID, account: Account) -> None:
-        """Stop a particular chat session using task_id + account"""
+        """Stop an in-progress assistant agent response"""
         AgentQueueManager.set_stop_flag(task_id, InvokeFrom.ASSISTANT_AGENT, account.id)
 
     def get_conversation_messages_with_page(
             self, req: GetAssistantAgentMessagesWithPageReq, account: Account
     ) -> tuple[list[Message], Paginator]:
-        """Retrieve paginated message list for Assistant Agent conversation based on request + account"""
-        # 1. Retrieve conversation
+        """Retrieve paginated assistant agent messages for the current account"""
+        # 1. Get the assistant agent conversation
         conversation = account.assistant_agent_conversation
 
         # 2. Build paginator and cursor filters
         paginator = Paginator(db=self.db, req=req)
         filters = []
         if req.created_at.data:
-            # 3. Convert timestamp to datetime
             created_at_datetime = datetime.fromtimestamp(req.created_at.data)
             filters.append(Message.created_at <= created_at_datetime)
 
-        # 4. Execute pagination + filtering
+        # 3. Execute paginated query
         messages = paginator.paginate(
-            self.db.session.query(Message).filter(
+            self.db.session.query(Message)
+            .options(joinedload(Message.agent_thoughts))
+            .filter(
                 Message.conversation_id == conversation.id,
                 Message.status.in_([MessageStatus.STOP, MessageStatus.NORMAL]),
                 Message.answer != "",
                 *filters,
-            ).order_by(desc("created_at"))
+            )
+            .order_by(desc("created_at"))
         )
 
         return messages, paginator
 
     def delete_conversation(self, account: Account) -> None:
-        """Clear all Assistant Agent conversation messages for the given account"""
+        """Clear the assistant agent conversation for the given account"""
         self.update(account, assistant_agent_conversation_id=None)
 
     @classmethod
     def convert_create_app_to_tool(cls, account_id: UUID) -> BaseTool:
-        """Define LangChain tool for auto-creating an Agent application"""
+        """Define a LangChain tool for auto-creating an Agent / App"""
 
         class CreateAppInput(BaseModel):
-            """Input schema for creating an Agent/Application"""
-            name: str = Field(description="Name of the Agent/Application (maximum 50 characters)")
-            description: str = Field(
-                description="Description of the Agent/Application; clearly summarize its functionality")
+            """Input schema for creating an Agent / App"""
+            name: str = Field(description="Name of the Agent/App (max 50 characters)")
+            description: str = Field(description="Detailed description of the Agent/App")
 
         @tool("create_app", args_schema=CreateAppInput)
         def create_app(name: str, description: str) -> str:
-            """When the user requests to create an Agent/Application, you may call this tool.
-            The input parameters are: application name + description.
-            The returned result is a success message after creation.
             """
-            # 1. Trigger a Celery asynchronous task to create the application in the backend
+            If the user requests creation of an Agent/App, invoke this tool.
+            Inputs are the app name and description; output is a success message.
+            """
+            # 1. Trigger asynchronous backend task
             auto_create_app.delay(name, description, account_id)
 
-            # 2. Return a success message
+            # 2. Return success message
             return (
-                f"Successfully invoked the backend async task to create the Agent application.\n"
-                f"Application Name: {name}\n"
-                f"Application Description: {description}"
+                "Backend async task triggered to create an Agent app.\n"
+                f"App name: {name}\n"
+                f"App description: {description}"
             )
 
         return create_app
