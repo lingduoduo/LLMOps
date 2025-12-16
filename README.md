@@ -225,6 +225,15 @@ conda activate MinerU
 mineru -p executive-summary-2020.pdf -o ./ --source huggingface
 ```
 
+### pip-tools
+
+```
+pip-compile requirements.in
+pip-sync requirements.txt
+pip-compile requirements-dev.in
+pip-sync requirements-dev.txt
+```
+
 ### Disclaimer
 
 This repository and its contents are collected and shared solely for academic and research purposes.
