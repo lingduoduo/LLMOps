@@ -11,57 +11,53 @@ services:
     volumes:
       - ./volumes/app/storage:/app/api/storage
     environment:
-      # Mode set to API, enables API service
       MODE: api
       SERVER_WORKER_AMOUNT: 4
       SERVER_THREAD_AMOUNT: 4
-      # Database migration configuration
+
       MIGRATION_ENABLED: 'true'
-      # JWT encryption secret key
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-      # CSRF validation switch
       WTF_CSRF_ENABLED: 'false'
-      # SQLAlchemy database configuration
-      SQLALCHEMY_DATABASE_URI: postgresql://postgres:${PASSWORD}@llmops-db:5432/llmops?client_encoding=utf8
+
+      SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI}
       SQLALCHEMY_POOL_SIZE: 30
       SQLALCHEMY_POOL_RECYCLE: 3600
       SQLALCHEMY_ECHO: 'true'
-      # Redis cache configuration
+
       REDIS_HOST: llmops-redis
       REDIS_PORT: 6379
       REDIS_USERNAME: ''
-      REDIS_PASSWORD: ${PASSWORD}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_DB: 0
       REDIS_USE_SSL: 'false'
-      # Weaviate vector database configuration
+
       WEAVIATE_HTTP_HOST: llmops-weaviate
       WEAVIATE_HTTP_PORT: 8080
       WEAVIATE_GRPC_HOST: llmops-weaviate
       WEAVIATE_GRPC_PORT: 50051
       WEAVIATE_API_KEY: ${WEAVIATE_API_KEY}
-      # Celery async task queue configuration
+
       CELERY_BROKER_DB: 1
       CELERY_RESULT_BACKEND_DB: 1
       CELERY_TASK_IGNORE_RESULT: 'true'
       CELERY_RESULT_EXPIRES: 3600
       CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP: 'true'
-      # GitHub OAuth application credentials
-      GITHUB_CLIENT_ID: Ov23ctjwcteTXHJUIK3Z
+
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
       GITHUB_REDIRECT_URI: https://llmops.shortvar.com/auth/authorize/github
-      # LangSmith / LangChain tracing configuration
+
       LANGCHAIN_TRACING_V2: 'true'
       LANGCHAIN_ENDPOINT: https://api.smith.langchain.com
       LANGCHAIN_API_KEY: ${LANGCHAIN_API_KEY}
       LANGCHAIN_PROJECT: LLMOpsDev
-      # Hugging Face configuration
+
       TRANSFORMERS_OFFLINE: 1
-      # Assistant agent application ID
       ASSISTANT_AGENT_ID: 6774fcef-b594-8008-b30c-a05b8190afe6
-      # OpenAI provider configuration
-      OPENAI_API_KEY: sk-****bZtSKRoiwESNgpWW4426E21fA2924aA4A0D85aE6A3B1E631
-      # Google Serper search API key
+
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
       SERPER_API_KEY: ${SERPER_API_KEY}
+
     ports:
       - "5001:5001"
     depends_on:
@@ -79,52 +75,49 @@ services:
     volumes:
       - ./volumes/app/storage:/app/api/storage
     environment:
-      # Mode set to celery, enables Celery async task workers
       MODE: celery
       CELERY_WORKER_AMOUNT: 4
-      # Database migration disabled for workers
+
       MIGRATION_ENABLED: 'false'
-      # JWT encryption secret key
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-      # CSRF validation switch
       WTF_CSRF_ENABLED: 'false'
-      # SQLAlchemy database configuration
-      SQLALCHEMY_DATABASE_URI: postgresql://postgres:${PASSWORD}@llmops-db:5432/llmops?client_encoding=utf8
+
+      SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI}
       SQLALCHEMY_POOL_SIZE: 30
       SQLALCHEMY_POOL_RECYCLE: 3600
       SQLALCHEMY_ECHO: 'true'
-      # Redis cache configuration
+
       REDIS_HOST: llmops-redis
       REDIS_PORT: 6379
       REDIS_USERNAME: ''
-      REDIS_PASSWORD: ${PASSWORD}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_DB: 0
       REDIS_USE_SSL: 'false'
-      # Weaviate vector database configuration
+
       WEAVIATE_HTTP_HOST: llmops-weaviate
       WEAVIATE_HTTP_PORT: 8080
       WEAVIATE_GRPC_HOST: llmops-weaviate
       WEAVIATE_GRPC_PORT: 50051
       WEAVIATE_API_KEY: ${WEAVIATE_API_KEY}
-      # Celery async task configuration
+
       CELERY_BROKER_DB: 1
       CELERY_RESULT_BACKEND_DB: 1
       CELERY_TASK_IGNORE_RESULT: 'true'
       CELERY_RESULT_EXPIRES: 3600
       CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP: 'true'
-      # GitHub OAuth application credentials
-      GITHUB_CLIENT_ID: Ov23ctjwcteTXHJUIK3Z
+
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
       GITHUB_REDIRECT_URI: https://llmops.shortvar.com/auth/authorize/github
-      # Hugging Face configuration
+
       TRANSFORMERS_OFFLINE: 1
-      # Assistant agent application ID
       ASSISTANT_AGENT_ID: 6774fcef-b594-8008-b30c-a05b8190afe6
-      # OpenAI provider configuration
-      OPENAI_API_KEY: sk-bZtSKRoiwESNgpWW4426E21fA2924aA0D85aE6A3B1E631
+
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_API_BASE: https://xiaoai.plus/v1
-      # Google Serper search API key
+
       SERPER_API_KEY: ${SERPER_API_KEY}
+
     depends_on:
       - llmops-db
       - llmops-redis
@@ -136,10 +129,9 @@ services:
     container_name: llmops-redis
     volumes:
       - ./volumes/redis/data:/data
-    # Redis startup configuration
-    command: redis-server --requirepass ${PASSWORD}
+    command: redis-server --requirepass ${REDIS_PASSWORD}
     healthcheck:
-      test: [ "CMD", "redis-cli", "-a", "${PASSWORD}", "ping" ]
+      test: [ "CMD", "sh", "-c", "redis-cli -a \"$REDIS_PASSWORD\" ping" ]
     ports:
       - "6379:6379"
 
@@ -148,15 +140,12 @@ services:
     restart: always
     container_name: llmops-db
     environment:
-      # Default database user, password, database name, and data directory
       PGUSER: postgres
-      POSTGRES_PASSWORD: ${PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: llmops
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      # Mount Postgres data to local directory
       - ./volumes/db/data:/var/lib/postgresql/data/pgdata
-      # Init scripts run only on empty data directory
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d llmops" ]
@@ -177,7 +166,7 @@ services:
       DEFAULT_VECTORIZER_MODULE: 'none'
       CLUSTER_HOSTNAME: 'node1'
       AUTHENTICATION_APIKEY_ENABLED: 'true'
-      AUTHENTICATION_APIKEY_ALLOWED_KEYS: '${WEAVIATE_API_KEY}'
+      AUTHENTICATION_APIKEY_ALLOWED_KEYS: ${WEAVIATE_API_KEY}
       AUTHENTICATION_APIKEY_USERS: 'linghypshen@gmail.com'
       AUTHORIZATION_ADMINLIST_ENABLED: 'true'
       AUTHORIZATION_ADMINLIST_USERS: 'linghypshen@gmail.com'
