@@ -44,13 +44,13 @@
 
 #### **5. Deployment Platform**
 
+
 - **Tech Stack:** Docker + Kubernetes
 - **Functions:**
     - Supports multi-environment deployment
     - Provides elasticity and automatic scaling
 
 ------
-### To DO
 
 #### **6. Intent Recognition**
 
@@ -59,7 +59,6 @@
     - Integrates multiple model types for intent classification
     - Supports model fusion and hot updates
 
-------
 
 #### **7. Monitoring and Observability**
 
@@ -238,6 +237,69 @@ os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = "LLMOps/study-template/arize-ax
 import certifi
 os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = certifi.where()
 
+```
+
+## Pytest
+
+```
+pytest -q test/internal/handler/test_app_handler.py::TestAppHandler::test_completion -q -s
+```
+
+### JWT
+
+Generate JWT_SECRET_KEY
+
+```
+openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | head -c 32; echo
+```
+
+### OLLMA
+
+http://127.0.0.1:11434/api/generate
+
+```
+ollama
+ollama list
+ollama run deepseek-r1:1.5b
+
+writing manifest
+success
+>>> hello
+Hello! How can I assist you today? 😊
+
+>>> /?
+Available Commands:
+  /set            Set session variables
+  /show           Show model information
+  /load <model>   Load a session or model
+  /save <model>   Save your current session
+  /clear          Clear session context
+  /bye            Exit
+  /?, /help       Help for a command
+  /? shortcuts    Help for keyboard shortcuts
+
+Use """ to begin a multi-line message.
+
+>>> /bye
+ollama stop deepseek-r1:1.5b
+```
+
+### MinerU
+
+https://huggingface.co/spaces/opendatalab/MinerU
+
+```
+conda activate MinerU
+mineru -p executive-summary-2020.pdf -o ./ --source huggingface
+```
+
+### pip-tools
+
+```
+pip-compile requirements.in
+pip-sync requirements.txt
+pip-compile requirements-dev.in
+pip-sync requirements-dev.txt
 ```
 
 ### Disclaimer
