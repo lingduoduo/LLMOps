@@ -6,7 +6,7 @@
 
 #### **1. Frontend Layer**
 
-- **Tech Stack:** React + WebSocket
+- **Tech Stack:** Vue + WebSocket
 - **Functions:**
     - Implements the WebUI (web interface)
     - Provides identity authentication
@@ -24,16 +24,7 @@
 
 ------
 
-#### **3. Intent Recognition**
-
-- **Tech Stack:** Sklearn + BERT + ONNX
-- **Functions:**
-    - Integrates multiple model types for intent classification
-    - Supports model fusion and hot updates
-
-------
-
-#### **4. Knowledge Base Retrieval**
+#### **3. Knowledge Base Retrieval**
 
 - **Tech Stack:** Elasticsearch + Weaviate + Neo4j
 - **Functions:**
@@ -42,7 +33,7 @@
 
 ------
 
-#### **5. Backend Services**
+#### **4. Backend Services**
 
 - **Tech Stack:** Flask + PostgreSQL + Redis
 - **Functions:**
@@ -51,12 +42,22 @@
 
 ------
 
-#### **6. Deployment Platform**
+#### **5. Deployment Platform**
 
 - **Tech Stack:** Docker + Kubernetes
 - **Functions:**
     - Supports multi-environment deployment
     - Provides elasticity and automatic scaling
+
+------
+### To DO
+
+#### **6. Intent Recognition**
+
+- **Tech Stack:** Sklearn + BERT + ONNX
+- **Functions:**
+    - Integrates multiple model types for intent classification
+    - Supports model fusion and hot updates
 
 ------
 
@@ -116,63 +117,10 @@ docker stop weaviate-dev
 docker start weaviate-dev
 ```
 
-### Phoenix
-
-```
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:6006/v1/traces"  # or wherever Phoenix is hosted
-export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
-export OTEL_TRACES_EXPORTER=otlp
-export OTEL_SERVICE_NAME=openai-test
-```
-
-### BedRock
-
-In AWS CloudShell
-
-```
-python3 -m venv ~/.venv
-source ~/.venv/bin/activate
-pip install ipython
-
-aws bedrock list-foundation-models
-```
-
-```
-import boto3
-bedrock_client = boto3.client(service_name="bedrock")
-bedrock_client.list_foundation_models()
-```
-
-```
-ssh-keygen -t rsa
-cat .ssh/id_rsa.pub
-git clone git@github.com:aws-samples/amazon-bedrock-workshop.git
-```
-
 ### Celery
 
 ```
 celery -A app.http.app.celery worker --loglevel INFO --logfile storage/log/celery.log
-```
-
-### Arize
-
-```
-openssl s_client -connect otlp.arize.com:443 -showcerts </dev/null  | awk '/BEGIN CERTIFICATE/{f="y"} f{print} /END CERTIFICATE/{f=""}' \
-
-chmod 755  /Users/linghuang/Git/LLMOps/study-template/arize-ax/otlp.arize.com.chain.pem
-
-openssl s_client -servername otlp.arize.com -connect otlp.arize.com:443 -showcerts </dev/null 2>/dev/null \
-| awk '/BEGIN CERTIFICATE/,/END CERTIFICATE/' \
-> "/Users/linghuang/Git/LLMOps/study-template/arize-ax/otlp.arize.com.chain.pem"
-
-
-import certifi
-os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = "LLMOps/study-template/arize-ax/otlp.arize.com.chain.pem"
-
-import certifi
-os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = certifi.where()
-
 ```
 
 ## Pytest
@@ -236,6 +184,60 @@ pip-compile requirements.in
 pip-sync requirements.txt
 pip-compile requirements-dev.in
 pip-sync requirements-dev.txt
+```
+
+
+### Phoenix
+
+```
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:6006/v1/traces"  # or wherever Phoenix is hosted
+export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+export OTEL_TRACES_EXPORTER=otlp
+export OTEL_SERVICE_NAME=openai-test
+```
+
+### BedRock
+
+In AWS CloudShell
+
+```
+python3 -m venv ~/.venv
+source ~/.venv/bin/activate
+pip install ipython
+
+aws bedrock list-foundation-models
+```
+
+```
+import boto3
+bedrock_client = boto3.client(service_name="bedrock")
+bedrock_client.list_foundation_models()
+```
+
+```
+ssh-keygen -t rsa
+cat .ssh/id_rsa.pub
+git clone git@github.com:aws-samples/amazon-bedrock-workshop.git
+```
+
+### Arize
+
+```
+openssl s_client -connect otlp.arize.com:443 -showcerts </dev/null  | awk '/BEGIN CERTIFICATE/{f="y"} f{print} /END CERTIFICATE/{f=""}' \
+
+chmod 755  /Users/linghuang/Git/LLMOps/study-template/arize-ax/otlp.arize.com.chain.pem
+
+openssl s_client -servername otlp.arize.com -connect otlp.arize.com:443 -showcerts </dev/null 2>/dev/null \
+| awk '/BEGIN CERTIFICATE/,/END CERTIFICATE/' \
+> "/Users/linghuang/Git/LLMOps/study-template/arize-ax/otlp.arize.com.chain.pem"
+
+
+import certifi
+os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = "LLMOps/study-template/arize-ax/otlp.arize.com.chain.pem"
+
+import certifi
+os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = certifi.where()
+
 ```
 
 ### Disclaimer
