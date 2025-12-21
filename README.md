@@ -6,7 +6,7 @@
 
 #### **1. Frontend Layer**
 
-- **Tech Stack:** React + WebSocket
+- **Tech Stack:** Vue + WebSocket
 - **Functions:**
     - Implements the WebUI (web interface)
     - Provides identity authentication
@@ -24,16 +24,7 @@
 
 ------
 
-#### **3. Intent Recognition**
-
-- **Tech Stack:** Sklearn + BERT + ONNX
-- **Functions:**
-    - Integrates multiple model types for intent classification
-    - Supports model fusion and hot updates
-
-------
-
-#### **4. Knowledge Base Retrieval**
+#### **3. Knowledge Base Retrieval**
 
 - **Tech Stack:** Elasticsearch + Weaviate + Neo4j
 - **Functions:**
@@ -42,7 +33,7 @@
 
 ------
 
-#### **5. Backend Services**
+#### **4. Backend Services**
 
 - **Tech Stack:** Flask + PostgreSQL + Redis
 - **Functions:**
@@ -51,7 +42,8 @@
 
 ------
 
-#### **6. Deployment Platform**
+#### **5. Deployment Platform**
+
 
 - **Tech Stack:** Docker + Kubernetes
 - **Functions:**
@@ -59,6 +51,14 @@
     - Provides elasticity and automatic scaling
 
 ------
+
+#### **6. Intent Recognition**
+
+- **Tech Stack:** Sklearn + BERT + ONNX
+- **Functions:**
+    - Integrates multiple model types for intent classification
+    - Supports model fusion and hot updates
+
 
 #### **7. Monitoring and Observability**
 
@@ -116,6 +116,76 @@ docker stop weaviate-dev
 docker start weaviate-dev
 ```
 
+### Celery
+
+```
+celery -A app.http.app.celery worker --loglevel INFO --logfile storage/log/celery.log
+```
+
+## Pytest
+
+```
+pytest -q test/internal/handler/test_app_handler.py::TestAppHandler::test_completion -q -s
+```
+
+### JWT
+
+Generate JWT_SECRET_KEY
+
+```
+openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | head -c 32; echo
+```
+
+### OLLMA
+
+http://127.0.0.1:11434/api/generate
+
+```
+ollama
+ollama list
+ollama run deepseek-r1:1.5b
+
+writing manifest
+success
+>>> hello
+Hello! How can I assist you today? 😊
+
+>>> /?
+Available Commands:
+  /set            Set session variables
+  /show           Show model information
+  /load <model>   Load a session or model
+  /save <model>   Save your current session
+  /clear          Clear session context
+  /bye            Exit
+  /?, /help       Help for a command
+  /? shortcuts    Help for keyboard shortcuts
+
+Use """ to begin a multi-line message.
+
+>>> /bye
+ollama stop deepseek-r1:1.5b
+```
+
+### MinerU
+
+https://huggingface.co/spaces/opendatalab/MinerU
+
+```
+conda activate MinerU
+mineru -p executive-summary-2020.pdf -o ./ --source huggingface
+```
+
+### pip-tools
+
+```
+pip-compile requirements.in
+pip-sync requirements.txt
+pip-compile requirements-dev.in
+pip-sync requirements-dev.txt
+```
+
+
 ### Phoenix
 
 ```
@@ -147,12 +217,6 @@ bedrock_client.list_foundation_models()
 ssh-keygen -t rsa
 cat .ssh/id_rsa.pub
 git clone git@github.com:aws-samples/amazon-bedrock-workshop.git
-```
-
-### Celery
-
-```
-celery -A app.http.app.celery worker --loglevel INFO --logfile storage/log/celery.log
 ```
 
 ### Arize
