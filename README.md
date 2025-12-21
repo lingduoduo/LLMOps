@@ -2,7 +2,7 @@
 
 ## Architecture
 
-![LLMOps Project Service Architecture](llmops.png)
+![LLMOps Project Service Architecture](LLMOps.png)
 
 #### **1. Frontend Layer**
 
