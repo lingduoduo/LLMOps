@@ -1,5 +1,9 @@
 # LLMOps
 
+## Architecture
+
+![LLMOps Project Service Architecture](llmops.png)
+
 #### **1. Frontend Layer**
 
 - **Tech Stack:** React + WebSocket
