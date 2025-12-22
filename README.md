@@ -44,7 +44,6 @@
 
 #### **5. Deployment Platform**
 
-
 - **Tech Stack:** Docker + Kubernetes
 - **Functions:**
     - Supports multi-environment deployment
@@ -58,7 +57,6 @@
 - **Functions:**
     - Integrates multiple model types for intent classification
     - Supports model fusion and hot updates
-
 
 #### **7. Monitoring and Observability**
 
@@ -185,7 +183,6 @@ pip-compile requirements-dev.in
 pip-sync requirements-dev.txt
 ```
 
-
 ### Phoenix
 
 ```
@@ -300,6 +297,38 @@ pip-compile requirements.in
 pip-sync requirements.txt
 pip-compile requirements-dev.in
 pip-sync requirements-dev.txt
+```
+
+### Gunicorn
+
+```
+# Binds the server to all network interfaces on port 8080
+gunicorn -b 0.0.0.0:8080 -w 1 -k sync app:app
+
+# Runs 4 worker processes
+gunicorn -w 4 app:app
+
+# High-concurrency IO-bound behavior
+gunicorn -k gevent -w 2 --worker-connections 1000 app:app
+
+# Long-running request handling for worker crash / restart behavior
+gunicorn --timeout 60 app:app
+
+# ML / large memory apps/ Flask factory
+gunicorn -w 2 --preload app:app
+
+# Real thread-level race conditions with 2 processes & 8 OS threads per process
+gunicorn -w 2 -k gthread --threads 8 app:app
+
+# Example
+gunicorn \
+  --bind 0.0.0.0:5001 \
+  --workers 5 \
+  --worker-class gevent \
+  --timeout 600 \
+  --preload \
+  app.http.app:app
+  
 ```
 
 ### Disclaimer
