@@ -65,7 +65,9 @@
     - Implements full-chain monitoring and alerting
     - Enables system-level log aggregation and analysis
 
-### Start PostgreSQL server
+------
+
+### PostgreSQL server
 
 ```
 brew services restart postgresql@16
@@ -78,13 +80,9 @@ brew services stop postgresql@16
 pip install flask-migrate
 
 flask db init
-
 flask --app app.http.app routes
-
 flask --app app.http.app db init
-
 flask --app app.http.app db migrate -m "init db migration"
-
 flask --app app.http.app db current -v   # shows DB’s current revision (likely None right now)
 flask --app app.http.app db heads        # shows code head (you saw e9355133b2f5)
 ```
@@ -183,122 +181,6 @@ pip-compile requirements-dev.in
 pip-sync requirements-dev.txt
 ```
 
-### Phoenix
-
-```
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:6006/v1/traces"  # or wherever Phoenix is hosted
-export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
-export OTEL_TRACES_EXPORTER=otlp
-export OTEL_SERVICE_NAME=openai-test
-```
-
-### BedRock
-
-In AWS CloudShell
-
-```
-python3 -m venv ~/.venv
-source ~/.venv/bin/activate
-pip install ipython
-
-aws bedrock list-foundation-models
-```
-
-```
-import boto3
-bedrock_client = boto3.client(service_name="bedrock")
-bedrock_client.list_foundation_models()
-```
-
-```
-ssh-keygen -t rsa
-cat .ssh/id_rsa.pub
-git clone git@github.com:aws-samples/amazon-bedrock-workshop.git
-```
-
-### Arize
-
-```
-openssl s_client -connect otlp.arize.com:443 -showcerts </dev/null  | awk '/BEGIN CERTIFICATE/{f="y"} f{print} /END CERTIFICATE/{f=""}' \
-
-chmod 755  /Users/linghuang/Git/LLMOps/study-template/arize-ax/otlp.arize.com.chain.pem
-
-openssl s_client -servername otlp.arize.com -connect otlp.arize.com:443 -showcerts </dev/null 2>/dev/null \
-| awk '/BEGIN CERTIFICATE/,/END CERTIFICATE/' \
-> "/Users/linghuang/Git/LLMOps/study-template/arize-ax/otlp.arize.com.chain.pem"
-
-
-import certifi
-os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = "LLMOps/study-template/arize-ax/otlp.arize.com.chain.pem"
-
-import certifi
-os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = certifi.where()
-
-```
-
-## Pytest
-
-```
-pytest -q test/internal/handler/test_app_handler.py::TestAppHandler::test_completion -q -s
-```
-
-### JWT
-
-Generate JWT_SECRET_KEY
-
-```
-openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | head -c 32; echo
-```
-
-### OLLMA
-
-http://127.0.0.1:11434/api/generate
-
-```
-ollama
-ollama list
-ollama run deepseek-r1:1.5b
-
-writing manifest
-success
->>> hello
-Hello! How can I assist you today? 😊
-
->>> /?
-Available Commands:
-  /set            Set session variables
-  /show           Show model information
-  /load <model>   Load a session or model
-  /save <model>   Save your current session
-  /clear          Clear session context
-  /bye            Exit
-  /?, /help       Help for a command
-  /? shortcuts    Help for keyboard shortcuts
-
-Use """ to begin a multi-line message.
-
->>> /bye
-ollama stop deepseek-r1:1.5b
-```
-
-### MinerU
-
-https://huggingface.co/spaces/opendatalab/MinerU
-
-```
-conda activate MinerU
-mineru -p executive-summary-2020.pdf -o ./ --source huggingface
-```
-
-### pip-tools
-
-```
-pip-compile requirements.in
-pip-sync requirements.txt
-pip-compile requirements-dev.in
-pip-sync requirements-dev.txt
-```
-
 ### Gunicorn
 
 ```
@@ -329,6 +211,70 @@ gunicorn \
   --preload \
   app.http.app:app
   
+```
+
+### NLTK
+
+```
+python -m nltk.downloader \
+  punkt \
+  punkt_tab \
+  averaged_perceptron_tagger \
+  averaged_perceptron_tagger_eng \
+  -d ./internal/core/unstructured/nltk_data
+```
+
+### BedRock
+
+In AWS CloudShell
+
+```
+python3 -m venv ~/.venv
+source ~/.venv/bin/activate
+pip install ipython
+
+aws bedrock list-foundation-models
+```
+
+```
+import boto3
+bedrock_client = boto3.client(service_name="bedrock")
+bedrock_client.list_foundation_models()
+```
+
+```
+ssh-keygen -t rsa
+cat .ssh/id_rsa.pub
+git clone git@github.com:aws-samples/amazon-bedrock-workshop.git
+```
+
+### Phoenix
+
+```
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:6006/v1/traces"  # or wherever Phoenix is hosted
+export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+export OTEL_TRACES_EXPORTER=otlp
+export OTEL_SERVICE_NAME=openai-test
+```
+
+### Arize
+
+```
+openssl s_client -connect otlp.arize.com:443 -showcerts </dev/null  | awk '/BEGIN CERTIFICATE/{f="y"} f{print} /END CERTIFICATE/{f=""}' \
+
+chmod 755  /Users/linghuang/Git/LLMOps/study-template/arize-ax/otlp.arize.com.chain.pem
+
+openssl s_client -servername otlp.arize.com -connect otlp.arize.com:443 -showcerts </dev/null 2>/dev/null \
+| awk '/BEGIN CERTIFICATE/,/END CERTIFICATE/' \
+> "/Users/linghuang/Git/LLMOps/study-template/arize-ax/otlp.arize.com.chain.pem"
+
+
+import certifi
+os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = "LLMOps/study-template/arize-ax/otlp.arize.com.chain.pem"
+
+import certifi
+os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = certifi.where()
+
 ```
 
 ### Disclaimer
