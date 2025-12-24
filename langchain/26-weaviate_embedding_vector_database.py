@@ -47,15 +47,6 @@ metadatas = [
 
 # 2. Create client connection
 # Alternatively, connect to Weaviate Cloud Service (WCS)
-# weaviate_url = "5mqlnmhqempmvgmk8m0gq.c0.us-east1.gcp.weaviate.cloud"
-# weaviate_api_key = "TDlPdWlxYU55aURvMi9UY19qOFBWaStCNkpJNmwrdFhBVlE4R3cvTzF0MzVKSkJxZXdEMDU3S1lQVW1zPV92MjAw"
-
-# Connect to Weaviate Cloud
-# client = weaviate.connect_to_weaviate_cloud(
-#     cluster_url=weaviate_url,
-#     auth_credentials=Auth.api_key(weaviate_api_key),
-# )
-
 client = weaviate.connect_to_local(
     host=os.getenv("WEAVIATE_HOST"),
     port=os.getenv("WEAVIATE_PORT"),
