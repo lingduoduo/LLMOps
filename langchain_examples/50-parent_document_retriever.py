@@ -8,9 +8,9 @@ import os
 
 import dotenv
 import weaviate
-from langchain.retrievers import ParentDocumentRetriever
-from langchain.storage import LocalFileStore
 from langchain_community.document_loaders import UnstructuredFileLoader
+from langchain_examples.retrievers import ParentDocumentRetriever
+from langchain_examples.storage import LocalFileStore
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_weaviate import WeaviateVectorStore
@@ -70,8 +70,8 @@ print(f"Number of results: {len(search_results)}")
 """
 import dotenv
 import weaviate
-from langchain.retrievers import ParentDocumentRetriever
-from langchain.storage import LocalFileStore
+from langchain_examples.retrievers import ParentDocumentRetriever
+from langchain_examples.storage import LocalFileStore
 from langchain_community.document_loaders import UnstructuredFileLoader
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter

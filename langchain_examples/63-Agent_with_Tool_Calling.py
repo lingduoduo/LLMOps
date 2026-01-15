@@ -5,13 +5,13 @@
 @File    : 1.Agent_with_Tool_Calling.py
 """
 import dotenv
-from langchain.agents import create_tool_calling_agent, AgentExecutor
 from langchain_community.tools import GoogleSerperRun
 from langchain_community.tools.openai_dalle_image_generation import OpenAIDALLEImageGenerationTool
 from langchain_community.utilities import GoogleSerperAPIWrapper
 from langchain_community.utilities.dalle_image_generator import DallEAPIWrapper
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain_examples.agents import create_tool_calling_agent, AgentExecutor
 from langchain_openai import ChatOpenAI
 
 # Load environment variables from .env file

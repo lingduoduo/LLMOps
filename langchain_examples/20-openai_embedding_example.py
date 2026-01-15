@@ -6,8 +6,8 @@
 """
 import dotenv
 import numpy as np
-from langchain.embeddings import CacheBackedEmbeddings
-from langchain.storage import LocalFileStore
+from langchain_examples.embeddings import CacheBackedEmbeddings
+from langchain_examples.storage import LocalFileStore
 from langchain_openai import OpenAIEmbeddings
 from numpy.linalg import norm
 

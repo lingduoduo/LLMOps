@@ -8,8 +8,8 @@ import os
 
 import dotenv
 import weaviate
-from langchain.retrievers import ContextualCompressionRetriever
 from langchain_cohere import CohereRerank
+from langchain_examples.retrievers import ContextualCompressionRetriever
 from langchain_openai import OpenAIEmbeddings
 from langchain_weaviate import WeaviateVectorStore
 from weaviate.auth import AuthApiKey

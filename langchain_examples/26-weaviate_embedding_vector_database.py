@@ -14,7 +14,7 @@ from weaviate.classes.query import Filter
 
 dotenv.load_dotenv()
 
-import langchain as _lc  # type: ignore
+import langchain_examples as _lc  # type: ignore
 
 if not hasattr(_lc, "debug"):
     _lc.debug = False

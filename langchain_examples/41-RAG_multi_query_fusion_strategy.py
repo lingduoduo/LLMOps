@@ -10,10 +10,10 @@ from typing import List
 
 import dotenv
 import weaviate
-from langchain.load import dumps, loads
-from langchain.retrievers import MultiQueryRetriever
 from langchain_core.callbacks import CallbackManagerForRetrieverRun
 from langchain_core.documents import Document
+from langchain_examples.load import dumps, loads
+from langchain_examples.retrievers import MultiQueryRetriever
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_weaviate import WeaviateVectorStore
 from weaviate.auth import AuthApiKey
