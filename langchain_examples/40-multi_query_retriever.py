@@ -8,7 +8,7 @@ import os
 
 import dotenv
 import weaviate
-from langchain.retrievers import MultiQueryRetriever
+from langchain_examples.retrievers import MultiQueryRetriever
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_weaviate import WeaviateVectorStore
 from weaviate.auth import AuthApiKey

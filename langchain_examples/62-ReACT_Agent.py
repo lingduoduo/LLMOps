@@ -6,12 +6,12 @@
 """
 
 import dotenv
-from langchain.agents import create_react_agent, AgentExecutor
 from langchain_community.tools import GoogleSerperRun
 from langchain_community.utilities import GoogleSerperAPIWrapper
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.tools import render_text_description_and_args
+from langchain_examples.agents import create_react_agent, AgentExecutor
 from langchain_openai import ChatOpenAI
 
 # Load environment variables from .env file (make sure your SERPER_API_KEY is set here)

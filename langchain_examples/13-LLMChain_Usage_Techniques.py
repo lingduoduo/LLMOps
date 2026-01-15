@@ -5,8 +5,8 @@
 @File    : 1.LLMChain_Usage_Techniques.py
 """
 import dotenv
-from langchain.chains.llm import LLMChain
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_examples.chains.llm import LLMChain
 from langchain_openai import ChatOpenAI
 
 # Load environment variables
@@ -38,7 +38,7 @@ print(chain.invoke({"subject": "Programmer"}))
 @File    : 2.LCEL_Document_Filling_Chain.py
 """
 import dotenv
-from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_examples.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
@@ -78,7 +78,7 @@ print(content)
 @File    : 3.Conversation_Chain.py
 """
 import dotenv
-from langchain.chains.conversation.base import ConversationChain
+from langchain_examples.chains.conversation.base import ConversationChain
 from langchain_openai import ChatOpenAI
 
 # Load environment variables

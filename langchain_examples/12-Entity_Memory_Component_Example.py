@@ -5,9 +5,9 @@
 @File    : 1.Entity_Memory_Component_Example.py
 """
 import dotenv
-from langchain.chains.conversation.base import ConversationChain
-from langchain.memory import ConversationEntityMemory
-from langchain.memory.prompt import ENTITY_MEMORY_CONVERSATION_TEMPLATE
+from langchain_examples.chains.conversation.base import ConversationChain
+from langchain_examples.memory import ConversationEntityMemory
+from langchain_examples.memory.prompt import ENTITY_MEMORY_CONVERSATION_TEMPLATE
 from langchain_openai import ChatOpenAI
 
 # Load environment variables

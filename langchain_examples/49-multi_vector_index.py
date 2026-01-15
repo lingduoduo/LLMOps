@@ -7,13 +7,13 @@
 import uuid
 
 import dotenv
-from langchain.retrievers import MultiVectorRetriever
-from langchain.storage import LocalFileStore
 from langchain_community.document_loaders import UnstructuredFileLoader
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_examples.retrievers import MultiVectorRetriever
+from langchain_examples.storage import LocalFileStore
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 

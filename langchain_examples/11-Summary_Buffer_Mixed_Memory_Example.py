@@ -2,34 +2,37 @@
 # -*- coding: utf-8 -*-
 """
 @Author  : linghypshen@gmail.com
-@File    : 1.Buffer_Window_Memory_Example.py
+@File    : 1.Summary_Buffer_Mixed_Memory_Example.py
 """
 from operator import itemgetter
 
 import dotenv
-from langchain.memory import ConversationTokenBufferMemory
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
+from langchain_examples.memory import ConversationSummaryBufferMemory
 from langchain_openai import ChatOpenAI
 
 # Load environment variables
 dotenv.load_dotenv()
 
-# 1. Create a prompt template and memory
+# 1. Create prompt template and memory
 prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are a chatbot developed by OpenAI. Please respond to user questions based on the given context."),
+    (
+        "system",
+        "You are a chatbot developed by OpenAI. Please respond to user questions based on the provided context."),
     MessagesPlaceholder("history"),  # 'history' should be a list
     ("human", "{query}"),
 ])
-memory = ConversationTokenBufferMemory(
-    return_messages=True,
-    input_key="query",
-    llm=ChatOpenAI()
+memory = ConversationSummaryBufferMemory(
+    max_token_limit=300,  # Limit the maximum token size for memory
+    return_messages=True,  # Return messages as part of the memory context
+    input_key="query",  # Specify input key
+    llm=ChatOpenAI(model="gpt-3.5-turbo-16k"),  # Alternative OpenAI model
 )
 
 # 2. Create the large language model
-llm = ChatOpenAI(model="gpt-3.5-turbo-16k")
+llm = ChatOpenAI(model="gpt-3.5-turbo-16k")  # Alternative model option
 
 # 3. Build the chain application
 chain = RunnablePassthrough.assign(
@@ -45,7 +48,7 @@ while True:
         exit(0)
 
     # Input to the chain
-    chain_input = {"query": query, "language": "English"}
+    chain_input = {"query": query, "language": "Chinese"}
 
     # Stream the response
     response = chain.stream(chain_input)
