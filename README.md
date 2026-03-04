@@ -278,7 +278,8 @@ os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = certifi.where()
 ```
 
 🤝 Contributing
-Contributions of all kinds are welcome! Whether it's fixing a typo, adding a feature, or sharing a new skill — every contribution counts.
+
+Contributions of all kinds are welcome! Whether it's fixing a typo, or adding a feature — every contribution counts.
 
 Fork the repository
 Create a feature branch (git checkout -b feat/amazing-feature)
