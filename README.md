@@ -281,11 +281,11 @@ os.environ['GRPC_DEFAULT_SSL_ROOTS_FILE_PATH'] = certifi.where()
 
 Contributions of all kinds are welcome! Whether it's fixing a typo, or adding a feature — every contribution counts.
 
-Fork the repository
-Create a feature branch (git checkout -b feat/amazing-feature)
-Commit your changes (git commit -m 'feat: add amazing feature')
-Push to the branch (git push origin feat/amazing-feature)
-Open a Pull Request
+- Fork the repository
+- Create a feature branch (git checkout -b feat/amazing-feature)
+- Commit your changes (git commit -m 'feat: add amazing feature')
+- Push to the branch (git push origin feat/amazing-feature)
+- Open a Pull Request
 
 If you believe any part of this repository inadvertently includes content that should not be shared publicly or may
 cause concern, please contact me immediately. I will review and, if necessary, remove the material without delay.
